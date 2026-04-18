@@ -18,550 +18,415 @@
       --red: #ef4444;
       --purple: #a855f7;
     }
-
     * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-    }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 
     /* HEADER */
     header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 16px 24px;
-      border-bottom: 1px solid var(--border);
-      background: var(--surface);
-      position: sticky;
-      top: 0;
-      z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 24px; border-bottom: 1px solid var(--border);
+      background: var(--surface); position: sticky; top: 0; z-index: 100;
     }
-
-    header h1 { font-size: 18px; font-weight: 600; letter-spacing: -0.3px; }
+    header h1 { font-size: 18px; font-weight: 600; }
     header h1 span { color: var(--accent); }
+    .header-right { display: flex; gap: 10px; align-items: center; }
 
-    .header-actions { display: flex; gap: 10px; align-items: center; }
-
-    /* STATS BAR */
-    .stats {
-      display: flex;
-      gap: 24px;
-      padding: 14px 24px;
-      border-bottom: 1px solid var(--border);
-      background: var(--surface);
-      flex-wrap: wrap;
+    /* SCRAPE PANEL */
+    .scrape-bar {
+      display: flex; gap: 8px; align-items: center; padding: 12px 24px;
+      border-bottom: 1px solid var(--border); background: var(--surface); flex-wrap: wrap;
+    }
+    .scrape-bar input[type="text"] {
+      flex: 1; min-width: 220px; padding: 8px 12px;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 6px; color: var(--text); font-size: 14px; outline: none;
+    }
+    .scrape-bar input[type="text"]:focus { border-color: var(--accent); }
+    .scrape-bar input[type="number"] {
+      width: 80px; padding: 8px 10px;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 6px; color: var(--text); font-size: 14px; outline: none;
     }
 
+    /* STATS */
+    .stats {
+      display: flex; gap: 24px; padding: 12px 24px;
+      border-bottom: 1px solid var(--border); flex-wrap: wrap;
+    }
     .stat { display: flex; flex-direction: column; gap: 2px; }
     .stat-value { font-size: 22px; font-weight: 700; }
     .stat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
-    .stat-value.blue { color: var(--accent); }
-    .stat-value.green { color: var(--green); }
-    .stat-value.yellow { color: var(--yellow); }
-    .stat-value.red { color: var(--red); }
 
     /* TOOLBAR */
     .toolbar {
-      display: flex;
-      gap: 10px;
-      padding: 14px 24px;
-      border-bottom: 1px solid var(--border);
-      align-items: center;
-      flex-wrap: wrap;
+      display: flex; gap: 8px; padding: 12px 24px;
+      border-bottom: 1px solid var(--border); flex-wrap: wrap; align-items: center;
     }
-
-    .search-input {
-      flex: 1;
-      min-width: 200px;
-      padding: 8px 12px;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      color: var(--text);
-      font-size: 14px;
-      outline: none;
+    .toolbar input[type="text"] {
+      flex: 1; min-width: 200px; padding: 8px 12px;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 6px; color: var(--text); font-size: 14px; outline: none;
     }
-    .search-input:focus { border-color: var(--accent); }
+    .toolbar input[type="text"]:focus { border-color: var(--accent); }
 
     select, button {
-      padding: 8px 12px;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      color: var(--text);
-      font-size: 14px;
-      cursor: pointer;
-      outline: none;
+      padding: 8px 12px; background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 6px; color: var(--text); font-size: 14px; cursor: pointer; outline: none;
     }
-    select:focus { border-color: var(--accent); }
-
-    button.primary {
-      background: var(--accent);
-      border-color: var(--accent);
-      color: #fff;
-      font-weight: 500;
-    }
+    button.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 500; }
     button.primary:hover { background: #2563eb; }
+    button.primary:disabled { opacity: 0.5; cursor: default; }
+    button:not(.primary):hover { border-color: #555; }
 
-    button.export-btn {
-      background: var(--surface2);
-      border-color: var(--border);
+    /* LOG */
+    .log-box {
+      margin: 0 24px 0; padding: 10px 14px;
+      background: #0a0a0a; border: 1px solid var(--border); border-top: none;
+      font-family: monospace; font-size: 12px; color: var(--green);
+      max-height: 120px; overflow-y: auto; display: none;
     }
-    button.export-btn:hover { border-color: var(--accent); }
-
-    /* EMPTY STATE */
-    .empty {
-      text-align: center;
-      padding: 80px 24px;
-      color: var(--muted);
-    }
-    .empty h2 { font-size: 18px; margin-bottom: 8px; color: var(--text); }
-    .empty p { font-size: 14px; line-height: 1.6; }
-    .empty code {
-      background: var(--surface2);
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-family: monospace;
-      color: var(--accent);
-    }
+    .log-box.visible { display: block; }
+    .log-line { line-height: 1.6; }
 
     /* GRID */
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-      gap: 16px;
-      padding: 20px 24px;
-    }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 16px; padding: 20px 24px; }
 
     /* CARD */
     .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      transition: border-color 0.15s;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 10px;
     }
-    .card:hover { border-color: #3a3a3a; }
     .card.status-contacted { border-left: 3px solid var(--yellow); }
     .card.status-interested { border-left: 3px solid var(--green); }
     .card.status-not_interested { border-left: 3px solid var(--red); }
     .card.status-to_contact { border-left: 3px solid var(--border); }
 
-    .card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 8px;
-    }
+    .card-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+    .card-name { font-size: 15px; font-weight: 600; line-height: 1.3; flex: 1; }
 
-    .card-name {
-      font-size: 15px;
-      font-weight: 600;
-      line-height: 1.3;
-      flex: 1;
-    }
-
-    .badge {
-      font-size: 11px;
-      font-weight: 500;
-      padding: 3px 8px;
-      border-radius: 20px;
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
+    .badge { font-size: 11px; font-weight: 500; padding: 3px 8px; border-radius: 20px; white-space: nowrap; flex-shrink: 0; }
     .badge-to_contact { background: #1e293b; color: var(--accent); }
     .badge-contacted { background: #2d2500; color: var(--yellow); }
     .badge-interested { background: #052e16; color: var(--green); }
     .badge-not_interested { background: #2d0a0a; color: var(--red); }
 
-    .card-meta {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      font-size: 13px;
-      color: var(--muted);
-    }
+    .card-meta { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--muted); }
     .card-meta span { display: flex; align-items: center; gap: 6px; }
     .card-meta a { color: var(--accent); text-decoration: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 220px; }
     .card-meta a:hover { text-decoration: underline; }
+    .card-type { font-size: 12px; color: var(--purple); font-weight: 500; }
+    .card-reviews { font-size: 12px; color: var(--muted); }
+    .card-reviews b { color: var(--yellow); }
 
-    .card-type {
-      font-size: 12px;
-      color: var(--purple);
-      font-weight: 500;
-    }
-
-    .card-reviews {
-      font-size: 12px;
-      color: var(--muted);
-    }
-    .card-reviews span { color: var(--yellow); }
-
-    .social-links { display: flex; gap: 8px; flex-wrap: wrap; }
+    .social-links { display: flex; gap: 6px; flex-wrap: wrap; }
     .social-link {
-      font-size: 11px;
-      padding: 3px 8px;
-      border-radius: 4px;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      color: var(--muted);
-      text-decoration: none;
+      font-size: 11px; padding: 3px 8px; border-radius: 4px;
+      background: var(--surface2); border: 1px solid var(--border);
+      color: var(--muted); text-decoration: none;
     }
-    .social-link:hover { color: var(--text); border-color: #444; }
+    .social-link:hover { color: var(--text); }
 
-    .card-actions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
-
+    .card-actions { display: flex; gap: 6px; flex-wrap: wrap; }
     .status-btn {
-      font-size: 12px;
-      padding: 5px 10px;
-      border-radius: 5px;
-      cursor: pointer;
-      border: 1px solid var(--border);
-      background: var(--surface2);
-      color: var(--muted);
-      transition: all 0.15s;
+      font-size: 12px; padding: 5px 10px; border-radius: 5px; cursor: pointer;
+      border: 1px solid var(--border); background: var(--surface2); color: var(--muted);
     }
-    .status-btn:hover { color: var(--text); }
     .status-btn.active-to_contact { background: #1e293b; border-color: var(--accent); color: var(--accent); }
     .status-btn.active-contacted { background: #2d2500; border-color: var(--yellow); color: var(--yellow); }
     .status-btn.active-interested { background: #052e16; border-color: var(--green); color: var(--green); }
     .status-btn.active-not_interested { background: #2d0a0a; border-color: var(--red); color: var(--red); }
 
     .notes-area {
-      width: 100%;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      color: var(--text);
-      font-size: 13px;
-      padding: 8px;
-      resize: vertical;
-      min-height: 60px;
-      font-family: inherit;
-      outline: none;
+      width: 100%; background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 6px; color: var(--text); font-size: 13px; padding: 8px;
+      resize: vertical; min-height: 56px; font-family: inherit; outline: none;
     }
     .notes-area:focus { border-color: var(--accent); }
 
-    .card-query {
-      font-size: 11px;
-      color: var(--muted);
-      border-top: 1px solid var(--border);
-      padding-top: 8px;
-    }
+    .card-query { font-size: 11px; color: var(--muted); border-top: 1px solid var(--border); padding-top: 8px; }
 
     /* PAGINATION */
     .pagination {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 12px;
-      padding: 20px 24px;
-      color: var(--muted);
-      font-size: 14px;
+      display: flex; justify-content: center; align-items: center;
+      gap: 12px; padding: 20px 24px; color: var(--muted); font-size: 14px;
     }
     .pagination button { padding: 6px 14px; }
     .pagination button:disabled { opacity: 0.3; cursor: default; }
 
-    /* LOAD FILE */
-    #file-input { display: none; }
-    .load-btn {
-      background: var(--surface2);
-      border: 1px dashed var(--border);
-      padding: 8px 14px;
-      border-radius: 6px;
-      color: var(--muted);
-      cursor: pointer;
-      font-size: 14px;
-    }
-    .load-btn:hover { border-color: var(--accent); color: var(--accent); }
+    /* EMPTY */
+    .empty { text-align: center; padding: 80px 24px; color: var(--muted); }
+    .empty h2 { font-size: 18px; margin-bottom: 8px; color: var(--text); }
+    .empty p { font-size: 14px; line-height: 1.8; }
+    .empty code { background: var(--surface2); padding: 2px 6px; border-radius: 4px; font-family: monospace; color: var(--accent); }
+
+    /* SPINNER */
+    .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid #fff4; border-top-color: #fff; border-radius: 50%; animation: spin .6s linear infinite; vertical-align: middle; margin-right: 6px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
 
 <header>
   <h1>GMap<span>Prospect</span></h1>
-  <div class="header-actions">
-    <label class="load-btn" for="file-input">Charger prospects.json</label>
-    <input type="file" id="file-input" accept=".json" />
-    <button class="export-btn" onclick="exportCSV()">Exporter CSV</button>
+  <div class="header-right">
+    <button onclick="exportCSV()">Exporter CSV</button>
   </div>
 </header>
 
+<!-- SCRAPE -->
+<div class="scrape-bar">
+  <input type="text" id="scrape-query" placeholder='Ex: restaurants in Paris, plombiers Lyon...' />
+  <input type="number" id="scrape-total" value="10" min="1" max="200" title="Nombre de fiches" />
+  <button class="primary" id="scrape-btn" onclick="launchScrape()">Lancer le scraping</button>
+</div>
+<div class="log-box" id="log-box"></div>
+
+<!-- STATS -->
 <div class="stats">
-  <div class="stat"><div class="stat-value blue" id="stat-total">0</div><div class="stat-label">Total</div></div>
-  <div class="stat"><div class="stat-value" id="stat-to_contact" style="color:var(--text)">0</div><div class="stat-label">À contacter</div></div>
-  <div class="stat"><div class="stat-value yellow" id="stat-contacted">0</div><div class="stat-label">Contactés</div></div>
-  <div class="stat"><div class="stat-value green" id="stat-interested">0</div><div class="stat-label">Intéressés</div></div>
-  <div class="stat"><div class="stat-value red" id="stat-not_interested">0</div><div class="stat-label">Pas intéressés</div></div>
+  <div class="stat"><div class="stat-value" id="s-total" style="color:var(--accent)">—</div><div class="stat-label">Total</div></div>
+  <div class="stat"><div class="stat-value" id="s-to_contact">—</div><div class="stat-label">À contacter</div></div>
+  <div class="stat"><div class="stat-value" id="s-contacted" style="color:var(--yellow)">—</div><div class="stat-label">Contactés</div></div>
+  <div class="stat"><div class="stat-value" id="s-interested" style="color:var(--green)">—</div><div class="stat-label">Intéressés</div></div>
+  <div class="stat"><div class="stat-value" id="s-not_interested" style="color:var(--red)">—</div><div class="stat-label">Pas intéressés</div></div>
 </div>
 
+<!-- TOOLBAR -->
 <div class="toolbar">
-  <input type="text" class="search-input" id="search-box" placeholder="Rechercher par nom, adresse, type..." oninput="filterAndRender()" />
-  <select id="filter-status" onchange="filterAndRender()">
+  <input type="text" id="filter-search" placeholder="Rechercher..." oninput="onFilter()" />
+  <select id="filter-status" onchange="onFilter()">
     <option value="">Tous les statuts</option>
     <option value="to_contact">À contacter</option>
     <option value="contacted">Contacté</option>
     <option value="interested">Intéressé</option>
     <option value="not_interested">Pas intéressé</option>
   </select>
-  <select id="filter-query" onchange="filterAndRender()">
+  <select id="filter-query" onchange="onFilter()">
     <option value="">Toutes les recherches</option>
   </select>
-  <select id="sort-by" onchange="filterAndRender()">
+  <select id="filter-sort" onchange="onFilter()">
     <option value="scraped_at">Plus récents</option>
     <option value="name">Nom A→Z</option>
     <option value="reviews_count">Meilleures notes</option>
   </select>
 </div>
 
-<div id="main-content">
+<div id="content">
   <div class="empty">
-    <h2>Aucun prospect chargé</h2>
-    <p>Lance le scraper : <code>python3 main.py -s "restaurants Paris" -t 20</code><br />
-    puis clique sur <strong>Charger prospects.json</strong>.</p>
+    <h2>Aucun prospect</h2>
+    <p>Lance un scraping en haut pour commencer.<br/>
+    Ex : <code>restaurants in Paris</code> · <code>plombiers Lyon</code></p>
   </div>
 </div>
 
 <div class="pagination" id="pagination" style="display:none">
-  <button onclick="changePage(-1)" id="btn-prev">← Préc.</button>
+  <button id="btn-prev" onclick="changePage(-1)">← Préc.</button>
   <span id="page-info"></span>
-  <button onclick="changePage(1)" id="btn-next">Suiv. →</button>
+  <button id="btn-next" onclick="changePage(1)">Suiv. →</button>
 </div>
 
 <script>
-  const PER_PAGE = 24;
-  let allData = [];
-  let filtered = [];
-  let currentPage = 1;
+const API = "http://localhost:8000/api";
+const STATUSES = {
+  to_contact:     { label: "À contacter",  cls: "badge-to_contact" },
+  contacted:      { label: "Contacté",      cls: "badge-contacted" },
+  interested:     { label: "Intéressé",     cls: "badge-interested" },
+  not_interested: { label: "Pas intéressé", cls: "badge-not_interested" },
+};
 
-  // STATUS CONFIG
-  const STATUSES = {
-    to_contact:    { label: "À contacter",   cls: "badge-to_contact" },
-    contacted:     { label: "Contacté",       cls: "badge-contacted" },
-    interested:    { label: "Intéressé",      cls: "badge-interested" },
-    not_interested:{ label: "Pas intéressé",  cls: "badge-not_interested" },
-  };
+let currentPage = 1;
+let totalCount = 0;
+const PER_PAGE = 24;
+let filterTimeout = null;
+let scrapePoller = null;
 
-  // LOAD FILE
-  document.getElementById("file-input").addEventListener("change", e => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = ev => {
-      try {
-        allData = JSON.parse(ev.target.result);
-        populateQueryFilter();
-        updateStats();
-        filterAndRender();
-      } catch {
-        alert("Fichier JSON invalide.");
-      }
-    };
-    reader.readAsText(file);
+// ── INIT ──────────────────────────────────────────────────────────────
+window.addEventListener("load", () => {
+  loadStats();
+  loadProspects();
+});
+
+// ── STATS ─────────────────────────────────────────────────────────────
+async function loadStats() {
+  const r = await fetch(`${API}/prospects/stats`).catch(() => null);
+  if (!r) return;
+  const d = await r.json();
+  document.getElementById("s-total").textContent = d.total;
+  document.getElementById("s-to_contact").textContent = d.to_contact;
+  document.getElementById("s-contacted").textContent = d.contacted;
+  document.getElementById("s-interested").textContent = d.interested;
+  document.getElementById("s-not_interested").textContent = d.not_interested;
+
+  const sel = document.getElementById("filter-query");
+  const current = sel.value;
+  sel.innerHTML = '<option value="">Toutes les recherches</option>';
+  (d.queries || []).forEach(q => {
+    const opt = document.createElement("option");
+    opt.value = opt.textContent = q;
+    if (q === current) opt.selected = true;
+    sel.appendChild(opt);
   });
+}
 
-  function populateQueryFilter() {
-    const sel = document.getElementById("filter-query");
-    const queries = [...new Set(allData.map(r => r.search_query).filter(Boolean))];
-    sel.innerHTML = '<option value="">Toutes les recherches</option>';
-    queries.forEach(q => {
-      const opt = document.createElement("option");
-      opt.value = q; opt.textContent = q;
-      sel.appendChild(opt);
-    });
-  }
-
-  function updateStats() {
-    document.getElementById("stat-total").textContent = allData.length;
-    ["to_contact","contacted","interested","not_interested"].forEach(s => {
-      document.getElementById("stat-" + s).textContent = allData.filter(r => r.status === s).length;
-    });
-  }
-
-  function filterAndRender() {
-    const q = document.getElementById("search-box").value.toLowerCase();
-    const status = document.getElementById("filter-status").value;
-    const query = document.getElementById("filter-query").value;
-    const sort = document.getElementById("sort-by").value;
-
-    filtered = allData.filter(r => {
-      const matchQ = !q || [r.name, r.address, r.place_type, r.area, r.phone, r.website]
-        .some(v => (v || "").toLowerCase().includes(q));
-      const matchStatus = !status || r.status === status;
-      const matchQuery = !query || r.search_query === query;
-      return matchQ && matchStatus && matchQuery;
-    });
-
-    filtered.sort((a, b) => {
-      if (sort === "name") return (a.name || "").localeCompare(b.name || "");
-      if (sort === "reviews_count") return (parseFloat(b.reviews_count) || 0) - (parseFloat(a.reviews_count) || 0);
-      return new Date(b.scraped_at) - new Date(a.scraped_at);
-    });
-
-    currentPage = 1;
-    renderPage();
-  }
-
-  function renderPage() {
-    const start = (currentPage - 1) * PER_PAGE;
-    const slice = filtered.slice(start, start + PER_PAGE);
-    const container = document.getElementById("main-content");
-
-    if (filtered.length === 0) {
-      container.innerHTML = '<div class="empty"><h2>Aucun résultat</h2><p>Modifie les filtres.</p></div>';
-      document.getElementById("pagination").style.display = "none";
-      return;
-    }
-
-    const grid = document.createElement("div");
-    grid.className = "grid";
-    slice.forEach(r => grid.appendChild(buildCard(r)));
-    container.innerHTML = "";
-    container.appendChild(grid);
-
-    const totalPages = Math.ceil(filtered.length / PER_PAGE);
-    document.getElementById("pagination").style.display = totalPages > 1 ? "flex" : "none";
-    document.getElementById("page-info").textContent = `Page ${currentPage} / ${totalPages} — ${filtered.length} prospects`;
-    document.getElementById("btn-prev").disabled = currentPage === 1;
-    document.getElementById("btn-next").disabled = currentPage === totalPages;
-  }
-
-  function buildCard(r) {
-    const card = document.createElement("div");
-    card.className = `card status-${r.status}`;
-    card.dataset.id = r.id;
-
-    const status = STATUSES[r.status] || STATUSES.to_contact;
-
-    let socialHtml = "";
-    const socials = [
-      { key: "website", label: "Web" },
-      { key: "facebook", label: "FB" },
-      { key: "instagram", label: "IG" },
-      { key: "twitter", label: "TW" },
-      { key: "tiktok", label: "TK" },
-      { key: "linkedin", label: "LI" },
-    ];
-    const links = socials.filter(s => r[s.key] && r[s.key] !== "Not Given");
-    if (links.length) {
-      socialHtml = `<div class="social-links">${links.map(s =>
-        `<a class="social-link" href="${r[s.key]}" target="_blank">${s.label}</a>`
-      ).join("")}</div>`;
-    }
-
-    let reviewsHtml = "";
-    if (r.reviews_average && r.reviews_count) {
-      reviewsHtml = `<div class="card-reviews"><span>★ ${r.reviews_average}</span> · ${r.reviews_count} avis</div>`;
-    }
-
-    const statusBtns = Object.entries(STATUSES).map(([key, val]) =>
-      `<button class="status-btn ${r.status === key ? 'active-'+key : ''}"
-        onclick="setStatus('${r.id}', '${key}', this)">${val.label}</button>`
-    ).join("");
-
-    const notes = (r.notes || "").replace(/"/g, "&quot;");
-
-    card.innerHTML = `
-      <div class="card-header">
-        <div class="card-name">${r.name || "—"}</div>
-        <span class="badge ${status.cls}">${status.label}</span>
-      </div>
-      ${r.place_type ? `<div class="card-type">${r.place_type}</div>` : ""}
-      <div class="card-meta">
-        ${r.address && r.address !== "Not Given" ? `<span>📍 ${r.address}</span>` : ""}
-        ${r.phone && r.phone !== "Not Given" ? `<span>📞 <a href="tel:${r.phone}">${r.phone}</a></span>` : ""}
-        ${r.opens_at ? `<span>🕐 ${r.opens_at}</span>` : ""}
-      </div>
-      ${reviewsHtml}
-      ${socialHtml}
-      <div class="card-actions">${statusBtns}</div>
-      <textarea class="notes-area" placeholder="Notes, date de contact..."
-        onchange="saveNote('${r.id}', this.value)">${notes}</textarea>
-      <div class="card-query">🔍 ${r.search_query || ""}</div>
-    `;
-
-    return card;
-  }
-
-  function setStatus(id, status, btn) {
-    const rec = allData.find(r => r.id === id);
-    if (!rec) return;
-    rec.status = status;
-    if (status === "contacted" && !rec.contacted_at) {
-      rec.contacted_at = new Date().toISOString();
-    }
-    updateStats();
-    // Update card visually
-    const card = btn.closest(".card");
-    card.className = `card status-${status}`;
-    // Update badge
-    const s = STATUSES[status];
-    card.querySelector(".badge").className = `badge ${s.cls}`;
-    card.querySelector(".badge").textContent = s.label;
-    // Update buttons
-    card.querySelectorAll(".status-btn").forEach(b => {
-      b.className = "status-btn";
-      if (b.textContent === s.label) b.classList.add("active-" + status);
-    });
-    updateStats();
-    autoSave();
-  }
-
-  function saveNote(id, value) {
-    const rec = allData.find(r => r.id === id);
-    if (rec) { rec.notes = value; autoSave(); }
-  }
-
-  function autoSave() {
-    // Save updated data to localStorage as backup
-    localStorage.setItem("gmapprospect_data", JSON.stringify(allData));
-  }
-
-  function changePage(dir) {
-    const totalPages = Math.ceil(filtered.length / PER_PAGE);
-    currentPage = Math.max(1, Math.min(totalPages, currentPage + dir));
-    renderPage();
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }
-
-  function exportCSV() {
-    if (!allData.length) { alert("Aucune donnée chargée."); return; }
-    const fields = ["name","status","phone","website","address","place_type","reviews_average","reviews_count","notes","contacted_at","search_query","scraped_at"];
-    const rows = [fields.join(",")];
-    allData.forEach(r => {
-      rows.push(fields.map(f => `"${(r[f] || "").toString().replace(/"/g, '""')}"`).join(","));
-    });
-    const blob = new Blob([rows.join("\n")], { type: "text/csv;charset=utf-8;" });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = `prospects_${new Date().toISOString().slice(0,10)}.csv`;
-    a.click();
-  }
-
-  // Restore from localStorage on load
-  window.addEventListener("load", () => {
-    const saved = localStorage.getItem("gmapprospect_data");
-    if (saved) {
-      try {
-        allData = JSON.parse(saved);
-        populateQueryFilter();
-        updateStats();
-        filterAndRender();
-        document.getElementById("main-content").insertAdjacentHTML("afterbegin",
-          `<div style="background:#1a2a1a;border:1px solid #22c55e;color:#22c55e;padding:10px 24px;font-size:13px;">
-            ✓ Données restaurées depuis la session précédente — recharge un fichier pour mettre à jour.
-          </div>`
-        );
-      } catch {}
-    }
+// ── PROSPECTS ─────────────────────────────────────────────────────────
+async function loadProspects() {
+  const params = new URLSearchParams({
+    page: currentPage,
+    per_page: PER_PAGE,
+    sort: document.getElementById("filter-sort").value,
   });
+  const s = document.getElementById("filter-search").value.trim();
+  const st = document.getElementById("filter-status").value;
+  const q = document.getElementById("filter-query").value;
+  if (s) params.set("search", s);
+  if (st) params.set("status", st);
+  if (q) params.set("query", q);
+
+  const r = await fetch(`${API}/prospects?${params}`).catch(() => null);
+  if (!r) {
+    document.getElementById("content").innerHTML = `<div class="empty"><h2>Serveur inaccessible</h2><p>Lance : <code>python3 server.py</code></p></div>`;
+    return;
+  }
+  const d = await r.json();
+  totalCount = d.total;
+  renderProspects(d.data);
+}
+
+function renderProspects(data) {
+  const el = document.getElementById("content");
+  if (!data.length) {
+    el.innerHTML = `<div class="empty"><h2>${totalCount === 0 ? "Aucun prospect" : "Aucun résultat"}</h2><p>${totalCount === 0 ? 'Lance un scraping pour commencer.' : 'Modifie les filtres.'}</p></div>`;
+    document.getElementById("pagination").style.display = "none";
+    return;
+  }
+  const grid = document.createElement("div");
+  grid.className = "grid";
+  data.forEach(r => grid.appendChild(buildCard(r)));
+  el.innerHTML = "";
+  el.appendChild(grid);
+
+  const totalPages = Math.ceil(totalCount / PER_PAGE);
+  document.getElementById("pagination").style.display = totalPages > 1 ? "flex" : "none";
+  document.getElementById("page-info").textContent = `Page ${currentPage} / ${totalPages} — ${totalCount} prospects`;
+  document.getElementById("btn-prev").disabled = currentPage === 1;
+  document.getElementById("btn-next").disabled = currentPage === totalPages;
+}
+
+function buildCard(r) {
+  const card = document.createElement("div");
+  card.className = `card status-${r.status}`;
+  card.dataset.id = r.id;
+  const s = STATUSES[r.status] || STATUSES.to_contact;
+
+  const socials = [
+    ["website","Web"], ["facebook","FB"], ["instagram","IG"],
+    ["twitter","TW"], ["tiktok","TK"], ["linkedin","LI"]
+  ].filter(([k]) => r[k] && r[k] !== "Not Given");
+
+  const socialHtml = socials.length
+    ? `<div class="social-links">${socials.map(([k,l]) => `<a class="social-link" href="${r[k]}" target="_blank">${l}</a>`).join("")}</div>`
+    : "";
+
+  const reviewsHtml = r.reviews_average
+    ? `<div class="card-reviews"><b>★ ${r.reviews_average}</b>${r.reviews_count ? ` · ${Number(r.reviews_count).toLocaleString("fr")} avis` : ""}</div>`
+    : "";
+
+  const statusBtns = Object.entries(STATUSES).map(([key, val]) =>
+    `<button class="status-btn ${r.status === key ? 'active-'+key : ''}" onclick="setStatus('${r.id}','${key}',this)">${val.label}</button>`
+  ).join("");
+
+  card.innerHTML = `
+    <div class="card-header">
+      <div class="card-name">${r.name || "—"}</div>
+      <span class="badge ${s.cls}">${s.label}</span>
+    </div>
+    ${r.place_type ? `<div class="card-type">${r.place_type}</div>` : ""}
+    <div class="card-meta">
+      ${r.address && r.address !== "Not Given" ? `<span>📍 ${r.address}</span>` : ""}
+      ${r.phone && r.phone !== "Not Given" ? `<span>📞 <a href="tel:${r.phone}">${r.phone}</a></span>` : ""}
+      ${r.opens_at && r.opens_at !== "Not Given" ? `<span>🕐 ${r.opens_at}</span>` : ""}
+    </div>
+    ${reviewsHtml}
+    ${socialHtml}
+    <div class="card-actions">${statusBtns}</div>
+    <textarea class="notes-area" placeholder="Notes, date de contact..."
+      onchange="saveNote('${r.id}',this.value)">${(r.notes||"").replace(/</g,"&lt;")}</textarea>
+    <div class="card-query">🔍 ${r.search_query || ""}</div>
+  `;
+  return card;
+}
+
+// ── ACTIONS ───────────────────────────────────────────────────────────
+async function setStatus(id, status, btn) {
+  const body = { status };
+  if (status === "contacted") body.contacted_at = new Date().toISOString();
+  await fetch(`${API}/prospects/${id}`, { method: "PUT", headers: {"Content-Type":"application/json"}, body: JSON.stringify(body) });
+
+  const card = btn.closest(".card");
+  card.className = `card status-${status}`;
+  const s = STATUSES[status];
+  card.querySelector(".badge").className = `badge ${s.cls}`;
+  card.querySelector(".badge").textContent = s.label;
+  card.querySelectorAll(".status-btn").forEach(b => {
+    b.className = "status-btn";
+    if (b.textContent === s.label) b.classList.add("active-" + status);
+  });
+  loadStats();
+}
+
+async function saveNote(id, value) {
+  await fetch(`${API}/prospects/${id}`, { method: "PUT", headers: {"Content-Type":"application/json"}, body: JSON.stringify({ notes: value }) });
+}
+
+// ── SCRAPE ────────────────────────────────────────────────────────────
+async function launchScrape() {
+  const search = document.getElementById("scrape-query").value.trim();
+  const total = parseInt(document.getElementById("scrape-total").value) || 10;
+  if (!search) { alert("Saisis une recherche."); return; }
+
+  const btn = document.getElementById("scrape-btn");
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Scraping...';
+
+  const r = await fetch(`${API}/scrape`, { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({ search, total }) });
+  const d = await r.json();
+  if (!r.ok) { alert(d.error); btn.disabled = false; btn.textContent = "Lancer le scraping"; return; }
+
+  const logBox = document.getElementById("log-box");
+  logBox.innerHTML = "";
+  logBox.classList.add("visible");
+
+  scrapePoller = setInterval(async () => {
+    const s = await fetch(`${API}/scrape/status`).then(r => r.json());
+    logBox.innerHTML = s.log.map(l => `<div class="log-line">${l}</div>`).join("");
+    logBox.scrollTop = logBox.scrollHeight;
+    if (!s.running) {
+      clearInterval(scrapePoller);
+      btn.disabled = false;
+      btn.textContent = "Lancer le scraping";
+      currentPage = 1;
+      loadStats();
+      loadProspects();
+    }
+  }, 800);
+}
+
+// ── FILTERS ───────────────────────────────────────────────────────────
+function onFilter() {
+  clearTimeout(filterTimeout);
+  filterTimeout = setTimeout(() => { currentPage = 1; loadProspects(); }, 300);
+}
+
+function changePage(dir) {
+  const totalPages = Math.ceil(totalCount / PER_PAGE);
+  currentPage = Math.max(1, Math.min(totalPages, currentPage + dir));
+  loadProspects();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+// ── EXPORT ────────────────────────────────────────────────────────────
+function exportCSV() {
+  window.location = `${API}/prospects/export`;
+}
 </script>
 </body>
 </html>
