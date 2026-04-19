@@ -24,6 +24,12 @@ def get_db():
     return conn
 
 
+def ensure_column(conn, table, column, definition):
+    cols = {row["name"] for row in conn.execute(f"PRAGMA table_info({table})").fetchall()}
+    if column not in cols:
+        conn.execute(f"ALTER TABLE {table} ADD COLUMN {column} {definition}")
+
+
 def init_db():
     conn = get_db()
     conn.execute("""
@@ -34,6 +40,8 @@ def init_db():
             status TEXT DEFAULT 'to_contact',
             notes TEXT DEFAULT '',
             contacted_at TEXT DEFAULT '',
+            is_closed INTEGER DEFAULT 0,
+            closed_at TEXT DEFAULT '',
             name TEXT,
             address TEXT,
             address_line TEXT,
@@ -66,13 +74,17 @@ def init_db():
             started_at TEXT,
             ended_at TEXT,
             duration_seconds INTEGER DEFAULT 0,
+            closed INTEGER DEFAULT 0,
             created_at TEXT,
             FOREIGN KEY(prospect_id) REFERENCES prospects(id)
         )
     """)
+    ensure_column(conn, "prospects", "is_closed", "INTEGER DEFAULT 0")
+    ensure_column(conn, "prospects", "closed_at", "TEXT DEFAULT ''")
+    ensure_column(conn, "call_history", "closed", "INTEGER DEFAULT 0")
     conn.execute("""
         INSERT INTO call_history
-        (id, prospect_id, prospect_name, phone, search_query, notes, started_at, ended_at, duration_seconds, created_at)
+        (id, prospect_id, prospect_name, phone, search_query, notes, started_at, ended_at, duration_seconds, closed, created_at)
         SELECT
             lower(hex(randomblob(16))),
             p.id,
@@ -82,6 +94,7 @@ def init_db():
             p.notes,
             p.contacted_at,
             p.contacted_at,
+            0,
             0,
             p.contacted_at
         FROM prospects p
@@ -110,6 +123,16 @@ def parse_int(value, default, *, minimum=None, maximum=None):
     if maximum is not None:
         parsed = min(maximum, parsed)
     return parsed
+
+
+def parse_bool(value):
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, (int, float)):
+        return value != 0
+    if value is None:
+        return False
+    return str(value).strip().lower() in {"1", "true", "yes", "on"}
 
 
 def run_scrape(search, total):
@@ -144,11 +167,12 @@ def run_scrape(search, total):
                 if not existing:
                     conn.execute("""
                         INSERT OR IGNORE INTO prospects
-                        (id,search_query,scraped_at,status,notes,contacted_at,name,address,address_line,area,zip_code,country,located_in,website,phone,reviews_count,reviews_average,place_type,opens_at,about,facebook,instagram,twitter,tiktok,linkedin)
-                        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                        (id,search_query,scraped_at,status,notes,contacted_at,is_closed,closed_at,name,address,address_line,area,zip_code,country,located_in,website,phone,reviews_count,reviews_average,place_type,opens_at,about,facebook,instagram,twitter,tiktok,linkedin)
+                        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
                     """, (
                         r.get("id"), r.get("search_query"), r.get("scraped_at"),
                         r.get("status","to_contact"), r.get("notes",""), r.get("contacted_at",""),
+                        1 if parse_bool(r.get("is_closed", 0)) else 0, r.get("closed_at",""),
                         r.get("name"), r.get("address"), r.get("address_line"), r.get("area"),
                         r.get("zip_code"), r.get("country"), r.get("located_in"), r.get("website"),
                         r.get("phone"), str(r.get("reviews_count","")), str(r.get("reviews_average","")),
@@ -204,6 +228,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
         elif path == "/api/prospects":
             conn = get_db()
             status_filter = qs.get("status", [None])[0]
+            closed_filter = qs.get("closed", [None])[0]
             query_filter = qs.get("query", [None])[0]
             search_filter = qs.get("search", [None])[0]
             sort = qs.get("sort", ["scraped_at"])[0]
@@ -214,6 +239,10 @@ class Handler(http.server.BaseHTTPRequestHandler):
             params = []
             if status_filter:
                 sql += " AND status=?"; params.append(status_filter)
+            if closed_filter == "open":
+                sql += " AND COALESCE(is_closed, 0)=0"
+            elif closed_filter == "closed":
+                sql += " AND COALESCE(is_closed, 0)=1"
             if query_filter:
                 sql += " AND search_query=?"; params.append(query_filter)
             if search_filter:
@@ -240,6 +269,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 "contacted": conn.execute("SELECT COUNT(*) FROM prospects WHERE status='contacted'").fetchone()[0],
                 "interested": conn.execute("SELECT COUNT(*) FROM prospects WHERE status='interested'").fetchone()[0],
                 "not_interested": conn.execute("SELECT COUNT(*) FROM prospects WHERE status='not_interested'").fetchone()[0],
+                "closed": conn.execute("SELECT COUNT(*) FROM prospects WHERE COALESCE(is_closed, 0)=1").fetchone()[0],
                 "queries": [r[0] for r in conn.execute("SELECT DISTINCT search_query FROM prospects WHERE search_query != '' ORDER BY search_query").fetchall()],
             }
             conn.close()
@@ -277,6 +307,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
                     COUNT(*) AS total_calls,
                     COALESCE(SUM(duration_seconds), 0) AS total_duration_seconds,
                     COALESCE(AVG(duration_seconds), 0) AS average_duration_seconds,
+                    COALESCE(SUM(closed), 0) AS closed_calls,
                     MAX(ended_at) AS last_call_at
                 FROM call_history
             """).fetchone()
@@ -300,7 +331,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
             conn = get_db()
             rows = conn.execute("SELECT * FROM prospects ORDER BY scraped_at DESC").fetchall()
             conn.close()
-            fields = ["name","status","phone","website","address","place_type","reviews_average","reviews_count","notes","contacted_at","search_query","scraped_at"]
+            fields = ["name","status","is_closed","closed_at","phone","website","address","place_type","reviews_average","reviews_count","notes","contacted_at","search_query","scraped_at"]
             out = io.StringIO()
             writer = csv.DictWriter(out, fieldnames=fields, extrasaction='ignore')
             writer.writeheader()
@@ -343,6 +374,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
             ended_at = body.get("ended_at", "")
             duration_seconds = int(body.get("duration_seconds", 0) or 0)
             notes = body.get("notes", "")
+            closed = 1 if parse_bool(body.get("closed")) else 0
 
             if not prospect_id:
                 self.send_json({"error": "prospect_id is required"}, 400)
@@ -358,8 +390,8 @@ class Handler(http.server.BaseHTTPRequestHandler):
             call_id = str(uuid.uuid4())
             conn.execute("""
                 INSERT INTO call_history
-                (id, prospect_id, prospect_name, phone, search_query, notes, started_at, ended_at, duration_seconds, created_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                (id, prospect_id, prospect_name, phone, search_query, notes, started_at, ended_at, duration_seconds, closed, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 call_id,
                 prospect_id,
@@ -370,13 +402,16 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 started_at,
                 ended_at,
                 duration_seconds,
+                closed,
                 ended_at or started_at
             ))
+            next_closed = closed or int(prospect["is_closed"] or 0)
+            next_closed_at = (ended_at or started_at) if closed else (prospect["closed_at"] or "")
             conn.execute("""
                 UPDATE prospects
-                SET status=?, notes=?, contacted_at=?
+                SET status=?, notes=?, contacted_at=?, is_closed=?, closed_at=?
                 WHERE id=?
-            """, ("contacted", notes, ended_at, prospect_id))
+            """, ("contacted", notes, ended_at, next_closed, next_closed_at, prospect_id))
             conn.commit()
             row = conn.execute("SELECT * FROM call_history WHERE id=?", (call_id,)).fetchone()
             conn.close()
@@ -395,8 +430,10 @@ class Handler(http.server.BaseHTTPRequestHandler):
             length = int(self.headers.get("Content-Length", 0))
             body = json.loads(self.rfile.read(length)) if length else {}
             conn = get_db()
-            allowed = ["status", "notes", "contacted_at"]
+            allowed = ["status", "notes", "contacted_at", "is_closed", "closed_at"]
             updates = {k: v for k, v in body.items() if k in allowed}
+            if "is_closed" in updates:
+                updates["is_closed"] = 1 if parse_bool(updates["is_closed"]) else 0
             if updates:
                 set_clause = ", ".join(f"{k}=?" for k in updates)
                 conn.execute(f"UPDATE prospects SET {set_clause} WHERE id=?", list(updates.values()) + [pid])

@@ -93,10 +93,11 @@ def get_prospect_stats() -> dict[str, Any]:
     return request_json("GET", "/api/prospects/stats")
 
 
-@mcp.tool(description="Search prospects with optional status, query, text search, sorting, and pagination.")
+@mcp.tool(description="Search prospects with optional status, closed state, query, text search, sorting, and pagination.")
 def search_prospects(
     search: str = "",
     status: str = "",
+    closed: str = "",
     query: str = "",
     sort: str = "scraped_at",
     page: int = 1,
@@ -111,6 +112,8 @@ def search_prospects(
         params["search"] = search
     if status:
         params["status"] = status
+    if closed:
+        params["closed"] = closed
     if query:
         params["query"] = query
     return request_json("GET", "/api/prospects", params=params)
@@ -132,12 +135,14 @@ def get_scrape_status() -> dict[str, Any]:
     return request_json("GET", "/api/scrape/status")
 
 
-@mcp.tool(description="Update a prospect status, notes, or contacted_at timestamp.")
+@mcp.tool(description="Update a prospect status, notes, contacted timestamp, or closed state.")
 def update_prospect(
     prospect_id: str,
     status: str = "",
     notes: str = "",
     contacted_at: str = "",
+    is_closed: bool | None = None,
+    closed_at: str = "",
 ) -> dict[str, Any]:
     if not prospect_id.strip():
         raise ValueError("prospect_id is required")
@@ -149,6 +154,11 @@ def update_prospect(
         payload["notes"] = notes
     if contacted_at:
         payload["contacted_at"] = contacted_at
+    if is_closed is not None:
+        payload["is_closed"] = is_closed
+        payload["closed_at"] = closed_at if is_closed else ""
+    elif closed_at:
+        payload["closed_at"] = closed_at
 
     if not payload:
         raise ValueError("At least one field must be provided to update a prospect")
@@ -179,13 +189,14 @@ def get_call_stats() -> dict[str, Any]:
     return request_json("GET", "/api/calls/stats")
 
 
-@mcp.tool(description="Create a call log for a prospect and mark it as contacted.")
+@mcp.tool(description="Create a call log for a prospect, mark it as contacted, and optionally close the lead.")
 def create_call(
     prospect_id: str,
     started_at: str = "",
     ended_at: str = "",
     duration_seconds: int = 0,
     notes: str = "",
+    closed: bool = False,
 ) -> dict[str, Any]:
     if not prospect_id.strip():
         raise ValueError("prospect_id is required")
@@ -199,6 +210,7 @@ def create_call(
             "ended_at": ended_at,
             "duration_seconds": duration_seconds,
             "notes": notes,
+            "closed": closed,
         },
     )
 
