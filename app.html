@@ -136,6 +136,8 @@
     .sidebar-footer {
       margin-top: auto;
       padding: 12px;
+      display: grid;
+      gap: 10px;
     }
 
     .sidebar-footer button {
@@ -152,6 +154,37 @@
     }
 
     .sidebar-footer button:hover { background: var(--surface-2); color: var(--text); }
+
+    .sidebar-promo {
+      display: grid;
+      gap: 6px;
+      padding: 12px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background:
+        linear-gradient(180deg, var(--accent-muted), transparent),
+        var(--surface);
+      color: var(--text);
+      text-decoration: none;
+      transition: border-color 0.15s, transform 0.15s, background 0.15s;
+    }
+
+    .sidebar-promo:hover {
+      border-color: var(--accent);
+      transform: translateY(-1px);
+    }
+
+    .sidebar-promo-title {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    .sidebar-promo-subtitle {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
 
     /* theme toggle */
     .theme-toggle {
@@ -1339,6 +1372,10 @@
     </button>
 
     <div class="sidebar-footer">
+      <a class="sidebar-promo" href="https://github.com/HamzaDams/GMapProspect" target="_blank" rel="noreferrer">
+        <div class="sidebar-promo-title">Like the project?</div>
+        <div class="sidebar-promo-subtitle">Drop a star on GitHub before exporting your leads.</div>
+      </a>
       <button onclick="exportCSV()">Export CSV</button>
     </div>
   </aside>

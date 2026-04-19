@@ -1,26 +1,26 @@
 # GMapProspect
 
-Outil local de scraping Google Maps et de prospection commerciale.
+Local Google Maps scraping and sales outreach tool.
 
-Le projet tourne sur **la machine de l'utilisateur**.
+The project runs **on the user's machine**.
 
-- lancer le scraper Playwright sur son propre PC
-- stocker ses prospects localement
-- trier les fiches en mode dashboard ou swipe
-- passer ses appels en mode focus
-- retrouver l'historique des appels avec les notes et la durée
+- run the Playwright scraper on your own computer
+- store prospects locally
+- review leads in dashboard or swipe mode
+- handle calls in focus mode
+- review call history with notes and duration
 
-## Ce que fait le projet
+## What the project does
 
-- scrape des fiches Google Maps depuis une recherche
-- exporte un `results.csv`
-- alimente une base locale `prospects.db`
-- maintient un fichier `prospects.json` pour l'agrégation des résultats
-- propose plusieurs interfaces locales :
-  - `/` : dashboard principal
-  - `/swipe` : tri rapide des fiches
-  - `/prospection` : mode appel focus
-  - `/history` : historique des appels
+- scrapes Google Maps leads from a search query
+- exports a `results.csv`
+- fills a local `prospects.db` database
+- maintains a `prospects.json` file for aggregated results
+- provides several local interfaces:
+  - `/`: main dashboard
+  - `/swipe`: quick lead triage
+  - `/prospection`: focus call mode
+  - `/history`: call history
 
 ## Stack
 
@@ -28,146 +28,146 @@ Le projet tourne sur **la machine de l'utilisateur**.
 - Playwright + Chromium
 - SQLite
 - HTML / CSS / JS vanilla
-- serveur HTTP local via `server.py`
+- local HTTP server via `server.py`
 
 ## Installation
 
-### 1. Cloner le dépôt
+### 1. Clone the repository
 
 ```bash
-git clone <TON-REPO-GITHUB>
+git clone <YOUR-GITHUB-REPO>
 cd GMapProspect
 ```
 
-### 2. Créer un environnement virtuel
+### 2. Create a virtual environment
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
 ```
 
-### 3. Installer les dépendances Python
+### 3. Install Python dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. Installer Chromium pour Playwright
+### 4. Install Chromium for Playwright
 
 ```bash
 python3 -m playwright install chromium
 ```
 
-## Lancement rapide
+## Quick start
 
-### Option recommandée : lancer l'application locale
+### Recommended option: run the local app
 
 ```bash
 python3 server.py
 ```
 
-Puis ouvrir :
+Then open:
 
 ```text
 http://localhost:8000
 ```
 
-Depuis cette interface, tu peux :
+From this interface, you can:
 
-- lancer un scraping
-- consulter les prospects
-- changer leur statut
-- prendre des notes
-- utiliser le mode swipe
-- utiliser le mode appel
-- consulter l'historique d'appels
+- start a scrape
+- browse prospects
+- change their status
+- take notes
+- use swipe mode
+- use call mode
+- view call history
 
-### Option CLI : lancer seulement le scraper
+### CLI option: run only the scraper
 
 ```bash
 python3 main.py -s "hotels in Paris" -t 20
 ```
 
-Arguments :
+Arguments:
 
-- `-s`, `--search` : requête Google Maps
-- `-t`, `--total` : nombre de fiches à récupérer
+- `-s`, `--search`: Google Maps query
+- `-t`, `--total`: number of leads to fetch
 
-## Données générées
+## Generated data
 
-Les données sont stockées localement dans le dossier du projet :
+Data is stored locally inside the project directory:
 
-- `results.csv` : export CSV du dernier scraping
-- `prospects.json` : agrégation JSON des prospects
-- `prospects.db` : base SQLite locale
+- `results.csv`: CSV export of the latest scrape
+- `prospects.json`: JSON aggregation of prospects
+- `prospects.db`: local SQLite database
 
-Le `.gitignore` ignore déjà :
+`.gitignore` already ignores:
 
 - `prospects.db`
 - `prospects.json`
 
-## Workflow conseillé
+## Recommended workflow
 
-1. Lancer `python3 server.py`
-2. Ouvrir `http://localhost:8000`
-3. Faire un scraping
-4. Qualifier les fiches sur le dashboard ou via `/swipe`
-5. Envoyer les fiches prometteuses dans le statut `Intéressé`
-6. Utiliser `/prospection` pour passer les appels
-7. Retrouver les appels terminés dans `/history`
+1. Run `python3 server.py`
+2. Open `http://localhost:8000`
+3. Start a scrape
+4. Qualify leads from the dashboard or via `/swipe`
+5. Move promising leads to the `Interested` status
+6. Use `/prospection` to handle calls
+7. Review completed calls in `/history`
 
-## Historique des appels
+## Call history
 
-Quand un appel est terminé depuis la page `/prospection`, l'application enregistre :
+When a call is completed from the `/prospection` page, the app stores:
 
-- la fiche appelée
-- la note prise pendant l'appel
-- la date de début
-- la date de fin
-- la durée de l'appel
+- the called lead
+- the note taken during the call
+- the start date
+- the end date
+- the call duration
 
-Ces données sont visibles dans la page `/history`, avec :
+This data is visible on the `/history` page, with:
 
-- le nombre total d'appels
-- le temps cumulé
-- le temps moyen par appel
-- la liste détaillée des appels passés
+- the total number of calls
+- the cumulative time
+- the average time per call
+- the detailed list of completed calls
 
 ## Important
 
-- Le scraping dépend d'un navigateur lancé localement via Playwright.
-- Ce projet est donc pensé pour être exécuté **sur le PC de l'utilisateur**.
-- Si tu partages ce repo sur GitHub, chaque personne pourra l'utiliser en local sans que tu héberges un service centralisé.
-- Google Maps peut changer son HTML ou renforcer ses protections anti-bot, donc certains sélecteurs peuvent casser avec le temps.
+- Scraping depends on a browser launched locally via Playwright.
+- This project is designed to run **on the user's computer**.
+- If you share this repo on GitHub, each person can use it locally without you hosting a centralized service.
+- Google Maps can change its HTML or tighten anti-bot protections, so some selectors may break over time.
 
-## Commandes utiles
+## Useful commands
 
-Installer / mettre à jour les dépendances :
+Install / update dependencies:
 
 ```bash
 pip install -r requirements.txt
 python3 -m playwright install chromium
 ```
 
-Lancer l'application :
+Run the app:
 
 ```bash
 python3 server.py
 ```
 
-Lancer un scraping direct :
+Run a direct scrape:
 
 ```bash
-python3 main.py -s "plombiers Lyon" -t 15
+python3 main.py -s "plumbers in London" -t 15
 ```
 
-## Limites actuelles
+## Current limitations
 
-- scraping dépendant de la structure actuelle de Google Maps
-- certaines fiches peuvent être incomplètes
-- les protections Google peuvent ralentir ou bloquer certains runs
-- l'interface est locale, pas multi-utilisateur
+- scraping depends on the current Google Maps structure
+- some leads may be incomplete
+- Google protections may slow down or block some runs
+- the interface is local, not multi-user
 
-## Licence
+## License
 
-Voir [LICENSE](LICENSE).
+See [LICENSE](LICENSE).
