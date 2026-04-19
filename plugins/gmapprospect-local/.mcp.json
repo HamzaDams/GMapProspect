@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "gmapprospect-api": {
+      "type": "stdio",
+      "command": "python3",
+      "args": [
+        "./plugins/gmapprospect-local/scripts/mcp_server.py"
+      ],
+      "env": {
+        "GMAPPROSPECT_BASE_URL": "http://127.0.0.1:8000",
+        "GMAPPROSPECT_AUTOSTART": "1"
+      },
+      "note": "Local MCP bridge for the GMapProspect API. Starts server.py on demand if the backend is not already running."
+    }
+  }
+}

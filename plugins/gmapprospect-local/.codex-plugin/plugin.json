@@ -1,0 +1,41 @@
+{
+  "name": "gmapprospect-local",
+  "version": "0.1.0",
+  "description": "Local Codex plugin for GMapProspect backed by the repo API.",
+  "author": {
+    "name": "HamzaDams",
+    "url": "https://github.com/HamzaDams"
+  },
+  "homepage": "https://github.com/HamzaDams/GMapProspect",
+  "repository": "https://github.com/HamzaDams/GMapProspect",
+  "license": "MIT",
+  "keywords": [
+    "gmapprospect",
+    "prospecting",
+    "scraping",
+    "crm"
+  ],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "GMapProspect Local",
+    "shortDescription": "Run scrapes and manage leads from the local repo backend",
+    "longDescription": "Expose GMapProspect lead, call, and scrape workflows to Codex through a local MCP server that talks to the existing server.py API and can auto-start it when needed.",
+    "developerName": "HamzaDams",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/HamzaDams/GMapProspect",
+    "privacyPolicyURL": "https://github.com/HamzaDams/GMapProspect",
+    "termsOfServiceURL": "https://github.com/HamzaDams/GMapProspect",
+    "defaultPrompt": [
+      "Launch a local scrape for plumbers in Paris and summarize the best leads",
+      "Show me contacted leads from the latest query and their notes",
+      "Give me call stats and the next leads to prioritize"
+    ],
+    "brandColor": "#2563EB",
+    "screenshots": []
+  }
+}

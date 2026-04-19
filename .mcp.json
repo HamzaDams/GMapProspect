@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "gmapprospect-local": {
+      "type": "stdio",
+      "command": "python3",
+      "args": [
+        "plugins/gmapprospect-local/scripts/mcp_server.py"
+      ],
+      "env": {
+        "GMAPPROSPECT_BASE_URL": "http://127.0.0.1:8000",
+        "GMAPPROSPECT_AUTOSTART": "1"
+      }
+    }
+  }
+}

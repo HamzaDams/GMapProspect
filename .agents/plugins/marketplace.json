@@ -1,0 +1,20 @@
+{
+  "name": "gmapprospect-local",
+  "interface": {
+    "displayName": "GMapProspect Local Plugins"
+  },
+  "plugins": [
+    {
+      "name": "gmapprospect-local",
+      "source": {
+        "source": "local",
+        "path": "./plugins/gmapprospect-local"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

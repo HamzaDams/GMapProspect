@@ -6,6 +6,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **GMapProspect** is a Python CLI tool that scrapes business data from Google Maps via Google Search. It uses Playwright to automate a Chromium browser, navigates search results, clicks each listing, and extracts 25+ fields (name, address, phone, website, social links, reviews, hours, service options) into a `results.csv`.
 
+## MCP Usage
+
+When the task is about running scrapes, listing prospects, updating lead status, or reading call history, prefer the project MCP server `gmapprospect-local` over ad hoc shell commands. It exposes the existing `server.py` backend and can auto-start it if needed.
+
 ## Setup & Usage
 
 **Requirements:** Python < 3.10 (3.9 recommended) due to dependency constraints.
