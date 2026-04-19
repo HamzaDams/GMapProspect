@@ -301,6 +301,7 @@
     .badge-contacted { background: var(--yellow-muted); color: var(--yellow); }
     .badge-interested { background: var(--green-muted); color: var(--green); }
     .badge-not_interested { background: var(--red-muted); color: var(--red); }
+    .badge-closed { background: var(--surface-2); color: var(--text); border: 1px solid var(--border); }
 
     /* stats row */
     .stats-row {
@@ -360,6 +361,11 @@
       transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
     }
 
+    .card.closed {
+      border-style: dashed;
+      box-shadow: 0 10px 22px hsl(0 0% 0% / 0.04);
+    }
+
     .card:hover {
       border-color: var(--accent);
       box-shadow: 0 18px 34px hsl(0 0% 0% / 0.08);
@@ -371,6 +377,13 @@
       justify-content: space-between;
       align-items: flex-start;
       gap: 12px;
+    }
+
+    .card-header-badges {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 6px;
     }
 
     .card-title-wrap {
@@ -502,6 +515,11 @@
       gap: 8px;
     }
 
+    .card-secondary-actions {
+      display: flex;
+      gap: 8px;
+    }
+
     .status-btn {
       width: 100%;
       min-height: 40px;
@@ -522,6 +540,24 @@
     .status-btn.active-contacted { background: var(--yellow-muted); border-color: var(--yellow); color: var(--yellow); }
     .status-btn.active-interested { background: var(--green-muted); border-color: var(--green); color: var(--green); }
     .status-btn.active-not_interested { background: var(--red-muted); border-color: var(--red); color: var(--red); }
+
+    .close-toggle-btn {
+      width: 100%;
+      min-height: 40px;
+      font-size: 12px;
+      padding: 8px 10px;
+      border-radius: 12px;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--text-secondary);
+      font-family: inherit;
+      transition: all 0.15s;
+      font-weight: 600;
+    }
+
+    .close-toggle-btn:hover { border-color: var(--ring); color: var(--text); }
+    .close-toggle-btn.active { background: var(--text); border-color: var(--text); color: var(--bg); }
 
     .card-notes {
       display: grid;
@@ -1353,6 +1389,94 @@
 
     .call-hint { color: var(--text-secondary); font-size: 13px; }
 
+    .call-end-dialog {
+      position: absolute;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: hsl(0 0% 0% / 0.45);
+      border-radius: 24px;
+      z-index: 5;
+    }
+
+    .call-end-dialog.visible { display: flex; }
+
+    .call-end-card {
+      width: min(100%, 440px);
+      display: grid;
+      gap: 18px;
+      padding: 22px;
+      border-radius: 22px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      box-shadow: 0 28px 60px hsl(0 0% 0% / 0.22);
+    }
+
+    .call-end-kicker {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-secondary);
+    }
+
+    .call-end-title {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+    }
+
+    .call-end-copy {
+      color: var(--text-secondary);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .call-end-actions {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .call-end-choice {
+      min-height: 52px;
+      border: 1px solid transparent;
+      border-radius: 16px;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+    }
+
+    .call-end-choice:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 14px 28px hsl(0 0% 0% / 0.12);
+    }
+
+    .call-end-choice.not-closed {
+      background: var(--red-muted);
+      border-color: hsl(0 72% 74% / 0.35);
+      color: var(--red);
+    }
+
+    .call-end-choice.closed {
+      background: var(--green-muted);
+      border-color: hsl(160 84% 64% / 0.35);
+      color: var(--green);
+    }
+
+    .call-end-cancel {
+      justify-self: center;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font: inherit;
+      cursor: pointer;
+      padding: 4px 10px;
+    }
+
     /* ── HISTORY PAGE ────────────────────────────────── */
     .history-list { display: grid; gap: 12px; }
 
@@ -1444,6 +1568,7 @@
       .detail-grid { grid-template-columns: 1fr; }
       .call-body { grid-template-columns: 1fr; }
       .call-grid { grid-template-columns: 1fr; }
+      .call-end-actions { grid-template-columns: 1fr; }
       .page-prospection.active { grid-template-columns: 1fr; }
     }
   </style>
@@ -1526,6 +1651,7 @@
           <div class="stat-card"><div class="stat-label">Contacted</div><div class="stat-value" id="s-contacted" style="color:var(--yellow)">--</div></div>
           <div class="stat-card"><div class="stat-label">Interested</div><div class="stat-value" id="s-interested" style="color:var(--green)">--</div></div>
           <div class="stat-card"><div class="stat-label">Not Interested</div><div class="stat-value" id="s-not_interested" style="color:var(--red)">--</div></div>
+          <div class="stat-card"><div class="stat-label">Closed-Won</div><div class="stat-value" id="s-closed">--</div></div>
         </div>
 
         <div class="toolbar">
@@ -1536,6 +1662,11 @@
             <option value="contacted">Contacted</option>
             <option value="interested">Interested</option>
             <option value="not_interested">Not Interested</option>
+          </select>
+          <select class="select" id="filter-closed" onchange="onFilter()">
+            <option value="">All leads</option>
+            <option value="open">Open only</option>
+            <option value="closed">Closed-won only</option>
           </select>
           <select class="select" id="filter-query" onchange="onFilter()">
             <option value="">All queries</option>
@@ -1574,6 +1705,11 @@
           <option value="interested">Interested</option>
           <option value="not_interested">Not Interested</option>
         </select>
+        <select class="select" id="swipe-filter-closed" onchange="swipeLoadCards()">
+          <option value="open">Open only</option>
+          <option value="">All leads</option>
+          <option value="closed">Closed-won only</option>
+        </select>
         <select class="select" id="swipe-filter-query" onchange="swipeLoadCards()">
           <option value="">All queries</option>
         </select>
@@ -1609,7 +1745,7 @@
         <div class="prosp-count-card">
           <div class="prosp-count-label">Call Pipeline</div>
           <div class="prosp-count-value" id="prosp-count">0</div>
-          <div class="prosp-count-desc">Interested leads ready to call.</div>
+          <div class="prosp-count-desc">Open interested leads ready to call.</div>
         </div>
 
         <div class="prosp-filters">
@@ -1642,6 +1778,7 @@
       <div class="page-body">
         <div class="stats-row" id="history-stats">
           <div class="stat-card"><div class="stat-label">Total Calls</div><div class="stat-value" id="hs-total">--</div></div>
+          <div class="stat-card"><div class="stat-label">Closed-Won Calls</div><div class="stat-value" id="hs-closed">--</div></div>
           <div class="stat-card"><div class="stat-label">Avg Duration</div><div class="stat-value" id="hs-avg">--</div></div>
           <div class="stat-card"><div class="stat-label">Total Time</div><div class="stat-value" id="hs-cumul">--</div></div>
           <div class="stat-card"><div class="stat-label">Top Query</div><div class="stat-value" id="hs-top" style="font-size:16px">--</div></div>
@@ -1685,6 +1822,20 @@
     <div class="call-footer">
       <div class="call-hint">Focus mode is active: only notes and the end call button remain available.</div>
       <button class="btn btn-danger" id="hangup-btn">End call</button>
+    </div>
+    <div class="call-end-dialog" id="call-end-dialog">
+      <div class="call-end-card">
+        <div>
+          <div class="call-end-kicker">Call Outcome</div>
+          <div class="call-end-title">Did you close this lead?</div>
+        </div>
+        <div class="call-end-copy">Choose the sales outcome before the call is saved. This marks whether the lead was actually closed, not just whether the call ended.</div>
+        <div class="call-end-actions">
+          <button class="call-end-choice not-closed" id="call-end-not-closed" type="button">Not closed</button>
+          <button class="call-end-choice closed" id="call-end-closed" type="button">Closed-won</button>
+        </div>
+        <button class="call-end-cancel" id="call-end-cancel" type="button">Cancel</button>
+      </div>
     </div>
   </div>
 </div>
@@ -1781,6 +1932,15 @@ function externalLinkHtml(url, label, className = "") {
   return `<a${cls} href="${escapeHtml(safeUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(label || safeUrl)}</a>`;
 }
 
+function isLeadClosed(value) {
+  return Number(value) === 1 || value === true;
+}
+
+function getCurrentRoute() {
+  const hash = location.hash.replace("#/", "") || "dashboard";
+  return ROUTES.includes(hash) ? hash : "dashboard";
+}
+
 function formatDuration(s) {
   s = Math.max(0, Number(s) || 0);
   const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
@@ -1810,6 +1970,7 @@ async function loadStats() {
   document.getElementById("s-contacted").textContent = d.contacted;
   document.getElementById("s-interested").textContent = d.interested;
   document.getElementById("s-not_interested").textContent = d.not_interested;
+  document.getElementById("s-closed").textContent = d.closed ?? 0;
 
   const sel = document.getElementById("filter-query");
   const cur = sel.value;
@@ -1826,9 +1987,11 @@ async function loadProspects() {
   const params = new URLSearchParams({ page: currentPage, per_page: PER_PAGE, sort: document.getElementById("filter-sort").value });
   const s = document.getElementById("filter-search").value.trim();
   const st = document.getElementById("filter-status").value;
+  const cf = document.getElementById("filter-closed").value;
   const q = document.getElementById("filter-query").value;
   if (s) params.set("search", s);
   if (st) params.set("status", st);
+  if (cf) params.set("closed", cf);
   if (q) params.set("query", q);
 
   const r = await fetch(`${API}/prospects?${params}`).catch(() => null);
@@ -1865,6 +2028,8 @@ function buildCard(r) {
   const card = document.createElement("div");
   card.className = "card";
   card.dataset.id = r.id;
+  const closed = isLeadClosed(r.is_closed);
+  if (closed) card.classList.add("closed");
   const s = STATUSES[r.status] || STATUSES.to_contact;
 
   const avg = parseFloat(String(r.reviews_average || "0").replace(",", ".")) || 0;
@@ -1883,6 +2048,7 @@ function buildCard(r) {
   const statusBtns = Object.entries(STATUSES).map(([key, val]) =>
     `<button class="status-btn ${r.status === key ? 'active-'+key : ''}" onclick="setStatus('${r.id}','${key}',this)">${val.label}</button>`
   ).join("");
+  const closeLabel = closed ? "Reopen lead" : "Mark closed-won";
 
   card.innerHTML = `
     <div class="card-header">
@@ -1890,7 +2056,10 @@ function buildCard(r) {
         <div class="card-name">${escapeHtml(r.name || "—")}</div>
         ${r.place_type ? `<div class="card-type">${escapeHtml(r.place_type)}</div>` : ""}
       </div>
-      <span class="badge ${s.cls}">${s.label}</span>
+      <div class="card-header-badges">
+        ${closed ? '<span class="badge badge-closed">Closed-won</span>' : ""}
+        <span class="badge status-badge ${s.cls}">${s.label}</span>
+      </div>
     </div>
     <div class="card-highlights">
       <div class="card-highlight">
@@ -1908,6 +2077,9 @@ function buildCard(r) {
     ${metaHtml ? `<div class="card-meta">${metaHtml}</div>` : ""}
     ${socialHtml}
     <div class="card-actions">${statusBtns}</div>
+    <div class="card-secondary-actions">
+      <button class="close-toggle-btn ${closed ? "active" : ""}" onclick="toggleClosed('${r.id}', ${closed ? 0 : 1})">${closeLabel}</button>
+    </div>
     <div class="card-notes">
       <div class="card-section-label">Notes</div>
       <textarea class="notes-area" placeholder="Notes..." onchange="saveNote('${r.id}',this.value)">${escapeHtml(r.notes || "")}</textarea>
@@ -1931,8 +2103,11 @@ async function setStatus(id, status, btn) {
   await fetch(`${API}/prospects/${id}`, { method: "PUT", headers: {"Content-Type":"application/json"}, body: JSON.stringify(body) });
   const card = btn.closest(".card");
   const s = STATUSES[status];
-  card.querySelector(".badge").className = `badge ${s.cls}`;
-  card.querySelector(".badge").textContent = s.label;
+  const statusBadge = card.querySelector(".status-badge");
+  if (statusBadge) {
+    statusBadge.className = `badge status-badge ${s.cls}`;
+    statusBadge.textContent = s.label;
+  }
   card.querySelectorAll(".status-btn").forEach(b => {
     b.className = "status-btn";
     if (b.textContent === s.label) b.classList.add("active-" + status);
@@ -1942,6 +2117,22 @@ async function setStatus(id, status, btn) {
 
 async function saveNote(id, value) {
   await fetch(`${API}/prospects/${id}`, { method: "PUT", headers: {"Content-Type":"application/json"}, body: JSON.stringify({ notes: value }) });
+}
+
+async function toggleClosed(id, nextValue) {
+  await fetch(`${API}/prospects/${id}`, {
+    method: "PUT",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({
+      is_closed: !!nextValue,
+      closed_at: nextValue ? new Date().toISOString() : ""
+    })
+  });
+  loadStats();
+  const route = getCurrentRoute();
+  if (route === "dashboard") loadProspects();
+  if (route === "swipe") swipeLoadCards();
+  if (route === "prospection") prospLoadLeads();
 }
 
 async function launchScrape() {
@@ -2008,9 +2199,11 @@ async function swipeInit() {
 
 async function swipeLoadCards() {
   const status = document.getElementById("swipe-filter-status").value;
+  const closed = document.getElementById("swipe-filter-closed").value;
   const query = document.getElementById("swipe-filter-query").value;
   const params = new URLSearchParams({ per_page: 200 });
   if (status) params.set("status", status);
+  if (closed) params.set("closed", closed);
   if (query) params.set("query", query);
   const r = await fetch(`${API}/prospects?${params}`).catch(() => null);
   if (!r) return;
@@ -2053,6 +2246,7 @@ function buildSwipeCard(r, isTop) {
   const card = document.createElement("div");
   card.className = `swipe-card${isTop ? " top" : ""}`;
   card.dataset.id = r.id;
+  const closed = isLeadClosed(r.is_closed);
 
   const socials = [["website","Site"],["facebook","FB"],["instagram","IG"],["twitter","TW"],["tiktok","TK"],["linkedin","LI"]].filter(([k]) => r[k] && r[k] !== "Not Given");
   const avg = parseFloat((r.reviews_average||"0").replace(",",".")) || 0;
@@ -2065,6 +2259,7 @@ function buildSwipeCard(r, isTop) {
     <span class="stamp nope">NOPE</span>
     <span class="stamp yep">HOT</span>
     <div class="swipe-card-name">${escapeHtml(r.name || "—")}</div>
+    ${closed ? '<div><span class="badge badge-closed">Closed-won</span></div>' : ""}
     ${r.place_type ? `<div class="swipe-card-type">${escapeHtml(r.place_type)}</div>` : ""}
     ${r.reviews_average ? `<div class="swipe-rating"><span class="stars">${"★".repeat(starsCount)}${"☆".repeat(5-starsCount)}</span> <span>${escapeHtml(r.reviews_average)}</span> ${r.reviews_count ? `<span class="count">(${Number(r.reviews_count).toLocaleString("en-US")} reviews)</span>` : ""}</div>` : ""}
     <div class="swipe-info">
@@ -2183,7 +2378,10 @@ async function prospInit() {
 
   document.getElementById("prosp-search").oninput = prospRenderList;
   document.getElementById("prosp-query-filter").onchange = prospLoadLeads;
-  document.getElementById("hangup-btn").onclick = prospFinishCall;
+  document.getElementById("hangup-btn").onclick = prospPromptEndCall;
+  document.getElementById("call-end-not-closed").onclick = () => prospFinishCall(false);
+  document.getElementById("call-end-closed").onclick = () => prospFinishCall(true);
+  document.getElementById("call-end-cancel").onclick = prospHideEndCallDialog;
   document.getElementById("call-notes").oninput = () => {
     clearTimeout(prospNoteSaveTimer);
     prospNoteSaveTimer = setTimeout(() => prospSaveNote(prospCallId, document.getElementById("call-notes").value), 300);
@@ -2191,7 +2389,7 @@ async function prospInit() {
 }
 
 async function prospLoadLeads() {
-  const params = new URLSearchParams({ status: "interested", per_page: 200, sort: "scraped_at" });
+  const params = new URLSearchParams({ status: "interested", closed: "open", per_page: 200, sort: "scraped_at" });
   const qf = document.getElementById("prosp-query-filter").value;
   if (qf) params.set("query", qf);
 
@@ -2218,7 +2416,7 @@ function prospRenderList() {
 
   const el = document.getElementById("prosp-lead-list");
   if (!leads.length) {
-    el.innerHTML = '<div style="padding:16px;text-align:center;color:var(--text-secondary);font-size:13px">No interested leads.</div>';
+    el.innerHTML = '<div style="padding:16px;text-align:center;color:var(--text-secondary);font-size:13px">No open interested leads.</div>';
     prospRenderDetail();
     return;
   }
@@ -2250,20 +2448,23 @@ function prospRenderList() {
 function prospRenderDetail() {
   const lead = prospLeads.find(l => l.id === prospSelectedId);
   const el = document.getElementById("prosp-detail-card");
-  if (!lead) { el.innerHTML = '<div class="prosp-empty">No interested leads ready to call.</div>'; return; }
+  if (!lead) { el.innerHTML = '<div class="prosp-empty">No open interested leads ready to call.</div>'; return; }
 
   const webHtml = lead.website && lead.website !== "Not Given" ? externalLinkHtml(lead.website, lead.website) : "Not provided";
+  const closed = isLeadClosed(lead.is_closed);
 
   el.innerHTML = `
     <div class="detail-head">
       <div>
         <span class="badge badge-interested">Interested</span>
+        ${closed ? '<span class="badge badge-closed" style="margin-left:8px">Closed-won</span>' : ""}
         <div class="detail-name">${escapeHtml(lead.name || "—")}</div>
         ${lead.place_type ? `<div class="detail-type">${escapeHtml(lead.place_type)}</div>` : ""}
         <div class="detail-rating">${lead.reviews_average ? `${escapeHtml(lead.reviews_average)}` : "No rating"} ${lead.reviews_count ? `· ${Number(lead.reviews_count).toLocaleString("en-US")} reviews` : ""}</div>
       </div>
       <div class="detail-actions">
         <button class="btn btn-primary" id="start-call-btn" type="button">Start call</button>
+        <button class="btn" id="toggle-close-btn" type="button">${closed ? "Reopen lead" : "Mark closed-won"}</button>
         <button class="btn" id="refresh-list-btn" type="button">Refresh</button>
       </div>
     </div>
@@ -2280,6 +2481,7 @@ function prospRenderDetail() {
   `;
 
   document.getElementById("start-call-btn").onclick = prospStartCall;
+  document.getElementById("toggle-close-btn").onclick = () => toggleClosed(lead.id, closed ? 0 : 1);
   document.getElementById("refresh-list-btn").onclick = prospLoadLeads;
 }
 
@@ -2292,6 +2494,7 @@ function prospStartCall() {
   prospCallStart = Date.now();
   document.getElementById("call-name").textContent = lead.name || "—";
   document.getElementById("call-notes").value = lead.notes || "";
+  prospHideEndCallDialog();
   document.getElementById("call-info").innerHTML = `
     ${lead.phone && lead.phone !== "Not Given" ? `<div class="call-pill"><strong>Phone</strong> ${escapeHtml(lead.phone)}</div>` : ""}
     ${lead.address && lead.address !== "Not Given" ? `<div class="call-pill"><strong>Addr.</strong> ${escapeHtml(lead.address)}</div>` : ""}
@@ -2316,20 +2519,37 @@ function prospStartCall() {
   setTimeout(() => document.getElementById("call-notes").focus(), 60);
 }
 
-async function prospFinishCall() {
+function prospPromptEndCall() {
+  if (!prospCallId) return;
+  document.getElementById("call-end-dialog").classList.add("visible");
+}
+
+function prospHideEndCallDialog() {
+  document.getElementById("call-end-dialog").classList.remove("visible");
+}
+
+async function prospFinishCall(closed) {
   if (!prospCallId) return;
   const endedAt = new Date().toISOString();
   const dur = Math.max(0, Math.floor((Date.now() - prospCallStart) / 1000));
+  prospHideEndCallDialog();
   clearInterval(prospCallTimer);
   clearTimeout(prospNoteSaveTimer);
 
   await fetch(`${API}/calls`, {
     method: "POST", headers: {"Content-Type":"application/json"},
-    body: JSON.stringify({ prospect_id: prospCallId, started_at: new Date(prospCallStart).toISOString(), ended_at: endedAt, duration_seconds: dur, notes: document.getElementById("call-notes").value })
+    body: JSON.stringify({ prospect_id: prospCallId, started_at: new Date(prospCallStart).toISOString(), ended_at: endedAt, duration_seconds: dur, notes: document.getElementById("call-notes").value, closed })
   });
 
   const lead = prospLeads.find(l => l.id === prospCallId);
-  if (lead) { lead.status = "contacted"; lead.notes = document.getElementById("call-notes").value; }
+  if (lead) {
+    lead.status = "contacted";
+    lead.notes = document.getElementById("call-notes").value;
+    if (closed) {
+      lead.is_closed = 1;
+      lead.closed_at = endedAt;
+    }
+  }
 
   const finId = prospCallId;
   prospCallId = null;
@@ -2358,6 +2578,11 @@ async function prospSaveNote(id, notes) {
 }
 
 document.addEventListener("keydown", e => {
+  if (e.key === "Escape" && document.getElementById("call-end-dialog").classList.contains("visible")) {
+    e.preventDefault();
+    prospHideEndCallDialog();
+    return;
+  }
   if (e.code !== "Space") return;
   const hash = location.hash.replace("#/", "");
   if (hash !== "prospection") return;
@@ -2395,6 +2620,7 @@ async function historyLoadStats() {
   if (!r) return;
   const d = await r.json();
   document.getElementById("hs-total").textContent = d.total_calls ?? 0;
+  document.getElementById("hs-closed").textContent = d.closed_calls ?? 0;
   document.getElementById("hs-avg").textContent = formatDuration(Math.round(d.average_duration_seconds || 0));
   document.getElementById("hs-cumul").textContent = formatDuration(d.total_duration_seconds || 0);
 
@@ -2441,6 +2667,7 @@ function historyRender(items) {
           </div>
         </div>
         <div style="display:flex;gap:6px;flex-wrap:wrap">
+          ${isLeadClosed(i.closed) ? '<span class="badge badge-closed">Closed-won</span>' : ""}
           <span class="chip time">${formatDuration(i.duration_seconds || 0)}</span>
           <span class="chip date">${i.ended_at ? formatDate(i.ended_at) : "—"}</span>
         </div>
