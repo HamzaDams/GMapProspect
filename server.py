@@ -112,7 +112,7 @@ def run_scrape(search, total):
             scrape_status["log"].append(line.rstrip())
         proc.wait()
         if proc.returncode != 0:
-            scrape_status["error"] = "Le script a terminé avec une erreur."
+            scrape_status["error"] = "The script ended with an error."
     except Exception as e:
         scrape_status["error"] = str(e)
     finally:
@@ -143,7 +143,7 @@ def run_scrape(search, total):
                     inserted += 1
             conn.commit()
             conn.close()
-            scrape_status["log"].append(f"✓ {inserted} prospects importés en base.")
+            scrape_status["log"].append(f"✓ {inserted} prospects imported into the database.")
         scrape_status["running"] = False
 
 
@@ -185,17 +185,8 @@ class Handler(http.server.BaseHTTPRequestHandler):
         path = parsed.path
         qs = parse_qs(parsed.query)
 
-        if path == "/" or path == "/index.html":
-            self.send_static_page("index.html")
-
-        elif path == "/swipe" or path == "/swipe.html":
-            self.send_static_page("swipe.html")
-
-        elif path == "/prospection" or path == "/prospection.html":
-            self.send_static_page("prospection.html")
-
-        elif path == "/history" or path == "/history.html":
-            self.send_static_page("history.html")
+        if path == "/" or path in ("/index.html", "/app.html", "/swipe", "/swipe.html", "/prospection", "/prospection.html", "/history", "/history.html"):
+            self.send_static_page("app.html")
 
         elif path == "/api/prospects":
             conn = get_db()
@@ -327,11 +318,11 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 self.send_json({"error": "search is required"}, 400)
                 return
             if scrape_status["running"]:
-                self.send_json({"error": "Un scraping est déjà en cours"}, 409)
+                self.send_json({"error": "A scrape is already running"}, 409)
                 return
             t = threading.Thread(target=run_scrape, args=(search, total), daemon=True)
             t.start()
-            self.send_json({"ok": True, "message": f"Scraping lancé : {search}"})
+            self.send_json({"ok": True, "message": f"Scrape started: {search}"})
 
         elif path == "/api/calls":
             prospect_id = body.get("prospect_id", "").strip()
@@ -348,7 +339,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
             prospect = conn.execute("SELECT * FROM prospects WHERE id=?", (prospect_id,)).fetchone()
             if not prospect:
                 conn.close()
-                self.send_json({"error": "Prospect introuvable"}, 404)
+                self.send_json({"error": "Prospect not found"}, 404)
                 return
 
             call_id = str(uuid.uuid4())
@@ -412,4 +403,4 @@ if __name__ == "__main__":
     try:
         server.serve_forever()
     except KeyboardInterrupt:
-        print("\nServeur arrêté.")
+        print("\nServer stopped.")
