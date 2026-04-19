@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GMapProspect — Historique Appels</title>
+  <style>
+    :root {
+      --bg: #0f1318;
+      --panel: #171d24;
+      --panel-2: #1e2630;
+      --line: #2e3946;
+      --text: #edf1f5;
+      --muted: #91a0af;
+      --accent: #ff8c42;
+      --green: #4ade80;
+      --blue: #60a5fa;
+      --yellow: #facc15;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Avenir Next", "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top right, rgba(255, 140, 66, 0.12), transparent 30%),
+        linear-gradient(180deg, #0f1318 0%, #0a0d11 100%);
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(15, 19, 24, 0.9);
+      backdrop-filter: blur(12px);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 20px;
+    }
+
+    h1 span {
+      color: var(--accent);
+    }
+
+    .header-links {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .header-links a {
+      color: var(--muted);
+      text-decoration: none;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 8px 13px;
+      font-size: 13px;
+    }
+
+    .header-links a:hover {
+      color: var(--text);
+      border-color: var(--accent);
+    }
+
+    main {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .intro {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      align-items: end;
+      flex-wrap: wrap;
+    }
+
+    .intro h2 {
+      margin: 0;
+      font-size: 30px;
+      line-height: 1.1;
+    }
+
+    .intro p {
+      margin: 10px 0 0;
+      color: var(--muted);
+      max-width: 720px;
+      line-height: 1.6;
+    }
+
+    .status-note {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .stat {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 18px;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .stat-value {
+      margin-top: 10px;
+      font-size: 30px;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .stat-sub {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .filters {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .filters input,
+    .filters select {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      color: var(--text);
+      padding: 12px 14px;
+      font: inherit;
+      outline: none;
+    }
+
+    .filters input {
+      flex: 1;
+      min-width: 220px;
+    }
+
+    .history-list {
+      display: grid;
+      gap: 14px;
+    }
+
+    .call-card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: 18px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .call-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: start;
+      flex-wrap: wrap;
+    }
+
+    .call-name {
+      font-size: 22px;
+      font-weight: 800;
+      line-height: 1.15;
+    }
+
+    .call-meta {
+      margin-top: 8px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--line);
+    }
+
+    .chip.time { color: var(--accent); }
+    .chip.date { color: var(--blue); }
+
+    .call-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .info-box {
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px;
+    }
+
+    .info-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+    }
+
+    .info-value {
+      margin-top: 8px;
+      line-height: 1.55;
+      word-break: break-word;
+    }
+
+    .notes-box {
+      border-top: 1px solid var(--line);
+      padding-top: 14px;
+    }
+
+    .notes-box h3 {
+      margin: 0 0 10px;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+    }
+
+    .notes-box p {
+      margin: 0;
+      line-height: 1.7;
+      white-space: pre-wrap;
+      color: var(--text);
+    }
+
+    .empty {
+      text-align: center;
+      padding: 80px 20px;
+      color: var(--muted);
+      border: 1px dashed var(--line);
+      border-radius: 24px;
+    }
+
+    .pagination {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      color: var(--muted);
+    }
+
+    .pagination button {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      color: var(--text);
+      border-radius: 12px;
+      padding: 10px 14px;
+      cursor: pointer;
+    }
+
+    .pagination button:disabled {
+      opacity: 0.35;
+      cursor: default;
+    }
+
+    @media (max-width: 980px) {
+      .stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .call-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      main {
+        padding: 18px;
+      }
+
+      .stats {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>GMap<span>Prospect</span> / Historique</h1>
+    <div class="header-links">
+      <a href="/">Dashboard</a>
+      <a href="/swipe">Swipe</a>
+      <a href="/prospection">Mode Appel</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="intro">
+      <div>
+        <h2>Historique des appels</h2>
+        <p id="intro-text">Chaque appel terminé est enregistré ici avec la note saisie pendant l’appel, la durée et la fiche concernée.</p>
+      </div>
+      <div class="status-note" id="last-call-note">Dernier appel : —</div>
+    </section>
+
+    <section class="stats">
+      <div class="stat">
+        <div class="stat-label">Appels passés</div>
+        <div class="stat-value" id="s-total-calls">—</div>
+        <div class="stat-sub">Nombre d’appels terminés et enregistrés</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Durée moyenne</div>
+        <div class="stat-value" id="s-avg-duration">—</div>
+        <div class="stat-sub">Temps passé en moyenne par appel</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Temps cumulé</div>
+        <div class="stat-value" id="s-total-duration">—</div>
+        <div class="stat-sub">Temps total passé au téléphone</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Recherche dominante</div>
+        <div class="stat-value" id="s-top-query">—</div>
+        <div class="stat-sub" id="s-top-query-sub">Aucune donnée pour le moment</div>
+      </div>
+    </section>
+
+    <section class="filters">
+      <input type="text" id="filter-search" placeholder="Rechercher un nom, téléphone ou note..." />
+      <select id="filter-query">
+        <option value="">Toutes les recherches</option>
+      </select>
+    </section>
+
+    <section class="history-list" id="history-list"></section>
+
+    <div class="pagination" id="pagination" style="display:none">
+      <button id="btn-prev" type="button">← Préc.</button>
+      <span id="page-info"></span>
+      <button id="btn-next" type="button">Suiv. →</button>
+    </div>
+  </main>
+
+  <script>
+    const API = "http://localhost:8000/api";
+    const PER_PAGE = 20;
+    let currentPage = 1;
+    let totalCount = 0;
+    let filterTimer = null;
+
+    const historyListEl = document.getElementById("history-list");
+    const queryFilterEl = document.getElementById("filter-query");
+    const searchFilterEl = document.getElementById("filter-search");
+
+    window.addEventListener("load", async () => {
+      bindEvents();
+      await loadStats();
+      await loadHistory();
+    });
+
+    function bindEvents() {
+      queryFilterEl.addEventListener("change", () => {
+        currentPage = 1;
+        loadHistory();
+      });
+
+      searchFilterEl.addEventListener("input", () => {
+        clearTimeout(filterTimer);
+        filterTimer = setTimeout(() => {
+          currentPage = 1;
+          loadHistory();
+        }, 250);
+      });
+
+      document.getElementById("btn-prev").addEventListener("click", () => changePage(-1));
+      document.getElementById("btn-next").addEventListener("click", () => changePage(1));
+    }
+
+    async function loadStats() {
+      const response = await fetch(`${API}/calls/stats`).catch(() => null);
+      if (!response) {
+        document.getElementById("intro-text").textContent = "Le serveur local est inaccessible. Lance `python3 server.py`.";
+        return;
+      }
+
+      const data = await response.json();
+      document.getElementById("s-total-calls").textContent = data.total_calls ?? 0;
+      document.getElementById("s-avg-duration").textContent = formatDuration(Math.round(data.average_duration_seconds || 0));
+      document.getElementById("s-total-duration").textContent = formatDuration(data.total_duration_seconds || 0);
+      document.getElementById("last-call-note").textContent = `Dernier appel : ${data.last_call_at ? formatDate(data.last_call_at) : "—"}`;
+
+      const topQuery = (data.by_query || [])[0];
+      document.getElementById("s-top-query").textContent = topQuery ? topQuery.search_query : "—";
+      document.getElementById("s-top-query-sub").textContent = topQuery ? `${topQuery.calls_count} appel(s)` : "Aucune donnée pour le moment";
+
+      const current = queryFilterEl.value;
+      queryFilterEl.innerHTML = '<option value="">Toutes les recherches</option>';
+      (data.queries || []).forEach(query => {
+        const option = document.createElement("option");
+        option.value = option.textContent = query;
+        if (query === current) option.selected = true;
+        queryFilterEl.appendChild(option);
+      });
+    }
+
+    async function loadHistory() {
+      const params = new URLSearchParams({
+        page: String(currentPage),
+        per_page: String(PER_PAGE)
+      });
+
+      if (queryFilterEl.value) params.set("query", queryFilterEl.value);
+      if (searchFilterEl.value.trim()) params.set("search", searchFilterEl.value.trim());
+
+      const response = await fetch(`${API}/calls?${params}`).catch(() => null);
+      if (!response) {
+        historyListEl.innerHTML = '<div class="empty">Serveur inaccessible. Lance <code>python3 server.py</code>.</div>';
+        document.getElementById("pagination").style.display = "none";
+        return;
+      }
+
+      const data = await response.json();
+      totalCount = data.total || 0;
+      renderHistory(data.data || []);
+      renderPagination();
+    }
+
+    function renderHistory(items) {
+      if (!items.length) {
+        historyListEl.innerHTML = '<div class="empty">Aucun appel enregistré pour le moment.</div>';
+        return;
+      }
+
+      historyListEl.innerHTML = items.map(item => `
+        <article class="call-card">
+          <div class="call-head">
+            <div>
+              <div class="call-name">${escapeHtml(item.prospect_name || "—")}</div>
+              <div class="call-meta">
+                ${item.phone ? `<span>📞 ${escapeHtml(item.phone)}</span>` : ""}
+                ${item.search_query ? `<span>🔍 ${escapeHtml(item.search_query)}</span>` : ""}
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
+              <span class="chip time">${formatDuration(item.duration_seconds || 0)}</span>
+              <span class="chip date">${item.ended_at ? formatDate(item.ended_at) : "Date inconnue"}</span>
+            </div>
+          </div>
+
+          <div class="call-grid">
+            <div class="info-box">
+              <div class="info-label">Début</div>
+              <div class="info-value">${item.started_at ? formatDate(item.started_at) : "—"}</div>
+            </div>
+            <div class="info-box">
+              <div class="info-label">Fin</div>
+              <div class="info-value">${item.ended_at ? formatDate(item.ended_at) : "—"}</div>
+            </div>
+            <div class="info-box">
+              <div class="info-label">Durée</div>
+              <div class="info-value">${formatDuration(item.duration_seconds || 0)}</div>
+            </div>
+          </div>
+
+          <div class="notes-box">
+            <h3>Notes d’appel</h3>
+            <p>${item.notes ? escapeHtml(item.notes) : "Aucune note enregistrée."}</p>
+          </div>
+        </article>
+      `).join("");
+    }
+
+    function renderPagination() {
+      const paginationEl = document.getElementById("pagination");
+      const totalPages = Math.max(1, Math.ceil(totalCount / PER_PAGE));
+      paginationEl.style.display = totalCount > PER_PAGE ? "flex" : "none";
+      document.getElementById("page-info").textContent = `Page ${currentPage} / ${totalPages} — ${totalCount} appel(s)`;
+      document.getElementById("btn-prev").disabled = currentPage <= 1;
+      document.getElementById("btn-next").disabled = currentPage >= totalPages;
+    }
+
+    function changePage(direction) {
+      const totalPages = Math.max(1, Math.ceil(totalCount / PER_PAGE));
+      currentPage = Math.max(1, Math.min(totalPages, currentPage + direction));
+      loadHistory();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function formatDuration(totalSeconds) {
+      const seconds = Math.max(0, Number(totalSeconds) || 0);
+      const hours = Math.floor(seconds / 3600);
+      const minutes = Math.floor((seconds % 3600) / 60);
+      const remainingSeconds = seconds % 60;
+
+      if (hours > 0) {
+        return `${hours}h ${String(minutes).padStart(2, "0")}m`;
+      }
+      return `${String(minutes).padStart(2, "0")}:${String(remainingSeconds).padStart(2, "0")}`;
+    }
+
+    function formatDate(value) {
+      return new Date(value).toLocaleString("fr-FR", {
+        dateStyle: "medium",
+        timeStyle: "short"
+      });
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+  </script>
+</body>
+</html>

@@ -243,7 +243,7 @@
 <nav>
   <h1>GMap<span>Prospect</span> <span style="color:var(--muted);font-weight:400;font-size:13px">/ Swipe</span></h1>
   <span class="nav-progress" id="nav-progress"></span>
-  <a href="/">← Dashboard</a>
+  <a href="/prospection">Mode appel →</a>
 </nav>
 
 <div class="filter-bar">
@@ -261,7 +261,7 @@
 
 <div class="deck-wrapper" id="deck-wrapper">
   <div class="hint-left" id="hint-left">✕ Pas intéressé</div>
-  <div class="hint-right" id="hint-right">✓ Contacté</div>
+  <div class="hint-right" id="hint-right">★ Intéressé</div>
   <div class="deck" id="deck"></div>
 
   <div class="done-screen" id="done-screen">
@@ -276,11 +276,11 @@
   <button class="btn-action btn-undo" onclick="undoLast()" title="Annuler">↩</button>
   <button class="btn-action btn-nope" onclick="swipeCard('left')" title="Pas intéressé">✕</button>
   <button class="btn-action btn-skip" onclick="skipCard()" title="Passer">→</button>
-  <button class="btn-action btn-contact" onclick="swipeCard('right')" title="Contacté">✓</button>
+  <button class="btn-action btn-contact" onclick="swipeCard('right')" title="Intéressé">★</button>
 </div>
 
 <div class="kbd-hint">
-  <kbd>←</kbd> Pas intéressé &nbsp;·&nbsp; <kbd>→</kbd> Contacté &nbsp;·&nbsp; <kbd>↓</kbd> Passer &nbsp;·&nbsp; <kbd>Z</kbd> Annuler
+  <kbd>←</kbd> Pas intéressé &nbsp;·&nbsp; <kbd>→</kbd> Intéressé &nbsp;·&nbsp; <kbd>↓</kbd> Passer &nbsp;·&nbsp; <kbd>Z</kbd> Annuler
 </div>
 
 <script>
@@ -369,7 +369,7 @@ function buildCard(r, isTop) {
     <div class="card-overlay left"></div>
     <div class="card-overlay right"></div>
     <span class="stamp nope">NOPE</span>
-    <span class="stamp yep">OUI</span>
+    <span class="stamp yep">HOT</span>
 
     <div class="card-name">${r.name || "—"}</div>
     ${r.place_type ? `<div class="card-type">${r.place_type}</div>` : ""}
@@ -478,7 +478,7 @@ async function swipeCard(direction) {
   if (!topCard) return;
 
   const id = topCard.dataset.id;
-  const status = direction === "right" ? "contacted" : "not_interested";
+  const status = direction === "right" ? "interested" : "not_interested";
 
   // Animate out
   topCard.style.transition = "transform 0.35s ease, opacity 0.35s ease";
@@ -490,9 +490,7 @@ async function swipeCard(direction) {
   currentIdx++;
 
   // Save to API
-  const body = { status };
-  if (status === "contacted") body.contacted_at = new Date().toISOString();
-  fetch(`${API}/prospects/${id}`, { method: "PUT", headers: {"Content-Type":"application/json"}, body: JSON.stringify(body) });
+  fetch(`${API}/prospects/${id}`, { method: "PUT", headers: {"Content-Type":"application/json"}, body: JSON.stringify({ status }) });
 
   setTimeout(() => renderDeck(), 320);
 }

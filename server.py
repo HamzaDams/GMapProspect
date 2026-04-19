@@ -7,6 +7,7 @@ import sys
 import os
 import csv
 import io
+import uuid
 from urllib.parse import urlparse, parse_qs
 
 DB_PATH = "prospects.db"
@@ -49,6 +50,44 @@ def init_db():
             tiktok TEXT,
             linkedin TEXT
         )
+    """)
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS call_history (
+            id TEXT PRIMARY KEY,
+            prospect_id TEXT NOT NULL,
+            prospect_name TEXT,
+            phone TEXT,
+            search_query TEXT,
+            notes TEXT DEFAULT '',
+            started_at TEXT,
+            ended_at TEXT,
+            duration_seconds INTEGER DEFAULT 0,
+            created_at TEXT,
+            FOREIGN KEY(prospect_id) REFERENCES prospects(id)
+        )
+    """)
+    conn.execute("""
+        INSERT INTO call_history
+        (id, prospect_id, prospect_name, phone, search_query, notes, started_at, ended_at, duration_seconds, created_at)
+        SELECT
+            lower(hex(randomblob(16))),
+            p.id,
+            p.name,
+            p.phone,
+            p.search_query,
+            p.notes,
+            p.contacted_at,
+            p.contacted_at,
+            0,
+            p.contacted_at
+        FROM prospects p
+        WHERE p.status = 'contacted'
+          AND p.contacted_at != ''
+          AND NOT EXISTS (
+              SELECT 1
+              FROM call_history c
+              WHERE c.prospect_id = p.id
+          )
     """)
     conn.commit()
     conn.close()
@@ -131,6 +170,9 @@ class Handler(http.server.BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def send_static_page(self, filename):
+        self.send_file(filename, "text/html; charset=utf-8")
+
     def do_OPTIONS(self):
         self.send_response(204)
         self.send_header("Access-Control-Allow-Origin", "*")
@@ -144,7 +186,16 @@ class Handler(http.server.BaseHTTPRequestHandler):
         qs = parse_qs(parsed.query)
 
         if path == "/" or path == "/index.html":
-            self.send_file("index.html", "text/html; charset=utf-8")
+            self.send_static_page("index.html")
+
+        elif path == "/swipe" or path == "/swipe.html":
+            self.send_static_page("swipe.html")
+
+        elif path == "/prospection" or path == "/prospection.html":
+            self.send_static_page("prospection.html")
+
+        elif path == "/history" or path == "/history.html":
+            self.send_static_page("history.html")
 
         elif path == "/api/prospects":
             conn = get_db()
@@ -190,6 +241,54 @@ class Handler(http.server.BaseHTTPRequestHandler):
             conn.close()
             self.send_json(stats)
 
+        elif path == "/api/calls":
+            conn = get_db()
+            query_filter = qs.get("query", [None])[0]
+            search_filter = qs.get("search", [None])[0]
+            page = int(qs.get("page", [1])[0])
+            per_page = int(qs.get("per_page", [20])[0])
+
+            sql = "SELECT * FROM call_history WHERE 1=1"
+            params = []
+            if query_filter:
+                sql += " AND search_query=?"
+                params.append(query_filter)
+            if search_filter:
+                sql += " AND (prospect_name LIKE ? OR phone LIKE ? OR notes LIKE ?)"
+                like = f"%{search_filter}%"
+                params += [like, like, like]
+
+            sql += " ORDER BY ended_at DESC, created_at DESC"
+            total_count = conn.execute(f"SELECT COUNT(*) FROM ({sql})", params).fetchone()[0]
+            sql += " LIMIT ? OFFSET ?"
+            params += [per_page, (page - 1) * per_page]
+            rows = conn.execute(sql, params).fetchall()
+            conn.close()
+            self.send_json({"total": total_count, "page": page, "per_page": per_page, "data": [dict(r) for r in rows]})
+
+        elif path == "/api/calls/stats":
+            conn = get_db()
+            row = conn.execute("""
+                SELECT
+                    COUNT(*) AS total_calls,
+                    COALESCE(SUM(duration_seconds), 0) AS total_duration_seconds,
+                    COALESCE(AVG(duration_seconds), 0) AS average_duration_seconds,
+                    MAX(ended_at) AS last_call_at
+                FROM call_history
+            """).fetchone()
+            query_rows = conn.execute("""
+                SELECT search_query, COUNT(*) AS calls_count
+                FROM call_history
+                WHERE search_query != ''
+                GROUP BY search_query
+                ORDER BY calls_count DESC, search_query ASC
+            """).fetchall()
+            conn.close()
+            payload = dict(row)
+            payload["queries"] = [r["search_query"] for r in query_rows]
+            payload["by_query"] = [dict(r) for r in query_rows]
+            self.send_json(payload)
+
         elif path == "/api/scrape/status":
             self.send_json(scrape_status)
 
@@ -233,6 +332,51 @@ class Handler(http.server.BaseHTTPRequestHandler):
             t = threading.Thread(target=run_scrape, args=(search, total), daemon=True)
             t.start()
             self.send_json({"ok": True, "message": f"Scraping lancé : {search}"})
+
+        elif path == "/api/calls":
+            prospect_id = body.get("prospect_id", "").strip()
+            started_at = body.get("started_at", "")
+            ended_at = body.get("ended_at", "")
+            duration_seconds = int(body.get("duration_seconds", 0) or 0)
+            notes = body.get("notes", "")
+
+            if not prospect_id:
+                self.send_json({"error": "prospect_id is required"}, 400)
+                return
+
+            conn = get_db()
+            prospect = conn.execute("SELECT * FROM prospects WHERE id=?", (prospect_id,)).fetchone()
+            if not prospect:
+                conn.close()
+                self.send_json({"error": "Prospect introuvable"}, 404)
+                return
+
+            call_id = str(uuid.uuid4())
+            conn.execute("""
+                INSERT INTO call_history
+                (id, prospect_id, prospect_name, phone, search_query, notes, started_at, ended_at, duration_seconds, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                call_id,
+                prospect_id,
+                prospect["name"],
+                prospect["phone"],
+                prospect["search_query"],
+                notes,
+                started_at,
+                ended_at,
+                duration_seconds,
+                ended_at or started_at
+            ))
+            conn.execute("""
+                UPDATE prospects
+                SET status=?, notes=?, contacted_at=?
+                WHERE id=?
+            """, ("contacted", notes, ended_at, prospect_id))
+            conn.commit()
+            row = conn.execute("SELECT * FROM call_history WHERE id=?", (call_id,)).fetchone()
+            conn.close()
+            self.send_json(dict(row), 201)
 
         else:
             self.send_response(404)
