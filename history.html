@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GMapProspect — Historique Appels</title>
+  <title>GMapProspect — Call History</title>
   <style>
     :root {
       --bg: #0f1318;
@@ -315,59 +315,59 @@
 </head>
 <body>
   <header>
-    <h1>GMap<span>Prospect</span> / Historique</h1>
+    <h1>GMap<span>Prospect</span> / History</h1>
     <div class="header-links">
       <a href="/">Dashboard</a>
       <a href="/swipe">Swipe</a>
-      <a href="/prospection">Mode Appel</a>
+      <a href="/prospection">Call Mode</a>
     </div>
   </header>
 
   <main>
     <section class="intro">
       <div>
-        <h2>Historique des appels</h2>
-        <p id="intro-text">Chaque appel terminé est enregistré ici avec la note saisie pendant l’appel, la durée et la fiche concernée.</p>
+        <h2>Call history</h2>
+        <p id="intro-text">Every completed call is saved here with the note taken during the call, the duration, and the related lead.</p>
       </div>
-      <div class="status-note" id="last-call-note">Dernier appel : —</div>
+      <div class="status-note" id="last-call-note">Last call: —</div>
     </section>
 
     <section class="stats">
       <div class="stat">
-        <div class="stat-label">Appels passés</div>
+        <div class="stat-label">Total calls</div>
         <div class="stat-value" id="s-total-calls">—</div>
-        <div class="stat-sub">Nombre d’appels terminés et enregistrés</div>
+        <div class="stat-sub">Number of completed and saved calls</div>
       </div>
       <div class="stat">
-        <div class="stat-label">Durée moyenne</div>
+        <div class="stat-label">Average duration</div>
         <div class="stat-value" id="s-avg-duration">—</div>
-        <div class="stat-sub">Temps passé en moyenne par appel</div>
+        <div class="stat-sub">Average time spent per call</div>
       </div>
       <div class="stat">
-        <div class="stat-label">Temps cumulé</div>
+        <div class="stat-label">Total time</div>
         <div class="stat-value" id="s-total-duration">—</div>
-        <div class="stat-sub">Temps total passé au téléphone</div>
+        <div class="stat-sub">Total time spent on calls</div>
       </div>
       <div class="stat">
-        <div class="stat-label">Recherche dominante</div>
+        <div class="stat-label">Top query</div>
         <div class="stat-value" id="s-top-query">—</div>
-        <div class="stat-sub" id="s-top-query-sub">Aucune donnée pour le moment</div>
+        <div class="stat-sub" id="s-top-query-sub">No data yet</div>
       </div>
     </section>
 
     <section class="filters">
-      <input type="text" id="filter-search" placeholder="Rechercher un nom, téléphone ou note..." />
+      <input type="text" id="filter-search" placeholder="Search a name, phone, or note..." />
       <select id="filter-query">
-        <option value="">Toutes les recherches</option>
+        <option value="">All queries</option>
       </select>
     </section>
 
     <section class="history-list" id="history-list"></section>
 
     <div class="pagination" id="pagination" style="display:none">
-      <button id="btn-prev" type="button">← Préc.</button>
+      <button id="btn-prev" type="button">← Prev.</button>
       <span id="page-info"></span>
-      <button id="btn-next" type="button">Suiv. →</button>
+      <button id="btn-next" type="button">Next →</button>
     </div>
   </main>
 
@@ -409,7 +409,7 @@
     async function loadStats() {
       const response = await fetch(`${API}/calls/stats`).catch(() => null);
       if (!response) {
-        document.getElementById("intro-text").textContent = "Le serveur local est inaccessible. Lance `python3 server.py`.";
+        document.getElementById("intro-text").textContent = "The local server is unavailable. Run `python3 server.py`.";
         return;
       }
 
@@ -417,14 +417,14 @@
       document.getElementById("s-total-calls").textContent = data.total_calls ?? 0;
       document.getElementById("s-avg-duration").textContent = formatDuration(Math.round(data.average_duration_seconds || 0));
       document.getElementById("s-total-duration").textContent = formatDuration(data.total_duration_seconds || 0);
-      document.getElementById("last-call-note").textContent = `Dernier appel : ${data.last_call_at ? formatDate(data.last_call_at) : "—"}`;
+      document.getElementById("last-call-note").textContent = `Last call: ${data.last_call_at ? formatDate(data.last_call_at) : "—"}`;
 
       const topQuery = (data.by_query || [])[0];
       document.getElementById("s-top-query").textContent = topQuery ? topQuery.search_query : "—";
-      document.getElementById("s-top-query-sub").textContent = topQuery ? `${topQuery.calls_count} appel(s)` : "Aucune donnée pour le moment";
+      document.getElementById("s-top-query-sub").textContent = topQuery ? `${topQuery.calls_count} call(s)` : "No data yet";
 
       const current = queryFilterEl.value;
-      queryFilterEl.innerHTML = '<option value="">Toutes les recherches</option>';
+      queryFilterEl.innerHTML = '<option value="">All queries</option>';
       (data.queries || []).forEach(query => {
         const option = document.createElement("option");
         option.value = option.textContent = query;
@@ -444,7 +444,7 @@
 
       const response = await fetch(`${API}/calls?${params}`).catch(() => null);
       if (!response) {
-        historyListEl.innerHTML = '<div class="empty">Serveur inaccessible. Lance <code>python3 server.py</code>.</div>';
+        historyListEl.innerHTML = '<div class="empty">Server unavailable. Run <code>python3 server.py</code>.</div>';
         document.getElementById("pagination").style.display = "none";
         return;
       }
@@ -457,7 +457,7 @@
 
     function renderHistory(items) {
       if (!items.length) {
-        historyListEl.innerHTML = '<div class="empty">Aucun appel enregistré pour le moment.</div>';
+        historyListEl.innerHTML = '<div class="empty">No calls recorded yet.</div>';
         return;
       }
 
@@ -473,28 +473,28 @@
             </div>
             <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
               <span class="chip time">${formatDuration(item.duration_seconds || 0)}</span>
-              <span class="chip date">${item.ended_at ? formatDate(item.ended_at) : "Date inconnue"}</span>
+              <span class="chip date">${item.ended_at ? formatDate(item.ended_at) : "Unknown date"}</span>
             </div>
           </div>
 
           <div class="call-grid">
             <div class="info-box">
-              <div class="info-label">Début</div>
+              <div class="info-label">Start</div>
               <div class="info-value">${item.started_at ? formatDate(item.started_at) : "—"}</div>
             </div>
             <div class="info-box">
-              <div class="info-label">Fin</div>
+              <div class="info-label">End</div>
               <div class="info-value">${item.ended_at ? formatDate(item.ended_at) : "—"}</div>
             </div>
             <div class="info-box">
-              <div class="info-label">Durée</div>
+              <div class="info-label">Duration</div>
               <div class="info-value">${formatDuration(item.duration_seconds || 0)}</div>
             </div>
           </div>
 
           <div class="notes-box">
-            <h3>Notes d’appel</h3>
-            <p>${item.notes ? escapeHtml(item.notes) : "Aucune note enregistrée."}</p>
+            <h3>Call notes</h3>
+            <p>${item.notes ? escapeHtml(item.notes) : "No note recorded."}</p>
           </div>
         </article>
       `).join("");
@@ -504,7 +504,7 @@
       const paginationEl = document.getElementById("pagination");
       const totalPages = Math.max(1, Math.ceil(totalCount / PER_PAGE));
       paginationEl.style.display = totalCount > PER_PAGE ? "flex" : "none";
-      document.getElementById("page-info").textContent = `Page ${currentPage} / ${totalPages} — ${totalCount} appel(s)`;
+      document.getElementById("page-info").textContent = `Page ${currentPage} / ${totalPages} — ${totalCount} call(s)`;
       document.getElementById("btn-prev").disabled = currentPage <= 1;
       document.getElementById("btn-next").disabled = currentPage >= totalPages;
     }
@@ -529,7 +529,7 @@
     }
 
     function formatDate(value) {
-      return new Date(value).toLocaleString("fr-FR", {
+      return new Date(value).toLocaleString("en-US", {
         dateStyle: "medium",
         timeStyle: "short"
       });

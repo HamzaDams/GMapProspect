@@ -1322,12 +1322,12 @@
 
     <button class="nav-item" data-route="prospection" onclick="navigate('prospection')">
       <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
-      Prospection
+      Outreach
     </button>
 
     <button class="nav-item" data-route="history" onclick="navigate('history')">
       <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-      Historique
+      History
     </button>
 
     <div class="nav-separator"></div>
@@ -1335,11 +1335,11 @@
     <button class="theme-toggle" onclick="toggleTheme()">
       <svg class="toggle-icon" id="theme-icon-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
       <svg class="toggle-icon" id="theme-icon-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-      <span id="theme-label">Mode clair</span>
+      <span id="theme-label">Light mode</span>
     </button>
 
     <div class="sidebar-footer">
-      <button onclick="exportCSV()">Exporter CSV</button>
+      <button onclick="exportCSV()">Export CSV</button>
     </div>
   </aside>
 
@@ -1350,67 +1350,67 @@
     <div class="page active" id="page-dashboard">
       <div class="page-header">
         <h1 class="page-title">Dashboard</h1>
-        <p class="page-desc">Vue d'ensemble de tes prospects</p>
+        <p class="page-desc">Overview of your prospects</p>
       </div>
       <div class="page-body">
         <div class="scrape-section">
           <div class="scrape-head">
             <div>
-              <div class="scrape-title">Lancer un scraping</div>
-              <div class="scrape-subtitle">Recherche une nouvelle serie de prospects en quelques secondes.</div>
+              <div class="scrape-title">Start a scrape</div>
+              <div class="scrape-subtitle">Search for a fresh batch of prospects in seconds.</div>
             </div>
           </div>
           <div class="scrape-form">
-            <input type="text" class="input" id="scrape-query" placeholder="restaurants in Paris, plombiers Lyon..." aria-label="Recherche Google Maps" />
+            <input type="text" class="input" id="scrape-query" placeholder="restaurants in Paris, plumbers in London..." aria-label="Google Maps search" />
             <label class="scrape-count">
               <span class="scrape-count-label">Volume</span>
-              <input type="number" id="scrape-total" value="10" min="1" max="200" aria-label="Volume du scraping" />
+              <input type="number" id="scrape-total" value="10" min="1" max="200" aria-label="Scrape volume" />
             </label>
-            <button class="btn btn-primary" id="scrape-btn" onclick="launchScrape()">Scraper</button>
+            <button class="btn btn-primary" id="scrape-btn" onclick="launchScrape()">Scrape</button>
           </div>
         </div>
         <div class="log-box" id="log-box"></div>
 
         <div class="stats-row">
           <div class="stat-card"><div class="stat-label">Total</div><div class="stat-value" id="s-total" style="color:var(--accent)">--</div></div>
-          <div class="stat-card"><div class="stat-label">A contacter</div><div class="stat-value" id="s-to_contact">--</div></div>
-          <div class="stat-card"><div class="stat-label">Contactes</div><div class="stat-value" id="s-contacted" style="color:var(--yellow)">--</div></div>
-          <div class="stat-card"><div class="stat-label">Interesses</div><div class="stat-value" id="s-interested" style="color:var(--green)">--</div></div>
-          <div class="stat-card"><div class="stat-label">Pas interesses</div><div class="stat-value" id="s-not_interested" style="color:var(--red)">--</div></div>
+          <div class="stat-card"><div class="stat-label">To Contact</div><div class="stat-value" id="s-to_contact">--</div></div>
+          <div class="stat-card"><div class="stat-label">Contacted</div><div class="stat-value" id="s-contacted" style="color:var(--yellow)">--</div></div>
+          <div class="stat-card"><div class="stat-label">Interested</div><div class="stat-value" id="s-interested" style="color:var(--green)">--</div></div>
+          <div class="stat-card"><div class="stat-label">Not Interested</div><div class="stat-value" id="s-not_interested" style="color:var(--red)">--</div></div>
         </div>
 
         <div class="toolbar">
-          <input type="text" class="input" id="filter-search" placeholder="Rechercher..." oninput="onFilter()" />
+          <input type="text" class="input" id="filter-search" placeholder="Search..." oninput="onFilter()" />
           <select class="select" id="filter-status" onchange="onFilter()">
-            <option value="">Tous les statuts</option>
-            <option value="to_contact">A contacter</option>
-            <option value="contacted">Contacte</option>
-            <option value="interested">Interesse</option>
-            <option value="not_interested">Pas interesse</option>
+            <option value="">All statuses</option>
+            <option value="to_contact">To Contact</option>
+            <option value="contacted">Contacted</option>
+            <option value="interested">Interested</option>
+            <option value="not_interested">Not Interested</option>
           </select>
           <select class="select" id="filter-query" onchange="onFilter()">
-            <option value="">Toutes les recherches</option>
+            <option value="">All queries</option>
           </select>
           <select class="select" id="filter-sort" onchange="onFilter()">
-            <option value="scraped_at">Plus recents</option>
-            <option value="name">Nom A-Z</option>
-            <option value="reviews_count">Meilleures notes</option>
+            <option value="scraped_at">Most recent</option>
+            <option value="name">Name A-Z</option>
+            <option value="reviews_count">Top rated</option>
           </select>
         </div>
 
         <div id="dashboard-content">
           <div class="empty-state">
             <div>
-              <h3>Aucun prospect</h3>
-              <p>Lance un scraping pour commencer.<br/><code>restaurants in Paris</code></p>
+              <h3>No prospects yet</h3>
+              <p>Start a scrape to begin.<br/><code>restaurants in Paris</code></p>
             </div>
           </div>
         </div>
 
         <div class="pagination" id="pagination" style="display:none">
-          <button class="btn btn-sm" id="btn-prev" onclick="changePage(-1)">Prec.</button>
+          <button class="btn btn-sm" id="btn-prev" onclick="changePage(-1)">Prev.</button>
           <span id="page-info"></span>
-          <button class="btn btn-sm" id="btn-next" onclick="changePage(1)">Suiv.</button>
+          <button class="btn btn-sm" id="btn-next" onclick="changePage(1)">Next</button>
         </div>
       </div>
     </div>
@@ -1419,38 +1419,38 @@
     <div class="page page-swipe" id="page-swipe">
       <div class="swipe-filter-bar">
         <select class="select" id="swipe-filter-status" onchange="swipeLoadCards()">
-          <option value="to_contact">A contacter</option>
-          <option value="">Tous</option>
-          <option value="contacted">Contactes</option>
-          <option value="interested">Interesses</option>
-          <option value="not_interested">Pas interesses</option>
+          <option value="to_contact">To Contact</option>
+          <option value="">All</option>
+          <option value="contacted">Contacted</option>
+          <option value="interested">Interested</option>
+          <option value="not_interested">Not Interested</option>
         </select>
         <select class="select" id="swipe-filter-query" onchange="swipeLoadCards()">
-          <option value="">Toutes les recherches</option>
+          <option value="">All queries</option>
         </select>
         <span id="swipe-progress" style="margin-left:auto;font-size:13px;color:var(--text-secondary)"></span>
       </div>
 
       <div class="deck-wrapper" id="deck-wrapper">
-        <div class="hint-left" id="hint-left">Pas interesse</div>
-        <div class="hint-right" id="hint-right">Interesse</div>
+        <div class="hint-left" id="hint-left">Not interested</div>
+        <div class="hint-right" id="hint-right">Interested</div>
         <div class="deck" id="deck"></div>
         <div class="done-screen" id="done-screen">
-          <h3>Termine !</h3>
-          <p>Tu as passe toutes les fiches.</p>
-          <button class="btn btn-primary" onclick="navigate('dashboard')">Retour au dashboard</button>
+          <h3>Done!</h3>
+          <p>You went through every lead.</p>
+          <button class="btn btn-primary" onclick="navigate('dashboard')">Back to dashboard</button>
         </div>
       </div>
 
       <div class="swipe-actions" id="swipe-actions">
-        <button class="btn-round undo" onclick="swipeUndo()" title="Annuler">&#x21A9;</button>
-        <button class="btn-round nope" onclick="swipeCard('left')" title="Pas interesse">&#x2715;</button>
-        <button class="btn-round skip" onclick="swipeSkip()" title="Passer">&#x2192;</button>
-        <button class="btn-round yep" onclick="swipeCard('right')" title="Interesse">&#x2605;</button>
+        <button class="btn-round undo" onclick="swipeUndo()" title="Undo">&#x21A9;</button>
+        <button class="btn-round nope" onclick="swipeCard('left')" title="Not interested">&#x2715;</button>
+        <button class="btn-round skip" onclick="swipeSkip()" title="Skip">&#x2192;</button>
+        <button class="btn-round yep" onclick="swipeCard('right')" title="Interested">&#x2605;</button>
       </div>
 
       <div class="swipe-kbd-hint">
-        <kbd>&larr;</kbd> Pas interesse &middot; <kbd>&rarr;</kbd> Interesse &middot; <kbd>&darr;</kbd> Passer &middot; <kbd>Z</kbd> Annuler
+        <kbd>&larr;</kbd> Not interested &middot; <kbd>&rarr;</kbd> Interested &middot; <kbd>&darr;</kbd> Skip &middot; <kbd>Z</kbd> Undo
       </div>
     </div>
 
@@ -1458,15 +1458,15 @@
     <div class="page page-prospection" id="page-prospection">
       <aside class="prosp-sidebar">
         <div class="prosp-count-card">
-          <div class="prosp-count-label">Pipeline Appels</div>
+          <div class="prosp-count-label">Call Pipeline</div>
           <div class="prosp-count-value" id="prosp-count">0</div>
-          <div class="prosp-count-desc">Fiches interessees, pretes a appeler.</div>
+          <div class="prosp-count-desc">Interested leads ready to call.</div>
         </div>
 
         <div class="prosp-filters">
-          <input type="text" class="input" id="prosp-search" placeholder="Rechercher une fiche..." />
+          <input type="text" class="input" id="prosp-search" placeholder="Search a lead..." />
           <select class="select" id="prosp-query-filter">
-            <option value="">Toutes les recherches</option>
+            <option value="">All queries</option>
           </select>
         </div>
 
@@ -1476,8 +1476,8 @@
       <div class="prosp-main">
         <div class="prosp-topbar">
           <div>
-            <h2>Prospection</h2>
-            <p>Prepare la fiche, puis lance l'appel avec <kbd>Espace</kbd></p>
+            <h2>Outreach</h2>
+            <p>Review the lead, then start the call with <kbd>Space</kbd></p>
           </div>
         </div>
         <div class="detail-card" id="prosp-detail-card"></div>
@@ -1487,30 +1487,30 @@
     <!-- ─── HISTORY ───────────────────────────────── -->
     <div class="page" id="page-history">
       <div class="page-header">
-        <h1 class="page-title">Historique des appels</h1>
-        <p class="page-desc">Chaque appel termine est enregistre ici.</p>
+        <h1 class="page-title">Call History</h1>
+        <p class="page-desc">Every completed call is stored here.</p>
       </div>
       <div class="page-body">
         <div class="stats-row" id="history-stats">
-          <div class="stat-card"><div class="stat-label">Appels passes</div><div class="stat-value" id="hs-total">--</div></div>
-          <div class="stat-card"><div class="stat-label">Duree moyenne</div><div class="stat-value" id="hs-avg">--</div></div>
-          <div class="stat-card"><div class="stat-label">Temps cumule</div><div class="stat-value" id="hs-cumul">--</div></div>
-          <div class="stat-card"><div class="stat-label">Top recherche</div><div class="stat-value" id="hs-top" style="font-size:16px">--</div></div>
+          <div class="stat-card"><div class="stat-label">Total Calls</div><div class="stat-value" id="hs-total">--</div></div>
+          <div class="stat-card"><div class="stat-label">Avg Duration</div><div class="stat-value" id="hs-avg">--</div></div>
+          <div class="stat-card"><div class="stat-label">Total Time</div><div class="stat-value" id="hs-cumul">--</div></div>
+          <div class="stat-card"><div class="stat-label">Top Query</div><div class="stat-value" id="hs-top" style="font-size:16px">--</div></div>
         </div>
 
         <div class="toolbar">
-          <input type="text" class="input" id="history-search" placeholder="Rechercher un nom, telephone ou note..." />
+          <input type="text" class="input" id="history-search" placeholder="Search a name, phone, or note..." />
           <select class="select" id="history-query-filter">
-            <option value="">Toutes les recherches</option>
+            <option value="">All queries</option>
           </select>
         </div>
 
         <div class="history-list" id="history-list"></div>
 
         <div class="pagination" id="history-pagination" style="display:none">
-          <button class="btn btn-sm" id="history-btn-prev">Prec.</button>
+          <button class="btn btn-sm" id="history-btn-prev">Prev.</button>
           <span id="history-page-info"></span>
-          <button class="btn btn-sm" id="history-btn-next">Suiv.</button>
+          <button class="btn btn-sm" id="history-btn-next">Next</button>
         </div>
       </div>
     </div>
@@ -1523,7 +1523,7 @@
   <div class="call-shell">
     <div class="call-top">
       <div>
-        <div class="call-title">Appel en cours</div>
+        <div class="call-title">Call in progress</div>
         <div class="call-name-display" id="call-name">--</div>
       </div>
       <div class="call-timer" id="call-timer">00:00</div>
@@ -1531,11 +1531,11 @@
     <div class="call-pills" id="call-info"></div>
     <div class="call-body">
       <aside class="call-lead-panel" id="call-lead-card"></aside>
-      <textarea class="call-notes-area" id="call-notes" placeholder="Prise de note pendant l'appel..."></textarea>
+      <textarea class="call-notes-area" id="call-notes" placeholder="Take notes during the call..."></textarea>
     </div>
     <div class="call-footer">
-      <div class="call-hint">Mode focus : seules les notes et le bouton fin restent accessibles.</div>
-      <button class="btn btn-danger" id="hangup-btn">Couper l'appel</button>
+      <div class="call-hint">Focus mode is active: only notes and the end call button remain available.</div>
+      <button class="btn btn-danger" id="hangup-btn">End call</button>
     </div>
   </div>
 </div>
@@ -1552,7 +1552,7 @@ function applyTheme(theme) {
   document.documentElement.setAttribute("data-theme", theme);
   document.getElementById("theme-icon-dark").style.display = theme === "dark" ? "" : "none";
   document.getElementById("theme-icon-light").style.display = theme === "light" ? "" : "none";
-  document.getElementById("theme-label").textContent = theme === "dark" ? "Mode clair" : "Mode sombre";
+  document.getElementById("theme-label").textContent = theme === "dark" ? "Light mode" : "Dark mode";
 }
 
 function toggleTheme() {
@@ -1601,10 +1601,10 @@ window.addEventListener("load", () => {
 //  SHARED
 // ════════════════════════════════════════════════════════════════════
 const STATUSES = {
-  to_contact:     { label: "A contacter",    cls: "badge-to_contact" },
-  contacted:      { label: "Contacte",       cls: "badge-contacted" },
-  interested:     { label: "Interesse",      cls: "badge-interested" },
-  not_interested: { label: "Pas interesse",  cls: "badge-not_interested" },
+  to_contact:     { label: "To Contact",     cls: "badge-to_contact" },
+  contacted:      { label: "Contacted",      cls: "badge-contacted" },
+  interested:     { label: "Interested",     cls: "badge-interested" },
+  not_interested: { label: "Not Interested", cls: "badge-not_interested" },
 };
 
 function escapeHtml(v) {
@@ -1619,7 +1619,7 @@ function formatDuration(s) {
 }
 
 function formatDate(v) {
-  return new Date(v).toLocaleString("fr-FR", { dateStyle: "medium", timeStyle: "short" });
+  return new Date(v).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" });
 }
 
 function exportCSV() { window.location = `${API}/prospects/export`; }
@@ -1643,7 +1643,7 @@ async function loadStats() {
 
   const sel = document.getElementById("filter-query");
   const cur = sel.value;
-  sel.innerHTML = '<option value="">Toutes les recherches</option>';
+  sel.innerHTML = '<option value="">All queries</option>';
   (d.queries || []).forEach(q => {
     const o = document.createElement("option");
     o.value = o.textContent = q;
@@ -1663,7 +1663,7 @@ async function loadProspects() {
 
   const r = await fetch(`${API}/prospects?${params}`).catch(() => null);
   if (!r) {
-    document.getElementById("dashboard-content").innerHTML = '<div class="empty-state"><div><h3>Serveur inaccessible</h3><p>Lance : <code>python3 server.py</code></p></div></div>';
+    document.getElementById("dashboard-content").innerHTML = '<div class="empty-state"><div><h3>Server unavailable</h3><p>Run: <code>python3 server.py</code></p></div></div>';
     return;
   }
   const d = await r.json();
@@ -1674,7 +1674,7 @@ async function loadProspects() {
 function renderProspects(data) {
   const el = document.getElementById("dashboard-content");
   if (!data.length) {
-    el.innerHTML = `<div class="empty-state"><div><h3>${totalCount === 0 ? "Aucun prospect" : "Aucun resultat"}</h3><p>${totalCount === 0 ? "Lance un scraping pour commencer." : "Modifie les filtres."}</p></div></div>`;
+    el.innerHTML = `<div class="empty-state"><div><h3>${totalCount === 0 ? "No prospects yet" : "No results"}</h3><p>${totalCount === 0 ? "Start a scrape to begin." : "Adjust the filters."}</p></div></div>`;
     document.getElementById("pagination").style.display = "none";
     return;
   }
@@ -1699,7 +1699,7 @@ function buildCard(r) {
 
   const socials = [["website","Web"],["facebook","FB"],["instagram","IG"],["twitter","TW"],["tiktok","TK"],["linkedin","LI"]].filter(([k]) => r[k] && r[k] !== "Not Given");
   const socialHtml = socials.length ? `<div class="social-links">${socials.map(([k,l]) => `<a class="social-link" href="${r[k]}" target="_blank">${l}</a>`).join("")}</div>` : "";
-  const reviewsHtml = r.reviews_average ? `<div class="card-reviews"><b>${r.reviews_average}</b>${r.reviews_count ? ` · ${Number(r.reviews_count).toLocaleString("fr")} avis` : ""}</div>` : "";
+  const reviewsHtml = r.reviews_average ? `<div class="card-reviews"><b>${r.reviews_average}</b>${r.reviews_count ? ` · ${Number(r.reviews_count).toLocaleString("en-US")} reviews` : ""}</div>` : "";
   const statusBtns = Object.entries(STATUSES).map(([key, val]) =>
     `<button class="status-btn ${r.status === key ? 'active-'+key : ''}" onclick="setStatus('${r.id}','${key}',this)">${val.label}</button>`
   ).join("");
@@ -1746,13 +1746,13 @@ async function saveNote(id, value) {
 async function launchScrape() {
   const search = document.getElementById("scrape-query").value.trim();
   const total = parseInt(document.getElementById("scrape-total").value) || 10;
-  if (!search) { alert("Saisis une recherche."); return; }
+  if (!search) { alert("Enter a search query."); return; }
   const btn = document.getElementById("scrape-btn");
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span>Scraping...';
   const r = await fetch(`${API}/scrape`, { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({ search, total }) });
   const d = await r.json();
-  if (!r.ok) { alert(d.error); btn.disabled = false; btn.textContent = "Lancer le scraping"; return; }
+  if (!r.ok) { alert(d.error); btn.disabled = false; btn.textContent = "Start scraping"; return; }
 
   const logBox = document.getElementById("log-box");
   logBox.innerHTML = "";
@@ -1764,7 +1764,7 @@ async function launchScrape() {
     if (!s.running) {
       clearInterval(scrapePoller);
       btn.disabled = false;
-      btn.textContent = "Lancer le scraping";
+      btn.textContent = "Start scraping";
       currentPage = 1;
       loadStats();
       loadProspects();
@@ -1864,7 +1864,7 @@ function buildSwipeCard(r, isTop) {
     <span class="stamp yep">HOT</span>
     <div class="swipe-card-name">${r.name || "—"}</div>
     ${r.place_type ? `<div class="swipe-card-type">${r.place_type}</div>` : ""}
-    ${r.reviews_average ? `<div class="swipe-rating"><span class="stars">${"★".repeat(starsCount)}${"☆".repeat(5-starsCount)}</span> <span>${r.reviews_average}</span> ${r.reviews_count ? `<span class="count">(${Number(r.reviews_count).toLocaleString("fr")} avis)</span>` : ""}</div>` : ""}
+    ${r.reviews_average ? `<div class="swipe-rating"><span class="stars">${"★".repeat(starsCount)}${"☆".repeat(5-starsCount)}</span> <span>${r.reviews_average}</span> ${r.reviews_count ? `<span class="count">(${Number(r.reviews_count).toLocaleString("en-US")} reviews)</span>` : ""}</div>` : ""}
     <div class="swipe-info">
       ${r.address && r.address !== "Not Given" ? `<span>${r.address}</span>` : ""}
       ${r.phone && r.phone !== "Not Given" ? `<span><a href="tel:${r.phone}">${r.phone}</a></span>` : ""}
@@ -2016,7 +2016,7 @@ function prospRenderList() {
 
   const el = document.getElementById("prosp-lead-list");
   if (!leads.length) {
-    el.innerHTML = '<div style="padding:16px;text-align:center;color:var(--text-secondary);font-size:13px">Aucune fiche interessee.</div>';
+    el.innerHTML = '<div style="padding:16px;text-align:center;color:var(--text-secondary);font-size:13px">No interested leads.</div>';
     prospRenderDetail();
     return;
   }
@@ -2048,32 +2048,32 @@ function prospRenderList() {
 function prospRenderDetail() {
   const lead = prospLeads.find(l => l.id === prospSelectedId);
   const el = document.getElementById("prosp-detail-card");
-  if (!lead) { el.innerHTML = '<div class="prosp-empty">Aucune fiche interessee a appeler.</div>'; return; }
+  if (!lead) { el.innerHTML = '<div class="prosp-empty">No interested leads ready to call.</div>'; return; }
 
-  const webHtml = lead.website && lead.website !== "Not Given" ? `<a href="${lead.website}" target="_blank">${escapeHtml(lead.website)}</a>` : "Non renseigne";
+  const webHtml = lead.website && lead.website !== "Not Given" ? `<a href="${lead.website}" target="_blank">${escapeHtml(lead.website)}</a>` : "Not provided";
 
   el.innerHTML = `
     <div class="detail-head">
       <div>
-        <span class="badge badge-interested">Interesse</span>
+        <span class="badge badge-interested">Interested</span>
         <div class="detail-name">${escapeHtml(lead.name || "—")}</div>
         ${lead.place_type ? `<div class="detail-type">${escapeHtml(lead.place_type)}</div>` : ""}
-        <div class="detail-rating">${lead.reviews_average ? `${escapeHtml(lead.reviews_average)}` : "Pas de note"} ${lead.reviews_count ? `· ${Number(lead.reviews_count).toLocaleString("fr")} avis` : ""}</div>
+        <div class="detail-rating">${lead.reviews_average ? `${escapeHtml(lead.reviews_average)}` : "No rating"} ${lead.reviews_count ? `· ${Number(lead.reviews_count).toLocaleString("en-US")} reviews` : ""}</div>
       </div>
       <div class="detail-actions">
-        <button class="btn btn-primary" id="start-call-btn" type="button">Lancer l'appel</button>
-        <button class="btn" id="refresh-list-btn" type="button">Rafraichir</button>
+        <button class="btn btn-primary" id="start-call-btn" type="button">Start call</button>
+        <button class="btn" id="refresh-list-btn" type="button">Refresh</button>
       </div>
     </div>
     <div class="detail-grid">
-      <div class="info-tile"><div class="info-label">Telephone</div><div class="info-value">${lead.phone && lead.phone !== "Not Given" ? escapeHtml(lead.phone) : "Non renseigne"}</div></div>
-      <div class="info-tile"><div class="info-label">Site web</div><div class="info-value">${webHtml}</div></div>
-      <div class="info-tile"><div class="info-label">Adresse</div><div class="info-value">${lead.address && lead.address !== "Not Given" ? escapeHtml(lead.address) : "Non renseignee"}</div></div>
-      <div class="info-tile"><div class="info-label">Recherche source</div><div class="info-value">${escapeHtml(lead.search_query || "—")}</div></div>
+      <div class="info-tile"><div class="info-label">Phone</div><div class="info-value">${lead.phone && lead.phone !== "Not Given" ? escapeHtml(lead.phone) : "Not provided"}</div></div>
+      <div class="info-tile"><div class="info-label">Website</div><div class="info-value">${webHtml}</div></div>
+      <div class="info-tile"><div class="info-label">Address</div><div class="info-value">${lead.address && lead.address !== "Not Given" ? escapeHtml(lead.address) : "Not provided"}</div></div>
+      <div class="info-tile"><div class="info-label">Source query</div><div class="info-value">${escapeHtml(lead.search_query || "—")}</div></div>
     </div>
     <div class="notes-section">
-      <h4>Notes existantes</h4>
-      <p>${lead.notes ? escapeHtml(lead.notes) : "Aucune note."}</p>
+      <h4>Existing notes</h4>
+      <p>${lead.notes ? escapeHtml(lead.notes) : "No notes."}</p>
     </div>
   `;
 
@@ -2091,20 +2091,20 @@ function prospStartCall() {
   document.getElementById("call-name").textContent = lead.name || "—";
   document.getElementById("call-notes").value = lead.notes || "";
   document.getElementById("call-info").innerHTML = `
-    ${lead.phone && lead.phone !== "Not Given" ? `<div class="call-pill"><strong>Tel</strong> ${escapeHtml(lead.phone)}</div>` : ""}
-    ${lead.address && lead.address !== "Not Given" ? `<div class="call-pill"><strong>Adr</strong> ${escapeHtml(lead.address)}</div>` : ""}
-    <div class="call-pill"><strong>Rech.</strong> ${escapeHtml(lead.search_query || "—")}</div>
+    ${lead.phone && lead.phone !== "Not Given" ? `<div class="call-pill"><strong>Phone</strong> ${escapeHtml(lead.phone)}</div>` : ""}
+    ${lead.address && lead.address !== "Not Given" ? `<div class="call-pill"><strong>Addr.</strong> ${escapeHtml(lead.address)}</div>` : ""}
+    <div class="call-pill"><strong>Query</strong> ${escapeHtml(lead.search_query || "—")}</div>
   `;
   document.getElementById("call-lead-card").innerHTML = `
     <div class="call-lead-header">
-      <div class="call-lead-kicker">Fiche en cours</div>
+      <div class="call-lead-kicker">Current lead</div>
       <div class="call-lead-name">${escapeHtml(lead.name || "—")}</div>
       ${lead.place_type ? `<div class="call-lead-type">${escapeHtml(lead.place_type)}</div>` : ""}
     </div>
-    <div class="call-lead-field"><div class="call-lead-field-label">Telephone</div><div class="call-lead-field-value">${lead.phone && lead.phone !== "Not Given" ? escapeHtml(lead.phone) : "N/A"}</div></div>
-    <div class="call-lead-field"><div class="call-lead-field-label">Adresse</div><div class="call-lead-field-value">${lead.address && lead.address !== "Not Given" ? escapeHtml(lead.address) : "N/A"}</div></div>
-    <div class="call-lead-field"><div class="call-lead-field-label">Site web</div><div class="call-lead-field-value">${lead.website && lead.website !== "Not Given" ? `<a href="${lead.website}" target="_blank">${escapeHtml(lead.website)}</a>` : "N/A"}</div></div>
-    <div class="call-lead-field"><div class="call-lead-field-label">Note Google</div><div class="call-lead-field-value">${lead.reviews_average ? `${escapeHtml(lead.reviews_average)}` : "Pas de note"} ${lead.reviews_count ? `· ${Number(lead.reviews_count).toLocaleString("fr")} avis` : ""}</div></div>
+    <div class="call-lead-field"><div class="call-lead-field-label">Phone</div><div class="call-lead-field-value">${lead.phone && lead.phone !== "Not Given" ? escapeHtml(lead.phone) : "N/A"}</div></div>
+    <div class="call-lead-field"><div class="call-lead-field-label">Address</div><div class="call-lead-field-value">${lead.address && lead.address !== "Not Given" ? escapeHtml(lead.address) : "N/A"}</div></div>
+    <div class="call-lead-field"><div class="call-lead-field-label">Website</div><div class="call-lead-field-value">${lead.website && lead.website !== "Not Given" ? `<a href="${lead.website}" target="_blank">${escapeHtml(lead.website)}</a>` : "N/A"}</div></div>
+    <div class="call-lead-field"><div class="call-lead-field-label">Google rating</div><div class="call-lead-field-value">${lead.reviews_average ? `${escapeHtml(lead.reviews_average)}` : "No rating"} ${lead.reviews_count ? `· ${Number(lead.reviews_count).toLocaleString("en-US")} reviews` : ""}</div></div>
   `;
 
   document.body.classList.add("call-active");
@@ -2217,7 +2217,7 @@ async function historyLoadList() {
   if (sf) params.set("search", sf);
 
   const r = await fetch(`${API}/calls?${params}`).catch(() => null);
-  if (!r) { document.getElementById("history-list").innerHTML = '<div class="empty-state"><div><h3>Serveur inaccessible</h3></div></div>'; return; }
+  if (!r) { document.getElementById("history-list").innerHTML = '<div class="empty-state"><div><h3>Server unavailable</h3></div></div>'; return; }
   const d = await r.json();
   historyTotal = d.total || 0;
   historyRender(d.data || []);
@@ -2226,7 +2226,7 @@ async function historyLoadList() {
 
 function historyRender(items) {
   const el = document.getElementById("history-list");
-  if (!items.length) { el.innerHTML = '<div class="empty-state"><div><h3>Aucun appel</h3><p>Les appels termines apparaitront ici.</p></div></div>'; return; }
+  if (!items.length) { el.innerHTML = '<div class="empty-state"><div><h3>No calls yet</h3><p>Completed calls will appear here.</p></div></div>'; return; }
 
   el.innerHTML = items.map(i => `
     <article class="call-card">
@@ -2244,13 +2244,13 @@ function historyRender(items) {
         </div>
       </div>
       <div class="call-grid">
-        <div class="info-box"><div class="info-label">Debut</div><div class="info-value">${i.started_at ? formatDate(i.started_at) : "—"}</div></div>
-        <div class="info-box"><div class="info-label">Fin</div><div class="info-value">${i.ended_at ? formatDate(i.ended_at) : "—"}</div></div>
-        <div class="info-box"><div class="info-label">Duree</div><div class="info-value">${formatDuration(i.duration_seconds || 0)}</div></div>
+        <div class="info-box"><div class="info-label">Start</div><div class="info-value">${i.started_at ? formatDate(i.started_at) : "—"}</div></div>
+        <div class="info-box"><div class="info-label">End</div><div class="info-value">${i.ended_at ? formatDate(i.ended_at) : "—"}</div></div>
+        <div class="info-box"><div class="info-label">Duration</div><div class="info-value">${formatDuration(i.duration_seconds || 0)}</div></div>
       </div>
       <div class="notes-box">
         <h4>Notes</h4>
-        <p>${i.notes ? escapeHtml(i.notes) : "Aucune note."}</p>
+        <p>${i.notes ? escapeHtml(i.notes) : "No notes."}</p>
       </div>
     </article>
   `).join("");
@@ -2260,7 +2260,7 @@ function historyRenderPagination() {
   const tp = Math.max(1, Math.ceil(historyTotal / HISTORY_PP));
   const el = document.getElementById("history-pagination");
   el.style.display = historyTotal > HISTORY_PP ? "flex" : "none";
-  document.getElementById("history-page-info").textContent = `Page ${historyPage} / ${tp} — ${historyTotal} appel(s)`;
+  document.getElementById("history-page-info").textContent = `Page ${historyPage} / ${tp} — ${historyTotal} call(s)`;
   document.getElementById("history-btn-prev").disabled = historyPage <= 1;
   document.getElementById("history-btn-next").disabled = historyPage >= tp;
 }

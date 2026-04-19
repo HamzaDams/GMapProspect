@@ -79,19 +79,19 @@ def main():
         browser = p.chromium.launch(headless=False)
         page = browser.new_page()
 
-        print("1. Ouverture Google Maps...")
+        print("1. Opening Google Maps...")
         maps_url = f"https://www.google.com/maps/search/{search_for.replace(' ', '+')}"
         page.goto(maps_url, timeout=60000)
         page.wait_for_timeout(3000)
 
-        print("2. Acceptation cookies...")
+        print("2. Accepting cookies...")
         try:
             page.locator('button:has-text("Tout accepter"), button:has-text("Accept all")').first.click(timeout=3000)
             page.wait_for_timeout(1000)
         except:
             pass
 
-        print("3. URL Maps:", page.url)
+        print("3. Maps URL:", page.url)
         
         
         
@@ -100,14 +100,14 @@ def main():
         # Scroll the results panel to load enough listings
         LISTING_SEL = 'a.hfpxzc'
         previously_counted = 0
-        print("4. Scroll pour charger les fiches...")
+        print("4. Scrolling to load leads...")
         while True:
             current_count = page.locator(LISTING_SEL).count()
-            print(f"   Fiches trouvées: {current_count}")
+            print(f"   Leads found: {current_count}")
             if current_count >= total:
                 break
             if current_count == previously_counted:
-                print("   Plus de fiches disponibles.")
+                print("   No more leads available.")
                 break
             previously_counted = current_count
             # Scroll inside the results panel

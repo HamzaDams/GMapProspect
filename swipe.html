@@ -243,44 +243,44 @@
 <nav>
   <h1>GMap<span>Prospect</span> <span style="color:var(--muted);font-weight:400;font-size:13px">/ Swipe</span></h1>
   <span class="nav-progress" id="nav-progress"></span>
-  <a href="/prospection">Mode appel →</a>
+  <a href="/prospection">Call mode →</a>
 </nav>
 
 <div class="filter-bar">
   <select id="filter-status" onchange="loadCards()">
-    <option value="to_contact">À contacter</option>
-    <option value="">Tous</option>
-    <option value="contacted">Contactés</option>
-    <option value="interested">Intéressés</option>
-    <option value="not_interested">Pas intéressés</option>
+    <option value="to_contact">To Contact</option>
+    <option value="">All</option>
+    <option value="contacted">Contacted</option>
+    <option value="interested">Interested</option>
+    <option value="not_interested">Not Interested</option>
   </select>
   <select id="filter-query" onchange="loadCards()">
-    <option value="">Toutes les recherches</option>
+    <option value="">All queries</option>
   </select>
 </div>
 
 <div class="deck-wrapper" id="deck-wrapper">
-  <div class="hint-left" id="hint-left">✕ Pas intéressé</div>
-  <div class="hint-right" id="hint-right">★ Intéressé</div>
+  <div class="hint-left" id="hint-left">✕ Not interested</div>
+  <div class="hint-right" id="hint-right">★ Interested</div>
   <div class="deck" id="deck"></div>
 
   <div class="done-screen" id="done-screen">
     <div class="done-icon">🎉</div>
-    <h2>C'est tout !</h2>
-    <p>Tu as passé toutes les fiches.<br/>Reviens au dashboard pour voir les résultats.</p>
-    <a href="/">Voir le dashboard</a>
+    <h2>That's it!</h2>
+    <p>You went through every lead.<br/>Head back to the dashboard to see the results.</p>
+    <a href="/">View dashboard</a>
   </div>
 </div>
 
 <div class="actions" id="actions">
-  <button class="btn-action btn-undo" onclick="undoLast()" title="Annuler">↩</button>
-  <button class="btn-action btn-nope" onclick="swipeCard('left')" title="Pas intéressé">✕</button>
-  <button class="btn-action btn-skip" onclick="skipCard()" title="Passer">→</button>
-  <button class="btn-action btn-contact" onclick="swipeCard('right')" title="Intéressé">★</button>
+  <button class="btn-action btn-undo" onclick="undoLast()" title="Undo">↩</button>
+  <button class="btn-action btn-nope" onclick="swipeCard('left')" title="Not interested">✕</button>
+  <button class="btn-action btn-skip" onclick="skipCard()" title="Skip">→</button>
+  <button class="btn-action btn-contact" onclick="swipeCard('right')" title="Interested">★</button>
 </div>
 
 <div class="kbd-hint">
-  <kbd>←</kbd> Pas intéressé &nbsp;·&nbsp; <kbd>→</kbd> Intéressé &nbsp;·&nbsp; <kbd>↓</kbd> Passer &nbsp;·&nbsp; <kbd>Z</kbd> Annuler
+  <kbd>←</kbd> Not interested &nbsp;·&nbsp; <kbd>→</kbd> Interested &nbsp;·&nbsp; <kbd>↓</kbd> Skip &nbsp;·&nbsp; <kbd>Z</kbd> Undo
 </div>
 
 <script>
@@ -358,7 +358,7 @@ function buildCard(r, isTop) {
   card.dataset.id = r.id;
 
   const socials = [
-    ["website","🌐 Site"], ["facebook","FB"], ["instagram","IG"],
+    ["website","🌐 Website"], ["facebook","FB"], ["instagram","IG"],
     ["twitter","TW"], ["tiktok","TK"], ["linkedin","LI"]
   ].filter(([k]) => r[k] && r[k] !== "Not Given");
 
@@ -378,7 +378,7 @@ function buildCard(r, isTop) {
     <div class="card-rating">
       <span class="stars">${stars}</span>
       <span>${r.reviews_average}</span>
-      ${r.reviews_count ? `<span class="rating-count">(${Number(r.reviews_count).toLocaleString("fr")} avis)</span>` : ""}
+      ${r.reviews_count ? `<span class="rating-count">(${Number(r.reviews_count).toLocaleString("en-US")} reviews)</span>` : ""}
     </div>` : ""}
 
     <div class="card-info">

@@ -169,71 +169,71 @@
 <header>
   <h1>GMap<span>Prospect</span></h1>
   <div class="header-right">
-    <button onclick="window.location='/swipe'">Mode Swipe</button>
-    <button onclick="window.location='/prospection'">Mode Appel</button>
-    <button onclick="window.location='/history'">Historique Appels</button>
-    <button onclick="exportCSV()">Exporter CSV</button>
+    <button onclick="window.location='/swipe'">Swipe Mode</button>
+    <button onclick="window.location='/prospection'">Call Mode</button>
+    <button onclick="window.location='/history'">Call History</button>
+    <button onclick="exportCSV()">Export CSV</button>
   </div>
 </header>
 
 <!-- SCRAPE -->
 <div class="scrape-bar">
-  <input type="text" id="scrape-query" placeholder='Ex: restaurants in Paris, plombiers Lyon...' />
-  <input type="number" id="scrape-total" value="10" min="1" max="200" title="Nombre de fiches" />
-  <button class="primary" id="scrape-btn" onclick="launchScrape()">Lancer le scraping</button>
+  <input type="text" id="scrape-query" placeholder='Ex: restaurants in Paris, plumbers in London...' />
+  <input type="number" id="scrape-total" value="10" min="1" max="200" title="Number of leads" />
+  <button class="primary" id="scrape-btn" onclick="launchScrape()">Start scraping</button>
 </div>
 <div class="log-box" id="log-box"></div>
 
 <!-- STATS -->
 <div class="stats">
   <div class="stat"><div class="stat-value" id="s-total" style="color:var(--accent)">—</div><div class="stat-label">Total</div></div>
-  <div class="stat"><div class="stat-value" id="s-to_contact">—</div><div class="stat-label">À contacter</div></div>
-  <div class="stat"><div class="stat-value" id="s-contacted" style="color:var(--yellow)">—</div><div class="stat-label">Contactés</div></div>
-  <div class="stat"><div class="stat-value" id="s-interested" style="color:var(--green)">—</div><div class="stat-label">Intéressés</div></div>
-  <div class="stat"><div class="stat-value" id="s-not_interested" style="color:var(--red)">—</div><div class="stat-label">Pas intéressés</div></div>
+  <div class="stat"><div class="stat-value" id="s-to_contact">—</div><div class="stat-label">To Contact</div></div>
+  <div class="stat"><div class="stat-value" id="s-contacted" style="color:var(--yellow)">—</div><div class="stat-label">Contacted</div></div>
+  <div class="stat"><div class="stat-value" id="s-interested" style="color:var(--green)">—</div><div class="stat-label">Interested</div></div>
+  <div class="stat"><div class="stat-value" id="s-not_interested" style="color:var(--red)">—</div><div class="stat-label">Not Interested</div></div>
 </div>
 
 <!-- TOOLBAR -->
 <div class="toolbar">
-  <input type="text" id="filter-search" placeholder="Rechercher..." oninput="onFilter()" />
+  <input type="text" id="filter-search" placeholder="Search..." oninput="onFilter()" />
   <select id="filter-status" onchange="onFilter()">
-    <option value="">Tous les statuts</option>
-    <option value="to_contact">À contacter</option>
-    <option value="contacted">Contacté</option>
-    <option value="interested">Intéressé</option>
-    <option value="not_interested">Pas intéressé</option>
+    <option value="">All statuses</option>
+    <option value="to_contact">To Contact</option>
+    <option value="contacted">Contacted</option>
+    <option value="interested">Interested</option>
+    <option value="not_interested">Not Interested</option>
   </select>
   <select id="filter-query" onchange="onFilter()">
-    <option value="">Toutes les recherches</option>
+    <option value="">All queries</option>
   </select>
   <select id="filter-sort" onchange="onFilter()">
-    <option value="scraped_at">Plus récents</option>
-    <option value="name">Nom A→Z</option>
-    <option value="reviews_count">Meilleures notes</option>
+    <option value="scraped_at">Most recent</option>
+    <option value="name">Name A→Z</option>
+    <option value="reviews_count">Top rated</option>
   </select>
 </div>
 
 <div id="content">
   <div class="empty">
-    <h2>Aucun prospect</h2>
-    <p>Lance un scraping en haut pour commencer.<br/>
-    Ex : <code>restaurants in Paris</code> · <code>plombiers Lyon</code></p>
+    <h2>No prospects yet</h2>
+    <p>Start a scrape above to begin.<br/>
+    Ex: <code>restaurants in Paris</code> · <code>plumbers in London</code></p>
   </div>
 </div>
 
 <div class="pagination" id="pagination" style="display:none">
-  <button id="btn-prev" onclick="changePage(-1)">← Préc.</button>
+  <button id="btn-prev" onclick="changePage(-1)">← Prev.</button>
   <span id="page-info"></span>
-  <button id="btn-next" onclick="changePage(1)">Suiv. →</button>
+  <button id="btn-next" onclick="changePage(1)">Next →</button>
 </div>
 
 <script>
 const API = "http://localhost:8000/api";
 const STATUSES = {
-  to_contact:     { label: "À contacter",  cls: "badge-to_contact" },
-  contacted:      { label: "Contacté",      cls: "badge-contacted" },
-  interested:     { label: "Intéressé",     cls: "badge-interested" },
-  not_interested: { label: "Pas intéressé", cls: "badge-not_interested" },
+  to_contact:     { label: "To Contact",     cls: "badge-to_contact" },
+  contacted:      { label: "Contacted",      cls: "badge-contacted" },
+  interested:     { label: "Interested",     cls: "badge-interested" },
+  not_interested: { label: "Not Interested", cls: "badge-not_interested" },
 };
 
 let currentPage = 1;
@@ -261,7 +261,7 @@ async function loadStats() {
 
   const sel = document.getElementById("filter-query");
   const current = sel.value;
-  sel.innerHTML = '<option value="">Toutes les recherches</option>';
+  sel.innerHTML = '<option value="">All queries</option>';
   (d.queries || []).forEach(q => {
     const opt = document.createElement("option");
     opt.value = opt.textContent = q;
@@ -286,7 +286,7 @@ async function loadProspects() {
 
   const r = await fetch(`${API}/prospects?${params}`).catch(() => null);
   if (!r) {
-    document.getElementById("content").innerHTML = `<div class="empty"><h2>Serveur inaccessible</h2><p>Lance : <code>python3 server.py</code></p></div>`;
+    document.getElementById("content").innerHTML = `<div class="empty"><h2>Server unavailable</h2><p>Run: <code>python3 server.py</code></p></div>`;
     return;
   }
   const d = await r.json();
@@ -297,7 +297,7 @@ async function loadProspects() {
 function renderProspects(data) {
   const el = document.getElementById("content");
   if (!data.length) {
-    el.innerHTML = `<div class="empty"><h2>${totalCount === 0 ? "Aucun prospect" : "Aucun résultat"}</h2><p>${totalCount === 0 ? 'Lance un scraping pour commencer.' : 'Modifie les filtres.'}</p></div>`;
+    el.innerHTML = `<div class="empty"><h2>${totalCount === 0 ? "No prospects yet" : "No results"}</h2><p>${totalCount === 0 ? 'Start a scrape to begin.' : 'Adjust the filters.'}</p></div>`;
     document.getElementById("pagination").style.display = "none";
     return;
   }
@@ -330,7 +330,7 @@ function buildCard(r) {
     : "";
 
   const reviewsHtml = r.reviews_average
-    ? `<div class="card-reviews"><b>★ ${r.reviews_average}</b>${r.reviews_count ? ` · ${Number(r.reviews_count).toLocaleString("fr")} avis` : ""}</div>`
+    ? `<div class="card-reviews"><b>★ ${r.reviews_average}</b>${r.reviews_count ? ` · ${Number(r.reviews_count).toLocaleString("en-US")} reviews` : ""}</div>`
     : "";
 
   const statusBtns = Object.entries(STATUSES).map(([key, val]) =>
@@ -351,7 +351,7 @@ function buildCard(r) {
     ${reviewsHtml}
     ${socialHtml}
     <div class="card-actions">${statusBtns}</div>
-    <textarea class="notes-area" placeholder="Notes, date de contact..."
+    <textarea class="notes-area" placeholder="Notes, contact date..."
       onchange="saveNote('${r.id}',this.value)">${(r.notes||"").replace(/</g,"&lt;")}</textarea>
     <div class="card-query">🔍 ${r.search_query || ""}</div>
   `;
@@ -384,7 +384,7 @@ async function saveNote(id, value) {
 async function launchScrape() {
   const search = document.getElementById("scrape-query").value.trim();
   const total = parseInt(document.getElementById("scrape-total").value) || 10;
-  if (!search) { alert("Saisis une recherche."); return; }
+  if (!search) { alert("Enter a search query."); return; }
 
   const btn = document.getElementById("scrape-btn");
   btn.disabled = true;
@@ -392,7 +392,7 @@ async function launchScrape() {
 
   const r = await fetch(`${API}/scrape`, { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({ search, total }) });
   const d = await r.json();
-  if (!r.ok) { alert(d.error); btn.disabled = false; btn.textContent = "Lancer le scraping"; return; }
+  if (!r.ok) { alert(d.error); btn.disabled = false; btn.textContent = "Start scraping"; return; }
 
   const logBox = document.getElementById("log-box");
   logBox.innerHTML = "";
@@ -405,7 +405,7 @@ async function launchScrape() {
     if (!s.running) {
       clearInterval(scrapePoller);
       btn.disabled = false;
-      btn.textContent = "Lancer le scraping";
+      btn.textContent = "Start scraping";
       currentPage = 1;
       loadStats();
       loadProspects();

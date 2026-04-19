@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GMapProspect — Prospection</title>
+  <title>GMapProspect — Outreach</title>
   <style>
     :root {
       --bg: #101418;
@@ -643,20 +643,20 @@
         <div class="brand-links">
           <a class="ghost-link" href="/">Dashboard</a>
           <a class="ghost-link" href="/swipe">Swipe</a>
-          <a class="ghost-link" href="/history">Historique</a>
+          <a class="ghost-link" href="/history">History</a>
         </div>
       </div>
 
       <section class="hero">
-        <div class="hero-kicker">Pipeline Appels</div>
+        <div class="hero-kicker">Call Pipeline</div>
         <div class="hero-count" id="hero-count">0</div>
-        <div class="hero-sub">Fiches marquées intéressées, prêtes à passer en appel.</div>
+        <div class="hero-sub">Interested leads, ready for calls.</div>
       </section>
 
       <section class="filters">
-        <input type="text" id="lead-search" placeholder="Rechercher une fiche..." />
+        <input type="text" id="lead-search" placeholder="Search a lead..." />
         <select id="query-filter">
-          <option value="">Toutes les recherches</option>
+          <option value="">All queries</option>
         </select>
       </section>
 
@@ -666,10 +666,10 @@
     <main class="main">
       <div class="topbar">
         <div class="topbar-title">
-          <h2>Prospection interactive</h2>
-          <p>Prépare la fiche, puis lance l’appel avec <strong>Espace</strong> ou le bouton Play.</p>
+          <h2>Interactive outreach</h2>
+          <p>Review the lead, then start the call with <strong>Space</strong> or the Play button.</p>
         </div>
-        <div class="shortcut-pill">Démarrer l’appel : <kbd>Espace</kbd></div>
+        <div class="shortcut-pill">Start call: <kbd>Space</kbd></div>
       </div>
 
       <section class="detail-card" id="detail-card"></section>
@@ -680,7 +680,7 @@
     <div class="call-shell">
       <div class="call-top">
         <div>
-          <div class="call-title">Appel en cours</div>
+          <div class="call-title">Call in progress</div>
           <div class="call-name" id="call-name">—</div>
         </div>
         <div class="timer" id="call-timer">00:00</div>
@@ -690,12 +690,12 @@
 
       <div class="call-notes">
         <aside class="call-lead-card" id="call-lead-card"></aside>
-        <textarea id="call-notes" placeholder="Prise de note pendant l'appel..."></textarea>
+        <textarea id="call-notes" placeholder="Take notes during the call..."></textarea>
       </div>
 
       <div class="call-footer">
-        <div class="call-hint">Mode focus actif : seules les notes et le bouton de fin d’appel restent accessibles.</div>
-        <button class="hangup-btn" id="hangup-btn" type="button">Couper l’appel</button>
+        <div class="call-hint">Focus mode is active: only notes and the end call button remain available.</div>
+        <button class="hangup-btn" id="hangup-btn" type="button">End call</button>
       </div>
     </div>
   </div>
@@ -756,7 +756,7 @@
       if (!response) return;
       const data = await response.json();
       const current = queryFilterEl.value;
-      queryFilterEl.innerHTML = '<option value="">Toutes les recherches</option>';
+      queryFilterEl.innerHTML = '<option value="">All queries</option>';
       (data.queries || []).forEach(query => {
         const option = document.createElement("option");
         option.value = option.textContent = query;
@@ -776,8 +776,8 @@
       const response = await fetch(`${API}/prospects?${params}`).catch(() => null);
       if (!response) {
         heroCountEl.textContent = "!";
-        leadListEl.innerHTML = '<div class="empty-list">Serveur inaccessible. Lance <code>python3 server.py</code>.</div>';
-        detailCardEl.innerHTML = '<div class="empty-main">Le serveur local ne répond pas.</div>';
+        leadListEl.innerHTML = '<div class="empty-list">Server unavailable. Run <code>python3 server.py</code>.</div>';
+        detailCardEl.innerHTML = '<div class="empty-main">The local server is not responding.</div>';
         return;
       }
 
@@ -821,7 +821,7 @@
       }
 
       if (!visibleLeads.length) {
-        leadListEl.innerHTML = '<div class="empty-list">Aucune fiche intéressée avec ces filtres.</div>';
+        leadListEl.innerHTML = '<div class="empty-list">No interested leads match these filters.</div>';
         renderDetail();
         return;
       }
@@ -854,57 +854,57 @@
     function renderDetail() {
       const lead = getSelectedLead();
       if (!lead) {
-        detailCardEl.innerHTML = '<div class="empty-main">Aucune fiche intéressée à appeler pour le moment.</div>';
+        detailCardEl.innerHTML = '<div class="empty-main">No interested leads ready to call right now.</div>';
         return;
       }
 
       const websiteHtml = lead.website && lead.website !== "Not Given"
         ? `<a href="${lead.website}" target="_blank">${escapeHtml(lead.website)}</a>`
-        : "Non renseigné";
+        : "Not provided";
 
       detailCardEl.innerHTML = `
         <div class="detail-head">
           <div>
-            <div class="status-chip">Intéressé</div>
+            <div class="status-chip">Interested</div>
             <div class="detail-name">${escapeHtml(lead.name || "—")}</div>
             ${lead.place_type ? `<div class="detail-type">${escapeHtml(lead.place_type)}</div>` : ""}
             <div class="detail-rating">
-              ${lead.reviews_average ? `★ ${escapeHtml(lead.reviews_average)}` : "Pas de note"}
-              ${lead.reviews_count ? ` · ${Number(lead.reviews_count).toLocaleString("fr")} avis` : ""}
+              ${lead.reviews_average ? `★ ${escapeHtml(lead.reviews_average)}` : "No rating"}
+              ${lead.reviews_count ? ` · ${Number(lead.reviews_count).toLocaleString("en-US")} reviews` : ""}
             </div>
           </div>
 
           <div class="detail-actions">
-            <button class="play-btn" id="start-call-btn" type="button">▶ Play l’appel</button>
-            <button class="refresh-btn" id="refresh-list-btn" type="button">Rafraîchir la file intéressée</button>
+            <button class="play-btn" id="start-call-btn" type="button">▶ Start call</button>
+            <button class="refresh-btn" id="refresh-list-btn" type="button">Refresh interested queue</button>
           </div>
         </div>
 
         <div class="detail-grid">
           <div class="info-tile">
-            <div class="info-label">Téléphone</div>
-            <div class="info-value">${lead.phone && lead.phone !== "Not Given" ? escapeHtml(lead.phone) : "Non renseigné"}</div>
+            <div class="info-label">Phone</div>
+            <div class="info-value">${lead.phone && lead.phone !== "Not Given" ? escapeHtml(lead.phone) : "Not provided"}</div>
           </div>
 
           <div class="info-tile">
-            <div class="info-label">Site web</div>
+            <div class="info-label">Website</div>
             <div class="info-value">${websiteHtml}</div>
           </div>
 
           <div class="info-tile">
-            <div class="info-label">Adresse</div>
-            <div class="info-value">${lead.address && lead.address !== "Not Given" ? escapeHtml(lead.address) : "Non renseignée"}</div>
+            <div class="info-label">Address</div>
+            <div class="info-value">${lead.address && lead.address !== "Not Given" ? escapeHtml(lead.address) : "Not provided"}</div>
           </div>
 
           <div class="info-tile">
-            <div class="info-label">Recherche source</div>
+            <div class="info-label">Source query</div>
             <div class="info-value">${escapeHtml(lead.search_query || "—")}</div>
           </div>
         </div>
 
         <div class="notes-preview">
-          <h3>Notes existantes</h3>
-          <p>${lead.notes ? escapeHtml(lead.notes) : "Aucune note pour cette fiche."}</p>
+          <h3>Existing notes</h3>
+          <p>${lead.notes ? escapeHtml(lead.notes) : "No notes for this lead."}</p>
         </div>
       `;
 
@@ -929,42 +929,42 @@
       `;
       callLeadCardEl.innerHTML = `
         <div class="call-lead-header">
-          <div class="call-lead-kicker">Fiche en cours</div>
+          <div class="call-lead-kicker">Current lead</div>
           <div class="call-lead-name">${escapeHtml(lead.name || "—")}</div>
           ${lead.place_type ? `<div class="call-lead-type">${escapeHtml(lead.place_type)}</div>` : ""}
         </div>
 
         <div class="call-lead-grid">
           <div class="call-lead-field">
-            <div class="call-lead-field-label">Téléphone</div>
-            <div class="call-lead-field-value">${lead.phone && lead.phone !== "Not Given" ? escapeHtml(lead.phone) : "Non renseigné"}</div>
+            <div class="call-lead-field-label">Phone</div>
+            <div class="call-lead-field-value">${lead.phone && lead.phone !== "Not Given" ? escapeHtml(lead.phone) : "Not provided"}</div>
           </div>
 
           <div class="call-lead-field">
-            <div class="call-lead-field-label">Adresse</div>
-            <div class="call-lead-field-value">${lead.address && lead.address !== "Not Given" ? escapeHtml(lead.address) : "Non renseignée"}</div>
+            <div class="call-lead-field-label">Address</div>
+            <div class="call-lead-field-value">${lead.address && lead.address !== "Not Given" ? escapeHtml(lead.address) : "Not provided"}</div>
           </div>
 
           <div class="call-lead-field">
-            <div class="call-lead-field-label">Site web</div>
-            <div class="call-lead-field-value">${lead.website && lead.website !== "Not Given" ? `<a href="${lead.website}" target="_blank">${escapeHtml(lead.website)}</a>` : "Non renseigné"}</div>
+            <div class="call-lead-field-label">Website</div>
+            <div class="call-lead-field-value">${lead.website && lead.website !== "Not Given" ? `<a href="${lead.website}" target="_blank">${escapeHtml(lead.website)}</a>` : "Not provided"}</div>
           </div>
 
           <div class="call-lead-field">
-            <div class="call-lead-field-label">Horaires</div>
-            <div class="call-lead-field-value">${lead.opens_at && lead.opens_at !== "Not Given" ? escapeHtml(lead.opens_at) : "Non renseignés"}</div>
+            <div class="call-lead-field-label">Opening hours</div>
+            <div class="call-lead-field-value">${lead.opens_at && lead.opens_at !== "Not Given" ? escapeHtml(lead.opens_at) : "Not provided"}</div>
           </div>
 
           <div class="call-lead-field">
-            <div class="call-lead-field-label">Recherche source</div>
+            <div class="call-lead-field-label">Source query</div>
             <div class="call-lead-field-value">${escapeHtml(lead.search_query || "—")}</div>
           </div>
 
           <div class="call-lead-field">
-            <div class="call-lead-field-label">Note Google</div>
+            <div class="call-lead-field-label">Google rating</div>
             <div class="call-lead-field-value">
-              ${lead.reviews_average ? `★ ${escapeHtml(lead.reviews_average)}` : "Pas de note"}
-              ${lead.reviews_count ? ` · ${Number(lead.reviews_count).toLocaleString("fr")} avis` : ""}
+              ${lead.reviews_average ? `★ ${escapeHtml(lead.reviews_average)}` : "No rating"}
+              ${lead.reviews_count ? ` · ${Number(lead.reviews_count).toLocaleString("en-US")} reviews` : ""}
             </div>
           </div>
         </div>
