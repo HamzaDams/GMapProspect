@@ -351,91 +351,201 @@
     .card {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 16px;
+      border-radius: 16px;
+      padding: 18px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 14px;
+      box-shadow: 0 14px 30px hsl(0 0% 0% / 0.05);
+      transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+    }
+
+    .card:hover {
+      border-color: var(--accent);
+      box-shadow: 0 18px 34px hsl(0 0% 0% / 0.08);
+      transform: translateY(-1px);
     }
 
     .card-header {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      gap: 8px;
+      gap: 12px;
+    }
+
+    .card-title-wrap {
+      min-width: 0;
+      display: grid;
+      gap: 6px;
     }
 
     .card-name {
-      font-size: 14px;
-      font-weight: 600;
-      line-height: 1.4;
+      font-size: 17px;
+      font-weight: 700;
+      line-height: 1.25;
+      letter-spacing: -0.02em;
     }
 
     .card-type {
       font-size: 12px;
       color: var(--purple);
       font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
     }
 
-    .card-meta {
-      display: flex;
-      flex-direction: column;
-      gap: 3px;
-      font-size: 13px;
+    .card-highlights {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .card-highlight {
+      min-width: 0;
+      padding: 12px 13px;
+      border-radius: 14px;
+      border: 1px solid var(--border-subtle);
+      background: var(--bg);
+      display: grid;
+      gap: 6px;
+    }
+
+    .card-highlight-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
       color: var(--text-secondary);
     }
 
-    .card-meta a { color: var(--accent); text-decoration: none; }
-    .card-meta a:hover { text-decoration: underline; }
+    .card-highlight-value {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.35;
+      word-break: break-word;
+    }
 
-    .card-reviews { font-size: 12px; color: var(--text-secondary); }
-    .card-reviews b { color: var(--yellow); }
+    .card-highlight-sub {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.45;
+    }
 
-    .social-links { display: flex; gap: 4px; flex-wrap: wrap; }
+    .card-highlight-value a {
+      color: var(--text);
+      text-decoration: none;
+    }
+
+    .card-highlight-value a:hover {
+      color: var(--accent);
+    }
+
+    .card-rating-stars {
+      letter-spacing: 0.08em;
+      color: var(--yellow);
+      font-size: 12px;
+    }
+
+    .card-meta {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .card-meta-item {
+      min-width: 0;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: var(--surface-2);
+      border: 1px solid var(--border-subtle);
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.45;
+    }
+
+    .card-meta-item strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 10px;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .card-meta-item a { color: var(--accent); text-decoration: none; }
+    .card-meta-item a:hover { text-decoration: underline; }
+
+    .social-links {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      padding-top: 2px;
+    }
 
     .social-link {
       font-size: 11px;
-      padding: 2px 8px;
-      border-radius: var(--radius);
+      padding: 5px 9px;
+      border-radius: 999px;
       background: var(--surface-2);
       border: 1px solid var(--border);
       color: var(--text-secondary);
       text-decoration: none;
-      transition: color 0.15s;
+      transition: color 0.15s, border-color 0.15s;
     }
 
-    .social-link:hover { color: var(--text); }
+    .social-link:hover { color: var(--text); border-color: var(--accent); }
 
-    .card-actions { display: flex; gap: 4px; flex-wrap: wrap; }
+    .card-actions {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
 
     .status-btn {
+      width: 100%;
+      min-height: 40px;
       font-size: 12px;
-      padding: 4px 10px;
-      border-radius: var(--radius);
+      padding: 8px 10px;
+      border-radius: 12px;
       cursor: pointer;
       border: 1px solid var(--border);
-      background: transparent;
+      background: var(--bg);
       color: var(--text-secondary);
       font-family: inherit;
       transition: all 0.15s;
+      font-weight: 600;
     }
 
-    .status-btn:hover { border-color: var(--ring); }
+    .status-btn:hover { border-color: var(--ring); color: var(--text); }
     .status-btn.active-to_contact { background: var(--accent-muted); border-color: var(--accent); color: var(--accent); }
     .status-btn.active-contacted { background: var(--yellow-muted); border-color: var(--yellow); color: var(--yellow); }
     .status-btn.active-interested { background: var(--green-muted); border-color: var(--green); color: var(--green); }
     .status-btn.active-not_interested { background: var(--red-muted); border-color: var(--red); color: var(--red); }
 
+    .card-notes {
+      display: grid;
+      gap: 8px;
+    }
+
+    .card-section-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
     .notes-area {
       width: 100%;
       background: var(--bg);
       border: 1px solid var(--border);
-      border-radius: var(--radius);
+      border-radius: 12px;
       color: var(--text);
       font-size: 13px;
-      padding: 8px 12px;
+      padding: 10px 12px;
       resize: vertical;
-      min-height: 52px;
+      min-height: 72px;
       font-family: inherit;
       outline: none;
       transition: border-color 0.15s;
@@ -444,10 +554,11 @@
     .notes-area:focus { border-color: var(--ring); }
 
     .card-query {
-      font-size: 11px;
-      color: var(--muted);
+      font-size: 12px;
+      color: var(--text-secondary);
       border-top: 1px solid var(--border-subtle);
-      padding-top: 8px;
+      padding-top: 10px;
+      line-height: 1.5;
     }
 
     /* pagination */
@@ -1329,6 +1440,7 @@
       .page-body, .page-header { padding-left: 16px; padding-right: 16px; }
       .scrape-section { padding: 12px; border-radius: 18px; }
       .scrape-form { grid-template-columns: 1fr; }
+      .card-highlights, .card-meta, .card-actions { grid-template-columns: 1fr; }
       .detail-grid { grid-template-columns: 1fr; }
       .call-body { grid-template-columns: 1fr; }
       .call-grid { grid-template-columns: 1fr; }
@@ -1734,31 +1846,61 @@ function buildCard(r) {
   card.dataset.id = r.id;
   const s = STATUSES[r.status] || STATUSES.to_contact;
 
-  const socials = [["website","Web"],["facebook","FB"],["instagram","IG"],["twitter","TW"],["tiktok","TK"],["linkedin","LI"]].filter(([k]) => r[k] && r[k] !== "Not Given");
+  const avg = parseFloat(String(r.reviews_average || "0").replace(",", ".")) || 0;
+  const starsCount = Math.max(0, Math.min(5, Math.round(avg)));
+  const stars = starsCount ? `${"★".repeat(starsCount)}${"☆".repeat(5 - starsCount)}` : "";
+  const hasWebsite = !!(r.website && r.website !== "Not Given");
+  const websiteLabel = hasWebsite ? formatWebsiteLabel(r.website) : "No website";
+  const socials = [["facebook","FB"],["instagram","IG"],["twitter","TW"],["tiktok","TK"],["linkedin","LI"]].filter(([k]) => r[k] && r[k] !== "Not Given");
   const socialHtml = socials.length ? `<div class="social-links">${socials.map(([k,l]) => `<a class="social-link" href="${r[k]}" target="_blank">${l}</a>`).join("")}</div>` : "";
-  const reviewsHtml = r.reviews_average ? `<div class="card-reviews"><b>${r.reviews_average}</b>${r.reviews_count ? ` · ${Number(r.reviews_count).toLocaleString("en-US")} reviews` : ""}</div>` : "";
+  const metaHtml = [
+    r.address && r.address !== "Not Given" ? `<div class="card-meta-item"><strong>Address</strong>${r.address}</div>` : "",
+    r.phone && r.phone !== "Not Given" ? `<div class="card-meta-item"><strong>Phone</strong><a href="tel:${r.phone}">${r.phone}</a></div>` : "",
+    r.opens_at && r.opens_at !== "Not Given" ? `<div class="card-meta-item"><strong>Hours</strong>${r.opens_at}</div>` : ""
+  ].filter(Boolean).join("");
   const statusBtns = Object.entries(STATUSES).map(([key, val]) =>
     `<button class="status-btn ${r.status === key ? 'active-'+key : ''}" onclick="setStatus('${r.id}','${key}',this)">${val.label}</button>`
   ).join("");
 
   card.innerHTML = `
     <div class="card-header">
-      <div class="card-name">${r.name || "—"}</div>
+      <div class="card-title-wrap">
+        <div class="card-name">${r.name || "—"}</div>
+        ${r.place_type ? `<div class="card-type">${r.place_type}</div>` : ""}
+      </div>
       <span class="badge ${s.cls}">${s.label}</span>
     </div>
-    ${r.place_type ? `<div class="card-type">${r.place_type}</div>` : ""}
-    <div class="card-meta">
-      ${r.address && r.address !== "Not Given" ? `<span>${r.address}</span>` : ""}
-      ${r.phone && r.phone !== "Not Given" ? `<span><a href="tel:${r.phone}">${r.phone}</a></span>` : ""}
-      ${r.opens_at && r.opens_at !== "Not Given" ? `<span>${r.opens_at}</span>` : ""}
+    <div class="card-highlights">
+      <div class="card-highlight">
+        <div class="card-highlight-label">Google rating</div>
+        <div class="card-highlight-value">${r.reviews_average ? `${escapeHtml(r.reviews_average)} / 5` : "No rating yet"}</div>
+        <div class="card-highlight-sub">${r.reviews_count ? `${Number(r.reviews_count).toLocaleString("en-US")} reviews` : "No public reviews"}</div>
+        ${stars ? `<div class="card-rating-stars">${stars}</div>` : ""}
+      </div>
+      <div class="card-highlight">
+        <div class="card-highlight-label">Website</div>
+        <div class="card-highlight-value">${hasWebsite ? `<a href="${r.website}" target="_blank">${escapeHtml(websiteLabel)}</a>` : websiteLabel}</div>
+        <div class="card-highlight-sub">${hasWebsite ? "Click to open the business site" : "No website detected on this lead"}</div>
+      </div>
     </div>
-    ${reviewsHtml}
+    ${metaHtml ? `<div class="card-meta">${metaHtml}</div>` : ""}
     ${socialHtml}
     <div class="card-actions">${statusBtns}</div>
-    <textarea class="notes-area" placeholder="Notes..." onchange="saveNote('${r.id}',this.value)">${(r.notes||"").replace(/</g,"&lt;")}</textarea>
-    <div class="card-query">${r.search_query || ""}</div>
+    <div class="card-notes">
+      <div class="card-section-label">Notes</div>
+      <textarea class="notes-area" placeholder="Notes..." onchange="saveNote('${r.id}',this.value)">${(r.notes||"").replace(/</g,"&lt;")}</textarea>
+    </div>
+    <div class="card-query"><span class="card-section-label">Source Query</span><br>${r.search_query || "—"}</div>
   `;
   return card;
+}
+
+function formatWebsiteLabel(url) {
+  try {
+    return new URL(url).hostname.replace(/^www\./, "");
+  } catch {
+    return String(url).replace(/^https?:\/\//, "").replace(/\/$/, "");
+  }
 }
 
 async function setStatus(id, status, btn) {
