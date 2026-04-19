@@ -1715,7 +1715,7 @@ applyTheme(getTheme());
 // ════════════════════════════════════════════════════════════════════
 //  ROUTER
 // ════════════════════════════════════════════════════════════════════
-const API = "http://localhost:8000/api";
+const API = `${window.location.origin}/api`;
 const ROUTES = ["dashboard", "swipe", "prospection", "history"];
 
 function navigate(route) {
@@ -1758,6 +1758,27 @@ const STATUSES = {
 
 function escapeHtml(v) {
   return String(v).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+}
+
+function sanitizeHttpUrl(value) {
+  try {
+    const url = new URL(String(value), window.location.origin);
+    return /^https?:$/.test(url.protocol) ? url.href : "";
+  } catch {
+    return "";
+  }
+}
+
+function sanitizeTelHref(value) {
+  const cleaned = String(value || "").replace(/[^\d+()\-\s]/g, "").trim();
+  return cleaned ? `tel:${cleaned}` : "";
+}
+
+function externalLinkHtml(url, label, className = "") {
+  const safeUrl = sanitizeHttpUrl(url);
+  if (!safeUrl) return label ? escapeHtml(label) : "";
+  const cls = className ? ` class="${className}"` : "";
+  return `<a${cls} href="${escapeHtml(safeUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(label || safeUrl)}</a>`;
 }
 
 function formatDuration(s) {
@@ -1849,14 +1870,15 @@ function buildCard(r) {
   const avg = parseFloat(String(r.reviews_average || "0").replace(",", ".")) || 0;
   const starsCount = Math.max(0, Math.min(5, Math.round(avg)));
   const stars = starsCount ? `${"★".repeat(starsCount)}${"☆".repeat(5 - starsCount)}` : "";
-  const hasWebsite = !!(r.website && r.website !== "Not Given");
+  const safeWebsiteUrl = sanitizeHttpUrl(r.website);
+  const hasWebsite = !!safeWebsiteUrl;
   const websiteLabel = hasWebsite ? formatWebsiteLabel(r.website) : "No website";
   const socials = [["facebook","FB"],["instagram","IG"],["twitter","TW"],["tiktok","TK"],["linkedin","LI"]].filter(([k]) => r[k] && r[k] !== "Not Given");
-  const socialHtml = socials.length ? `<div class="social-links">${socials.map(([k,l]) => `<a class="social-link" href="${r[k]}" target="_blank">${l}</a>`).join("")}</div>` : "";
+  const socialHtml = socials.length ? `<div class="social-links">${socials.map(([k,l]) => externalLinkHtml(r[k], l, "social-link")).join("")}</div>` : "";
   const metaHtml = [
-    r.address && r.address !== "Not Given" ? `<div class="card-meta-item"><strong>Address</strong>${r.address}</div>` : "",
-    r.phone && r.phone !== "Not Given" ? `<div class="card-meta-item"><strong>Phone</strong><a href="tel:${r.phone}">${r.phone}</a></div>` : "",
-    r.opens_at && r.opens_at !== "Not Given" ? `<div class="card-meta-item"><strong>Hours</strong>${r.opens_at}</div>` : ""
+    r.address && r.address !== "Not Given" ? `<div class="card-meta-item"><strong>Address</strong>${escapeHtml(r.address)}</div>` : "",
+    r.phone && r.phone !== "Not Given" ? `<div class="card-meta-item"><strong>Phone</strong>${sanitizeTelHref(r.phone) ? `<a href="${escapeHtml(sanitizeTelHref(r.phone))}">${escapeHtml(r.phone)}</a>` : escapeHtml(r.phone)}</div>` : "",
+    r.opens_at && r.opens_at !== "Not Given" ? `<div class="card-meta-item"><strong>Hours</strong>${escapeHtml(r.opens_at)}</div>` : ""
   ].filter(Boolean).join("");
   const statusBtns = Object.entries(STATUSES).map(([key, val]) =>
     `<button class="status-btn ${r.status === key ? 'active-'+key : ''}" onclick="setStatus('${r.id}','${key}',this)">${val.label}</button>`
@@ -1865,8 +1887,8 @@ function buildCard(r) {
   card.innerHTML = `
     <div class="card-header">
       <div class="card-title-wrap">
-        <div class="card-name">${r.name || "—"}</div>
-        ${r.place_type ? `<div class="card-type">${r.place_type}</div>` : ""}
+        <div class="card-name">${escapeHtml(r.name || "—")}</div>
+        ${r.place_type ? `<div class="card-type">${escapeHtml(r.place_type)}</div>` : ""}
       </div>
       <span class="badge ${s.cls}">${s.label}</span>
     </div>
@@ -1879,7 +1901,7 @@ function buildCard(r) {
       </div>
       <div class="card-highlight">
         <div class="card-highlight-label">Website</div>
-        <div class="card-highlight-value">${hasWebsite ? `<a href="${r.website}" target="_blank">${escapeHtml(websiteLabel)}</a>` : websiteLabel}</div>
+        <div class="card-highlight-value">${hasWebsite ? externalLinkHtml(safeWebsiteUrl, websiteLabel) : escapeHtml(websiteLabel)}</div>
         <div class="card-highlight-sub">${hasWebsite ? "Click to open the business site" : "No website detected on this lead"}</div>
       </div>
     </div>
@@ -1888,9 +1910,9 @@ function buildCard(r) {
     <div class="card-actions">${statusBtns}</div>
     <div class="card-notes">
       <div class="card-section-label">Notes</div>
-      <textarea class="notes-area" placeholder="Notes..." onchange="saveNote('${r.id}',this.value)">${(r.notes||"").replace(/</g,"&lt;")}</textarea>
+      <textarea class="notes-area" placeholder="Notes..." onchange="saveNote('${r.id}',this.value)">${escapeHtml(r.notes || "")}</textarea>
     </div>
-    <div class="card-query"><span class="card-section-label">Source Query</span><br>${r.search_query || "—"}</div>
+    <div class="card-query"><span class="card-section-label">Source Query</span><br>${escapeHtml(r.search_query || "—")}</div>
   `;
   return card;
 }
@@ -1938,7 +1960,7 @@ async function launchScrape() {
   logBox.classList.add("visible");
   scrapePoller = setInterval(async () => {
     const s = await fetch(`${API}/scrape/status`).then(r => r.json());
-    logBox.innerHTML = s.log.map(l => `<div class="log-line">${l}</div>`).join("");
+    logBox.innerHTML = s.log.map(l => `<div class="log-line">${escapeHtml(l)}</div>`).join("");
     logBox.scrollTop = logBox.scrollHeight;
     if (!s.running) {
       clearInterval(scrapePoller);
@@ -2035,23 +2057,24 @@ function buildSwipeCard(r, isTop) {
   const socials = [["website","Site"],["facebook","FB"],["instagram","IG"],["twitter","TW"],["tiktok","TK"],["linkedin","LI"]].filter(([k]) => r[k] && r[k] !== "Not Given");
   const avg = parseFloat((r.reviews_average||"0").replace(",",".")) || 0;
   const starsCount = Math.round(avg);
+  const safePhoneHref = sanitizeTelHref(r.phone);
 
   card.innerHTML = `
     <div class="swipe-overlay left"></div>
     <div class="swipe-overlay right"></div>
     <span class="stamp nope">NOPE</span>
     <span class="stamp yep">HOT</span>
-    <div class="swipe-card-name">${r.name || "—"}</div>
-    ${r.place_type ? `<div class="swipe-card-type">${r.place_type}</div>` : ""}
-    ${r.reviews_average ? `<div class="swipe-rating"><span class="stars">${"★".repeat(starsCount)}${"☆".repeat(5-starsCount)}</span> <span>${r.reviews_average}</span> ${r.reviews_count ? `<span class="count">(${Number(r.reviews_count).toLocaleString("en-US")} reviews)</span>` : ""}</div>` : ""}
+    <div class="swipe-card-name">${escapeHtml(r.name || "—")}</div>
+    ${r.place_type ? `<div class="swipe-card-type">${escapeHtml(r.place_type)}</div>` : ""}
+    ${r.reviews_average ? `<div class="swipe-rating"><span class="stars">${"★".repeat(starsCount)}${"☆".repeat(5-starsCount)}</span> <span>${escapeHtml(r.reviews_average)}</span> ${r.reviews_count ? `<span class="count">(${Number(r.reviews_count).toLocaleString("en-US")} reviews)</span>` : ""}</div>` : ""}
     <div class="swipe-info">
-      ${r.address && r.address !== "Not Given" ? `<span>${r.address}</span>` : ""}
-      ${r.phone && r.phone !== "Not Given" ? `<span><a href="tel:${r.phone}">${r.phone}</a></span>` : ""}
-      ${r.opens_at && r.opens_at !== "Not Given" ? `<span>${r.opens_at}</span>` : ""}
+      ${r.address && r.address !== "Not Given" ? `<span>${escapeHtml(r.address)}</span>` : ""}
+      ${r.phone && r.phone !== "Not Given" ? `<span>${safePhoneHref ? `<a href="${escapeHtml(safePhoneHref)}">${escapeHtml(r.phone)}</a>` : escapeHtml(r.phone)}</span>` : ""}
+      ${r.opens_at && r.opens_at !== "Not Given" ? `<span>${escapeHtml(r.opens_at)}</span>` : ""}
     </div>
-    ${socials.length ? `<div class="swipe-socials">${socials.map(([k,l]) => `<a class="swipe-pill" href="${r[k]}" target="_blank">${l}</a>`).join("")}</div>` : ""}
-    ${r.about && r.about !== "Not Given" ? `<div class="swipe-about">${r.about}</div>` : ""}
-    <div class="swipe-query">${r.search_query || ""}</div>
+    ${socials.length ? `<div class="swipe-socials">${socials.map(([k,l]) => externalLinkHtml(r[k], l, "swipe-pill")).join("")}</div>` : ""}
+    ${r.about && r.about !== "Not Given" ? `<div class="swipe-about">${escapeHtml(r.about)}</div>` : ""}
+    <div class="swipe-query">${escapeHtml(r.search_query || "")}</div>
   `;
   return card;
 }
@@ -2229,7 +2252,7 @@ function prospRenderDetail() {
   const el = document.getElementById("prosp-detail-card");
   if (!lead) { el.innerHTML = '<div class="prosp-empty">No interested leads ready to call.</div>'; return; }
 
-  const webHtml = lead.website && lead.website !== "Not Given" ? `<a href="${lead.website}" target="_blank">${escapeHtml(lead.website)}</a>` : "Not provided";
+  const webHtml = lead.website && lead.website !== "Not Given" ? externalLinkHtml(lead.website, lead.website) : "Not provided";
 
   el.innerHTML = `
     <div class="detail-head">
@@ -2282,7 +2305,7 @@ function prospStartCall() {
     </div>
     <div class="call-lead-field"><div class="call-lead-field-label">Phone</div><div class="call-lead-field-value">${lead.phone && lead.phone !== "Not Given" ? escapeHtml(lead.phone) : "N/A"}</div></div>
     <div class="call-lead-field"><div class="call-lead-field-label">Address</div><div class="call-lead-field-value">${lead.address && lead.address !== "Not Given" ? escapeHtml(lead.address) : "N/A"}</div></div>
-    <div class="call-lead-field"><div class="call-lead-field-label">Website</div><div class="call-lead-field-value">${lead.website && lead.website !== "Not Given" ? `<a href="${lead.website}" target="_blank">${escapeHtml(lead.website)}</a>` : "N/A"}</div></div>
+    <div class="call-lead-field"><div class="call-lead-field-label">Website</div><div class="call-lead-field-value">${lead.website && lead.website !== "Not Given" ? externalLinkHtml(lead.website, lead.website) : "N/A"}</div></div>
     <div class="call-lead-field"><div class="call-lead-field-label">Google rating</div><div class="call-lead-field-value">${lead.reviews_average ? `${escapeHtml(lead.reviews_average)}` : "No rating"} ${lead.reviews_count ? `· ${Number(lead.reviews_count).toLocaleString("en-US")} reviews` : ""}</div></div>
   `;
 
