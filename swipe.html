@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GMapProspect — Swipe</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --surface: #161616;
+      --border: #232323;
+      --text: #f0f0f0;
+      --muted: #666;
+      --accent: #3b82f6;
+      --green: #22c55e;
+      --red: #ef4444;
+      --yellow: #eab308;
+      --purple: #a855f7;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* NAV */
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    nav h1 { font-size: 16px; font-weight: 600; }
+    nav h1 span { color: var(--accent); }
+    nav a {
+      font-size: 13px; color: var(--muted); text-decoration: none;
+      padding: 6px 12px; border: 1px solid var(--border); border-radius: 6px;
+    }
+    nav a:hover { color: var(--text); border-color: #444; }
+    .nav-progress { font-size: 13px; color: var(--muted); }
+
+    /* FILTER BAR */
+    .filter-bar {
+      display: flex; gap: 8px; padding: 10px 20px;
+      border-bottom: 1px solid var(--border); flex-shrink: 0;
+    }
+    select {
+      padding: 6px 10px; background: #1a1a1a; border: 1px solid var(--border);
+      border-radius: 6px; color: var(--text); font-size: 13px; cursor: pointer; outline: none;
+    }
+
+    /* DECK */
+    .deck-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      padding: 20px;
+      overflow: hidden;
+    }
+
+    /* HINT OVERLAYS */
+    .hint-left, .hint-right {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      opacity: 0;
+      transition: opacity 0.1s;
+      pointer-events: none;
+      z-index: 10;
+    }
+    .hint-left { left: 24px; color: var(--red); }
+    .hint-right { right: 24px; color: var(--green); }
+
+    /* CARDS STACK */
+    .deck {
+      position: relative;
+      width: 100%;
+      max-width: 400px;
+      height: 100%;
+      max-height: 540px;
+    }
+
+    .card {
+      position: absolute;
+      inset: 0;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      cursor: grab;
+      touch-action: none;
+      transition: transform 0.08s ease, box-shadow 0.08s ease;
+      will-change: transform;
+      overflow-y: auto;
+    }
+    .card:active { cursor: grabbing; }
+
+    /* Stack effect for cards below */
+    .card:nth-child(2) { transform: scale(0.97) translateY(10px); z-index: 1; }
+    .card:nth-child(3) { transform: scale(0.94) translateY(20px); z-index: 0; }
+    .card:nth-child(n+4) { display: none; }
+    .card.top { z-index: 2; }
+
+    /* SWIPE COLOR OVERLAY */
+    .card-overlay {
+      position: absolute;
+      inset: 0;
+      border-radius: 20px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.1s;
+    }
+    .card-overlay.left { background: linear-gradient(135deg, rgba(239,68,68,0.25), transparent); }
+    .card-overlay.right { background: linear-gradient(225deg, rgba(34,197,94,0.25), transparent); }
+
+    /* STAMP */
+    .stamp {
+      position: absolute;
+      top: 28px;
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      border: 3px solid;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.1s;
+      transform: rotate(-15deg);
+    }
+    .stamp.nope { left: 24px; color: var(--red); border-color: var(--red); }
+    .stamp.yep  { right: 24px; color: var(--green); border-color: var(--green); transform: rotate(15deg); }
+
+    /* CARD CONTENT */
+    .card-name { font-size: 22px; font-weight: 700; line-height: 1.2; }
+    .card-type { font-size: 13px; color: var(--purple); font-weight: 500; }
+    .card-rating {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 14px;
+    }
+    .stars { color: var(--yellow); font-size: 16px; }
+    .rating-count { color: var(--muted); font-size: 13px; }
+
+    .card-info { display: flex; flex-direction: column; gap: 6px; font-size: 14px; color: var(--muted); }
+    .card-info span { display: flex; align-items: flex-start; gap: 8px; }
+    .card-info a { color: var(--accent); text-decoration: none; word-break: break-all; }
+    .card-info a:hover { text-decoration: underline; }
+
+    .card-about {
+      font-size: 13px; color: #888; line-height: 1.6;
+      border-top: 1px solid var(--border); padding-top: 10px;
+    }
+
+    .card-socials { display: flex; gap: 8px; flex-wrap: wrap; }
+    .social-pill {
+      font-size: 12px; padding: 4px 10px; border-radius: 20px;
+      background: #1e1e1e; border: 1px solid var(--border); color: var(--muted);
+      text-decoration: none;
+    }
+    .social-pill:hover { color: var(--text); }
+
+    .card-query {
+      font-size: 11px; color: #444; border-top: 1px solid var(--border);
+      padding-top: 8px; margin-top: auto;
+    }
+
+    /* BUTTONS */
+    .actions {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 20px;
+      padding: 16px 20px 20px;
+      flex-shrink: 0;
+    }
+
+    .btn-action {
+      width: 60px; height: 60px; border-radius: 50%;
+      border: none; cursor: pointer; font-size: 24px;
+      display: flex; align-items: center; justify-content: center;
+      transition: transform 0.15s, box-shadow 0.15s;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    }
+    .btn-action:hover { transform: scale(1.1); }
+    .btn-action:active { transform: scale(0.95); }
+    .btn-nope { background: #1a0a0a; color: var(--red); border: 2px solid var(--red); }
+    .btn-skip { background: #1a1a1a; color: var(--muted); border: 2px solid var(--border); width: 44px; height: 44px; font-size: 18px; }
+    .btn-contact { background: #0a1a0a; color: var(--green); border: 2px solid var(--green); }
+    .btn-undo { background: #1a1a1a; color: var(--yellow); border: 2px solid #333; width: 44px; height: 44px; font-size: 18px; }
+
+    /* EMPTY / DONE */
+    .done-screen {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      text-align: center;
+      padding: 40px;
+      flex: 1;
+    }
+    .done-screen.visible { display: flex; }
+    .done-icon { font-size: 56px; }
+    .done-screen h2 { font-size: 22px; font-weight: 700; }
+    .done-screen p { color: var(--muted); font-size: 14px; line-height: 1.7; }
+    .done-screen a {
+      padding: 10px 24px; background: var(--accent); color: #fff;
+      border-radius: 8px; text-decoration: none; font-weight: 500;
+    }
+
+    /* KEYBOARD HINT */
+    .kbd-hint {
+      text-align: center; font-size: 12px; color: #333;
+      padding: 0 0 10px; flex-shrink: 0;
+    }
+    .kbd-hint kbd {
+      background: #1a1a1a; border: 1px solid #333; border-radius: 4px;
+      padding: 2px 6px; font-family: inherit; font-size: 11px; color: #666;
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <h1>GMap<span>Prospect</span> <span style="color:var(--muted);font-weight:400;font-size:13px">/ Swipe</span></h1>
+  <span class="nav-progress" id="nav-progress"></span>
+  <a href="/">← Dashboard</a>
+</nav>
+
+<div class="filter-bar">
+  <select id="filter-status" onchange="loadCards()">
+    <option value="to_contact">À contacter</option>
+    <option value="">Tous</option>
+    <option value="contacted">Contactés</option>
+    <option value="interested">Intéressés</option>
+    <option value="not_interested">Pas intéressés</option>
+  </select>
+  <select id="filter-query" onchange="loadCards()">
+    <option value="">Toutes les recherches</option>
+  </select>
+</div>
+
+<div class="deck-wrapper" id="deck-wrapper">
+  <div class="hint-left" id="hint-left">✕ Pas intéressé</div>
+  <div class="hint-right" id="hint-right">✓ Contacté</div>
+  <div class="deck" id="deck"></div>
+
+  <div class="done-screen" id="done-screen">
+    <div class="done-icon">🎉</div>
+    <h2>C'est tout !</h2>
+    <p>Tu as passé toutes les fiches.<br/>Reviens au dashboard pour voir les résultats.</p>
+    <a href="/">Voir le dashboard</a>
+  </div>
+</div>
+
+<div class="actions" id="actions">
+  <button class="btn-action btn-undo" onclick="undoLast()" title="Annuler">↩</button>
+  <button class="btn-action btn-nope" onclick="swipeCard('left')" title="Pas intéressé">✕</button>
+  <button class="btn-action btn-skip" onclick="skipCard()" title="Passer">→</button>
+  <button class="btn-action btn-contact" onclick="swipeCard('right')" title="Contacté">✓</button>
+</div>
+
+<div class="kbd-hint">
+  <kbd>←</kbd> Pas intéressé &nbsp;·&nbsp; <kbd>→</kbd> Contacté &nbsp;·&nbsp; <kbd>↓</kbd> Passer &nbsp;·&nbsp; <kbd>Z</kbd> Annuler
+</div>
+
+<script>
+const API = "http://localhost:8000/api";
+let cards = [];
+let history = [];
+let currentIdx = 0;
+
+// ── LOAD ──────────────────────────────────────────────────────────────
+window.addEventListener("load", async () => {
+  const r = await fetch(`${API}/prospects/stats`).catch(() => null);
+  if (r) {
+    const d = await r.json();
+    const sel = document.getElementById("filter-query");
+    (d.queries || []).forEach(q => {
+      const opt = document.createElement("option");
+      opt.value = opt.textContent = q;
+      sel.appendChild(opt);
+    });
+  }
+  loadCards();
+});
+
+async function loadCards() {
+  const status = document.getElementById("filter-status").value;
+  const query = document.getElementById("filter-query").value;
+  const params = new URLSearchParams({ per_page: 200 });
+  if (status) params.set("status", status);
+  if (query) params.set("query", query);
+
+  const r = await fetch(`${API}/prospects?${params}`).catch(() => null);
+  if (!r) return;
+  const d = await r.json();
+  cards = d.data;
+  history = [];
+  currentIdx = 0;
+  renderDeck();
+}
+
+// ── RENDER ────────────────────────────────────────────────────────────
+function renderDeck() {
+  const deck = document.getElementById("deck");
+  const done = document.getElementById("done-screen");
+  const actions = document.getElementById("actions");
+  const progress = document.getElementById("nav-progress");
+
+  const remaining = cards.slice(currentIdx);
+  progress.textContent = remaining.length
+    ? `${currentIdx} / ${cards.length}`
+    : `${cards.length} / ${cards.length}`;
+
+  if (!remaining.length) {
+    deck.innerHTML = "";
+    done.classList.add("visible");
+    actions.style.display = "none";
+    return;
+  }
+
+  done.classList.remove("visible");
+  actions.style.display = "flex";
+  deck.innerHTML = "";
+
+  // Render up to 3 cards (stack effect)
+  remaining.slice(0, 3).forEach((r, i) => {
+    const card = buildCard(r, i === 0);
+    deck.appendChild(card);
+  });
+
+  if (remaining.length > 0) initDrag(deck.querySelector(".card.top"));
+}
+
+function buildCard(r, isTop) {
+  const card = document.createElement("div");
+  card.className = `card${isTop ? " top" : ""}`;
+  card.dataset.id = r.id;
+
+  const socials = [
+    ["website","🌐 Site"], ["facebook","FB"], ["instagram","IG"],
+    ["twitter","TW"], ["tiktok","TK"], ["linkedin","LI"]
+  ].filter(([k]) => r[k] && r[k] !== "Not Given");
+
+  const starsCount = Math.round(parseFloat((r.reviews_average||"0").replace(",",".")) || 0);
+  const stars = "★".repeat(starsCount) + "☆".repeat(5 - starsCount);
+
+  card.innerHTML = `
+    <div class="card-overlay left"></div>
+    <div class="card-overlay right"></div>
+    <span class="stamp nope">NOPE</span>
+    <span class="stamp yep">OUI</span>
+
+    <div class="card-name">${r.name || "—"}</div>
+    ${r.place_type ? `<div class="card-type">${r.place_type}</div>` : ""}
+
+    ${r.reviews_average ? `
+    <div class="card-rating">
+      <span class="stars">${stars}</span>
+      <span>${r.reviews_average}</span>
+      ${r.reviews_count ? `<span class="rating-count">(${Number(r.reviews_count).toLocaleString("fr")} avis)</span>` : ""}
+    </div>` : ""}
+
+    <div class="card-info">
+      ${r.address && r.address !== "Not Given" ? `<span>📍 <span>${r.address}</span></span>` : ""}
+      ${r.phone && r.phone !== "Not Given" ? `<span>📞 <a href="tel:${r.phone}">${r.phone}</a></span>` : ""}
+      ${r.opens_at && r.opens_at !== "Not Given" ? `<span>🕐 <span>${r.opens_at}</span></span>` : ""}
+    </div>
+
+    ${socials.length ? `<div class="card-socials">${socials.map(([k,l]) => `<a class="social-pill" href="${r[k]}" target="_blank">${l}</a>`).join("")}</div>` : ""}
+
+    ${r.about && r.about !== "Not Given" ? `<div class="card-about">${r.about}</div>` : ""}
+
+    <div class="card-query">🔍 ${r.search_query || ""}</div>
+  `;
+  return card;
+}
+
+// ── DRAG ──────────────────────────────────────────────────────────────
+function initDrag(card) {
+  if (!card) return;
+  let startX, startY, dx = 0, dy = 0, dragging = false;
+
+  const onStart = e => {
+    dragging = true;
+    const pt = e.touches ? e.touches[0] : e;
+    startX = pt.clientX; startY = pt.clientY;
+    card.style.transition = "none";
+  };
+
+  const onMove = e => {
+    if (!dragging) return;
+    const pt = e.touches ? e.touches[0] : e;
+    dx = pt.clientX - startX;
+    dy = pt.clientY - startY;
+    const rot = dx * 0.08;
+    card.style.transform = `translate(${dx}px, ${dy}px) rotate(${rot}deg)`;
+
+    const ratio = Math.min(Math.abs(dx) / 120, 1);
+    const leftOverlay = card.querySelector(".card-overlay.left");
+    const rightOverlay = card.querySelector(".card-overlay.right");
+    const nope = card.querySelector(".stamp.nope");
+    const yep = card.querySelector(".stamp.yep");
+
+    if (dx < 0) {
+      leftOverlay.style.opacity = ratio;
+      rightOverlay.style.opacity = 0;
+      nope.style.opacity = ratio;
+      yep.style.opacity = 0;
+      document.getElementById("hint-left").style.opacity = ratio;
+      document.getElementById("hint-right").style.opacity = 0;
+    } else {
+      rightOverlay.style.opacity = ratio;
+      leftOverlay.style.opacity = 0;
+      yep.style.opacity = ratio;
+      nope.style.opacity = 0;
+      document.getElementById("hint-right").style.opacity = ratio;
+      document.getElementById("hint-left").style.opacity = 0;
+    }
+    e.preventDefault();
+  };
+
+  const onEnd = () => {
+    if (!dragging) return;
+    dragging = false;
+    document.getElementById("hint-left").style.opacity = 0;
+    document.getElementById("hint-right").style.opacity = 0;
+
+    if (dx > 100) swipeCard("right");
+    else if (dx < -100) swipeCard("left");
+    else {
+      card.style.transition = "transform 0.3s ease";
+      card.style.transform = "";
+    }
+  };
+
+  card.addEventListener("mousedown", onStart);
+  card.addEventListener("touchstart", onStart, { passive: false });
+  window.addEventListener("mousemove", onMove);
+  window.addEventListener("touchmove", onMove, { passive: false });
+  window.addEventListener("mouseup", onEnd);
+  window.addEventListener("touchend", onEnd);
+
+  card._cleanup = () => {
+    card.removeEventListener("mousedown", onStart);
+    card.removeEventListener("touchstart", onStart);
+    window.removeEventListener("mousemove", onMove);
+    window.removeEventListener("touchmove", onMove);
+    window.removeEventListener("mouseup", onEnd);
+    window.removeEventListener("touchend", onEnd);
+  };
+}
+
+// ── SWIPE ─────────────────────────────────────────────────────────────
+async function swipeCard(direction) {
+  const deck = document.getElementById("deck");
+  const topCard = deck.querySelector(".card.top");
+  if (!topCard) return;
+
+  const id = topCard.dataset.id;
+  const status = direction === "right" ? "contacted" : "not_interested";
+
+  // Animate out
+  topCard.style.transition = "transform 0.35s ease, opacity 0.35s ease";
+  const xOut = direction === "right" ? 600 : -600;
+  topCard.style.transform = `translate(${xOut}px, -40px) rotate(${direction === "right" ? 25 : -25}deg)`;
+  topCard.style.opacity = "0";
+
+  history.push({ id, prevStatus: cards[currentIdx].status });
+  currentIdx++;
+
+  // Save to API
+  const body = { status };
+  if (status === "contacted") body.contacted_at = new Date().toISOString();
+  fetch(`${API}/prospects/${id}`, { method: "PUT", headers: {"Content-Type":"application/json"}, body: JSON.stringify(body) });
+
+  setTimeout(() => renderDeck(), 320);
+}
+
+function skipCard() {
+  if (currentIdx >= cards.length) return;
+  // Move current card to end
+  cards.push(cards.splice(currentIdx, 1)[0]);
+  renderDeck();
+}
+
+async function undoLast() {
+  if (!history.length) return;
+  const last = history.pop();
+  currentIdx--;
+  // Restore status
+  fetch(`${API}/prospects/${last.id}`, { method: "PUT", headers: {"Content-Type":"application/json"}, body: JSON.stringify({ status: last.prevStatus }) });
+  renderDeck();
+}
+
+// ── KEYBOARD ──────────────────────────────────────────────────────────
+document.addEventListener("keydown", e => {
+  if (e.key === "ArrowLeft")  swipeCard("left");
+  if (e.key === "ArrowRight") swipeCard("right");
+  if (e.key === "ArrowDown")  skipCard();
+  if (e.key === "z" || e.key === "Z") undoLast();
+});
+</script>
+</body>
+</html>
