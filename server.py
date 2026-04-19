@@ -1,4 +1,5 @@
 import http.server
+import argparse
 import json
 import sqlite3
 import subprocess
@@ -11,7 +12,10 @@ import uuid
 from urllib.parse import urlparse, parse_qs
 
 DB_PATH = "prospects.db"
-PORT = 8000
+DEFAULT_HOST = os.environ.get("GMAPPROSPECT_HOST", "127.0.0.1")
+DEFAULT_PORT = int(os.environ.get("GMAPPROSPECT_PORT", "8000"))
+MAX_SCRAPE_TOTAL = 100
+MAX_PAGE_SIZE = 100
 
 
 def get_db():
@@ -96,6 +100,18 @@ def init_db():
 scrape_status = {"running": False, "log": [], "error": None}
 
 
+def parse_int(value, default, *, minimum=None, maximum=None):
+    try:
+        parsed = int(value)
+    except (TypeError, ValueError):
+        parsed = default
+    if minimum is not None:
+        parsed = max(minimum, parsed)
+    if maximum is not None:
+        parsed = min(maximum, parsed)
+    return parsed
+
+
 def run_scrape(search, total):
     scrape_status["running"] = True
     scrape_status["log"] = []
@@ -157,7 +173,6 @@ class Handler(http.server.BaseHTTPRequestHandler):
         self.send_response(status)
         self.send_header("Content-Type", "application/json")
         self.send_header("Content-Length", len(body))
-        self.send_header("Access-Control-Allow-Origin", "*")
         self.end_headers()
         self.wfile.write(body)
 
@@ -175,9 +190,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
 
     def do_OPTIONS(self):
         self.send_response(204)
-        self.send_header("Access-Control-Allow-Origin", "*")
-        self.send_header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        self.send_header("Allow", "GET, POST, PUT, OPTIONS")
         self.end_headers()
 
     def do_GET(self):
@@ -194,8 +207,8 @@ class Handler(http.server.BaseHTTPRequestHandler):
             query_filter = qs.get("query", [None])[0]
             search_filter = qs.get("search", [None])[0]
             sort = qs.get("sort", ["scraped_at"])[0]
-            page = int(qs.get("page", [1])[0])
-            per_page = int(qs.get("per_page", [24])[0])
+            page = parse_int(qs.get("page", [1])[0], 1, minimum=1)
+            per_page = parse_int(qs.get("per_page", [24])[0], 24, minimum=1, maximum=MAX_PAGE_SIZE)
 
             sql = "SELECT * FROM prospects WHERE 1=1"
             params = []
@@ -236,8 +249,8 @@ class Handler(http.server.BaseHTTPRequestHandler):
             conn = get_db()
             query_filter = qs.get("query", [None])[0]
             search_filter = qs.get("search", [None])[0]
-            page = int(qs.get("page", [1])[0])
-            per_page = int(qs.get("per_page", [20])[0])
+            page = parse_int(qs.get("page", [1])[0], 1, minimum=1)
+            per_page = parse_int(qs.get("per_page", [20])[0], 20, minimum=1, maximum=MAX_PAGE_SIZE)
 
             sql = "SELECT * FROM call_history WHERE 1=1"
             params = []
@@ -313,7 +326,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
 
         if path == "/api/scrape":
             search = body.get("search", "").strip()
-            total = int(body.get("total", 10))
+            total = parse_int(body.get("total", 10), 10, minimum=1, maximum=MAX_SCRAPE_TOTAL)
             if not search:
                 self.send_json({"error": "search is required"}, 400)
                 return
@@ -397,9 +410,15 @@ class Handler(http.server.BaseHTTPRequestHandler):
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--host", default=DEFAULT_HOST, help="Host interface to bind the local server to")
+    parser.add_argument("--port", type=int, default=DEFAULT_PORT, help="Port to bind the local server to")
+    args = parser.parse_args()
+
     init_db()
-    server = http.server.HTTPServer(("", PORT), Handler)
-    print(f"GMapProspect running → http://localhost:{PORT}")
+    server = http.server.HTTPServer((args.host, args.port), Handler)
+    display_host = "localhost" if args.host == "127.0.0.1" else args.host
+    print(f"GMapProspect running → http://{display_host}:{args.port}")
     try:
         server.serve_forever()
     except KeyboardInterrupt:
