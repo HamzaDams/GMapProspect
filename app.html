@@ -1,0 +1,2168 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GMapProspect</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+    :root, [data-theme="dark"] {
+      --bg: hsl(0 0% 4%);
+      --surface: hsl(0 0% 9%);
+      --surface-2: hsl(0 0% 12%);
+      --border: hsl(0 0% 16%);
+      --border-subtle: hsl(0 0% 13%);
+      --ring: hsl(0 0% 20%);
+      --text: hsl(0 0% 93%);
+      --text-secondary: hsl(0 0% 64%);
+      --muted: hsl(0 0% 45%);
+      --accent: hsl(217 91% 60%);
+      --accent-muted: hsl(217 91% 60% / 0.15);
+      --green: hsl(142 71% 45%);
+      --green-muted: hsl(142 71% 45% / 0.15);
+      --red: hsl(0 84% 60%);
+      --red-muted: hsl(0 84% 60% / 0.15);
+      --yellow: hsl(48 96% 53%);
+      --yellow-muted: hsl(48 96% 53% / 0.12);
+      --purple: hsl(271 81% 56%);
+      --overlay-backdrop: hsl(0 0% 4% / 0.95);
+      --overlay-glow: hsl(217 91% 60% / 0.08);
+      --radius: 8px;
+      --radius-lg: 12px;
+      --sidebar-w: 240px;
+    }
+
+    [data-theme="light"] {
+      --bg: hsl(0 0% 100%);
+      --surface: hsl(0 0% 98%);
+      --surface-2: hsl(0 0% 95%);
+      --border: hsl(0 0% 90%);
+      --border-subtle: hsl(0 0% 92%);
+      --ring: hsl(0 0% 80%);
+      --text: hsl(0 0% 9%);
+      --text-secondary: hsl(0 0% 45%);
+      --muted: hsl(0 0% 55%);
+      --accent: hsl(217 91% 50%);
+      --accent-muted: hsl(217 91% 50% / 0.1);
+      --green: hsl(142 71% 35%);
+      --green-muted: hsl(142 71% 35% / 0.1);
+      --red: hsl(0 84% 50%);
+      --red-muted: hsl(0 84% 50% / 0.1);
+      --yellow: hsl(48 96% 43%);
+      --yellow-muted: hsl(48 96% 43% / 0.08);
+      --purple: hsl(271 81% 46%);
+      --overlay-backdrop: hsl(0 0% 100% / 0.88);
+      --overlay-glow: hsl(217 91% 50% / 0.12);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── LAYOUT ──────────────────────────────────────── */
+    .app {
+      display: grid;
+      grid-template-columns: var(--sidebar-w) 1fr;
+      min-height: 100vh;
+    }
+
+    /* ── SIDEBAR ─────────────────────────────────────── */
+    .sidebar {
+      border-right: 1px solid var(--border);
+      background: var(--surface);
+      display: flex;
+      flex-direction: column;
+      padding: 16px 12px;
+      gap: 2px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+    }
+
+    .sidebar-brand {
+      padding: 8px 12px 20px;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .sidebar-brand span { color: var(--accent); }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: var(--radius);
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      cursor: pointer;
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+      transition: background 0.15s, color 0.15s;
+      text-decoration: none;
+    }
+
+    .nav-item:hover { background: var(--surface-2); color: var(--text); }
+    .nav-item.active { background: var(--surface-2); color: var(--text); }
+
+    .nav-icon {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+      opacity: 0.7;
+    }
+
+    .nav-item.active .nav-icon { opacity: 1; }
+
+    .nav-separator {
+      height: 1px;
+      background: var(--border);
+      margin: 8px 12px;
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding: 12px;
+    }
+
+    .sidebar-footer button {
+      width: 100%;
+      padding: 8px 12px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 13px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .sidebar-footer button:hover { background: var(--surface-2); color: var(--text); }
+
+    /* theme toggle */
+    .theme-toggle {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: var(--radius);
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      cursor: pointer;
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+      transition: background 0.15s, color 0.15s;
+      font-family: inherit;
+    }
+
+    .theme-toggle:hover { background: var(--surface-2); color: var(--text); }
+
+    .theme-toggle .toggle-icon { width: 18px; height: 18px; flex-shrink: 0; opacity: 0.7; }
+
+    /* ── MAIN AREA ───────────────────────────────────── */
+    .main { overflow-y: auto; }
+
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* ── SHARED COMPONENTS ───────────────────────────── */
+    .page-header {
+      padding: 24px 32px 0;
+    }
+
+    .page-title {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+    }
+
+    .page-desc {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+
+    .page-body { padding: 20px 32px 32px; }
+
+    /* inputs */
+    .input, .select {
+      padding: 8px 12px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-size: 14px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .input:focus, .select:focus { border-color: var(--ring); }
+    .input::placeholder { color: var(--muted); }
+
+    /* buttons */
+    .btn {
+      padding: 8px 16px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn:hover { background: var(--surface-2); border-color: var(--ring); }
+    .btn:disabled { opacity: 0.5; cursor: default; }
+
+    .btn-primary {
+      background: var(--text);
+      color: var(--bg);
+      border-color: var(--text);
+    }
+
+    .btn-primary:hover { background: hsl(0 0% 85%); border-color: hsl(0 0% 85%); }
+
+    .btn-danger {
+      background: var(--red);
+      color: white;
+      border-color: var(--red);
+    }
+
+    .btn-danger:hover { background: hsl(0 84% 50%); }
+
+    .btn-sm { padding: 5px 10px; font-size: 13px; }
+
+    /* badges */
+    .badge {
+      font-size: 12px;
+      font-weight: 500;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      white-space: nowrap;
+    }
+
+    .badge-to_contact { background: var(--accent-muted); color: var(--accent); }
+    .badge-contacted { background: var(--yellow-muted); color: var(--yellow); }
+    .badge-interested { background: var(--green-muted); color: var(--green); }
+    .badge-not_interested { background: var(--red-muted); color: var(--red); }
+
+    /* stats row */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .stat-value {
+      font-size: 28px;
+      font-weight: 700;
+      margin-top: 4px;
+      letter-spacing: -0.02em;
+    }
+
+    /* toolbar */
+    .toolbar {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    .toolbar .input { flex: 1; min-width: 200px; }
+
+    /* table-like grid */
+    .data-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 12px;
+    }
+
+    /* card */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .card-name {
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 1.4;
+    }
+
+    .card-type {
+      font-size: 12px;
+      color: var(--purple);
+      font-weight: 500;
+    }
+
+    .card-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .card-meta a { color: var(--accent); text-decoration: none; }
+    .card-meta a:hover { text-decoration: underline; }
+
+    .card-reviews { font-size: 12px; color: var(--text-secondary); }
+    .card-reviews b { color: var(--yellow); }
+
+    .social-links { display: flex; gap: 4px; flex-wrap: wrap; }
+
+    .social-link {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: var(--radius);
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+
+    .social-link:hover { color: var(--text); }
+
+    .card-actions { display: flex; gap: 4px; flex-wrap: wrap; }
+
+    .status-btn {
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: var(--radius);
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-secondary);
+      font-family: inherit;
+      transition: all 0.15s;
+    }
+
+    .status-btn:hover { border-color: var(--ring); }
+    .status-btn.active-to_contact { background: var(--accent-muted); border-color: var(--accent); color: var(--accent); }
+    .status-btn.active-contacted { background: var(--yellow-muted); border-color: var(--yellow); color: var(--yellow); }
+    .status-btn.active-interested { background: var(--green-muted); border-color: var(--green); color: var(--green); }
+    .status-btn.active-not_interested { background: var(--red-muted); border-color: var(--red); color: var(--red); }
+
+    .notes-area {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-size: 13px;
+      padding: 8px 12px;
+      resize: vertical;
+      min-height: 52px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .notes-area:focus { border-color: var(--ring); }
+
+    .card-query {
+      font-size: 11px;
+      color: var(--muted);
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 8px;
+    }
+
+    /* pagination */
+    .pagination {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      padding: 20px 0;
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+
+    /* scrape bar */
+    .scrape-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      margin-bottom: 20px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .scrape-section .input { flex: 1; min-width: 200px; }
+
+    .scrape-section input[type="number"] {
+      width: 80px;
+      padding: 8px 12px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-size: 14px;
+      font-family: inherit;
+      outline: none;
+    }
+
+    .log-box {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 12px;
+      color: var(--green);
+      max-height: 120px;
+      overflow-y: auto;
+      margin-bottom: 20px;
+      display: none;
+    }
+
+    .log-box.visible { display: block; }
+    .log-line { line-height: 1.6; }
+
+    /* empty state */
+    .empty-state {
+      text-align: center;
+      padding: 60px 24px;
+      color: var(--text-secondary);
+    }
+
+    .empty-state h3 {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    .empty-state p { font-size: 14px; line-height: 1.7; }
+
+    .empty-state code {
+      background: var(--surface-2);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 13px;
+      color: var(--accent);
+    }
+
+    /* spinner */
+    .spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid var(--border);
+      border-top-color: var(--text);
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      vertical-align: middle;
+      margin-right: 4px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── SWIPE PAGE ──────────────────────────────────── */
+    .page-swipe {
+      height: 100vh;
+      display: none;
+      flex-direction: column;
+    }
+
+    .page-swipe.active { display: flex; }
+
+    .swipe-filter-bar {
+      display: flex;
+      gap: 8px;
+      padding: 16px 32px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .deck-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      padding: 20px;
+      overflow: hidden;
+    }
+
+    .hint-left, .hint-right {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      opacity: 0;
+      transition: opacity 0.1s;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    .hint-left { left: 24px; color: var(--red); }
+    .hint-right { right: 24px; color: var(--green); }
+
+    .deck {
+      position: relative;
+      width: 100%;
+      max-width: 380px;
+      height: 100%;
+      max-height: 500px;
+    }
+
+    .swipe-card {
+      position: absolute;
+      inset: 0;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      cursor: grab;
+      touch-action: none;
+      transition: transform 0.08s ease;
+      will-change: transform;
+      overflow-y: auto;
+    }
+
+    .swipe-card:active { cursor: grabbing; }
+    .swipe-card:nth-child(2) { transform: scale(0.97) translateY(8px); z-index: 1; }
+    .swipe-card:nth-child(3) { transform: scale(0.94) translateY(16px); z-index: 0; }
+    .swipe-card:nth-child(n+4) { display: none; }
+    .swipe-card.top { z-index: 2; }
+
+    .swipe-overlay {
+      position: absolute;
+      inset: 0;
+      border-radius: var(--radius-lg);
+      pointer-events: none;
+      opacity: 0;
+    }
+
+    .swipe-overlay.left { background: linear-gradient(135deg, hsl(0 84% 60% / 0.2), transparent); }
+    .swipe-overlay.right { background: linear-gradient(225deg, hsl(142 71% 45% / 0.2), transparent); }
+
+    .stamp {
+      position: absolute;
+      top: 24px;
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      padding: 4px 12px;
+      border-radius: var(--radius);
+      border: 2px solid;
+      opacity: 0;
+      pointer-events: none;
+      transform: rotate(-15deg);
+    }
+
+    .stamp.nope { left: 20px; color: var(--red); border-color: var(--red); }
+    .stamp.yep { right: 20px; color: var(--green); border-color: var(--green); transform: rotate(15deg); }
+
+    .swipe-card-name { font-size: 20px; font-weight: 700; letter-spacing: -0.02em; }
+    .swipe-card-type { font-size: 13px; color: var(--purple); font-weight: 500; }
+
+    .swipe-rating {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+    }
+
+    .swipe-rating .stars { color: var(--yellow); }
+    .swipe-rating .count { color: var(--text-secondary); font-size: 13px; }
+
+    .swipe-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .swipe-info a { color: var(--accent); text-decoration: none; }
+
+    .swipe-socials { display: flex; gap: 6px; flex-wrap: wrap; }
+
+    .swipe-pill {
+      font-size: 11px;
+      padding: 3px 10px;
+      border-radius: var(--radius);
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      text-decoration: none;
+    }
+
+    .swipe-about {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 10px;
+    }
+
+    .swipe-query {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: auto;
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 8px;
+    }
+
+    .swipe-actions {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 16px;
+      padding: 16px 20px;
+      flex-shrink: 0;
+    }
+
+    .btn-round {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      cursor: pointer;
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.15s, border-color 0.15s;
+    }
+
+    .btn-round:hover { transform: scale(1.1); border-color: var(--ring); }
+    .btn-round:active { transform: scale(0.95); }
+    .btn-round.nope { color: var(--red); }
+    .btn-round.skip { color: var(--text-secondary); width: 40px; height: 40px; font-size: 16px; }
+    .btn-round.yep { color: var(--green); }
+    .btn-round.undo { color: var(--yellow); width: 40px; height: 40px; font-size: 16px; }
+
+    .swipe-kbd-hint {
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+      padding: 0 0 12px;
+    }
+
+    .swipe-kbd-hint kbd {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1px 5px;
+      font-family: inherit;
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+
+    .done-screen {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      text-align: center;
+      padding: 40px;
+      flex: 1;
+    }
+
+    .done-screen.visible { display: flex; }
+    .done-screen h3 { font-size: 18px; font-weight: 600; }
+    .done-screen p { color: var(--text-secondary); font-size: 14px; }
+
+    /* ── PROSPECTION PAGE ────────────────────────────── */
+    .page-prospection.active {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      height: 100vh;
+    }
+
+    .prosp-sidebar {
+      border-right: 1px solid var(--border);
+      background: var(--surface);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 20px 16px;
+      overflow-y: auto;
+    }
+
+    .prosp-count-card {
+      background: var(--accent-muted);
+      border: 1px solid hsl(217 91% 60% / 0.2);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+    }
+
+    .prosp-count-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .prosp-count-value {
+      font-size: 32px;
+      font-weight: 700;
+      margin-top: 4px;
+      color: var(--accent);
+    }
+
+    .prosp-count-desc {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+
+    .prosp-filters { display: flex; flex-direction: column; gap: 8px; }
+    .prosp-filters .input, .prosp-filters .select { width: 100%; }
+
+    .lead-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      overflow-y: auto;
+      min-height: 0;
+    }
+
+    .lead-item {
+      width: 100%;
+      padding: 12px;
+      border-radius: var(--radius);
+      background: transparent;
+      border: 1px solid transparent;
+      cursor: pointer;
+      color: var(--text);
+      font-family: inherit;
+      text-align: left;
+      font-size: 14px;
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    .lead-item:hover { background: var(--surface-2); }
+    .lead-item.active { background: var(--surface-2); border-color: var(--border); }
+
+    .lead-name { font-weight: 600; font-size: 14px; }
+
+    .lead-meta {
+      margin-top: 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      color: var(--text-secondary);
+      font-size: 12px;
+    }
+
+    .lead-query { color: var(--accent); font-size: 11px; margin-top: 4px; }
+
+    .prosp-main {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      overflow-y: auto;
+    }
+
+    .prosp-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .prosp-topbar h2 {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .prosp-topbar p {
+      color: var(--text-secondary);
+      font-size: 13px;
+      margin-top: 2px;
+    }
+
+    .prosp-topbar kbd {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .detail-card {
+      flex: 1;
+      min-height: 0;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .detail-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .detail-name {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-top: 8px;
+    }
+
+    .detail-type {
+      font-size: 14px;
+      color: var(--purple);
+      font-weight: 500;
+      margin-top: 4px;
+    }
+
+    .detail-rating {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-top: 8px;
+    }
+
+    .detail-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      min-width: 200px;
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .info-tile {
+      background: var(--bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius);
+      padding: 14px;
+    }
+
+    .info-label {
+      font-size: 11px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-secondary);
+    }
+
+    .info-value {
+      margin-top: 6px;
+      font-size: 14px;
+      line-height: 1.5;
+      word-break: break-word;
+    }
+
+    .info-value a { color: var(--accent); text-decoration: none; }
+    .info-value a:hover { text-decoration: underline; }
+
+    .notes-section {
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 16px;
+    }
+
+    .notes-section h4 {
+      font-size: 12px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    .notes-section p {
+      line-height: 1.7;
+      white-space: pre-wrap;
+      color: var(--text);
+      font-size: 14px;
+    }
+
+    .prosp-empty {
+      flex: 1;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      color: var(--text-secondary);
+      border: 1px dashed var(--border);
+      border-radius: var(--radius-lg);
+      padding: 40px;
+    }
+
+    /* RIP clean code :) */
+    /* call overlay */
+    .call-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      display: none;
+      background:
+        radial-gradient(circle at top, var(--overlay-glow), transparent 40%),
+        var(--overlay-backdrop);
+      backdrop-filter: blur(8px);
+      padding: 24px;
+    }
+
+    .call-overlay.visible { display: block; }
+
+    .call-shell {
+      max-width: 960px;
+      height: 100%;
+      margin: 0 auto;
+      display: grid;
+      grid-template-rows: auto auto 1fr auto;
+      gap: 16px;
+    }
+
+    .call-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .call-title {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-secondary);
+    }
+
+    .call-name-display {
+      font-size: 28px;
+      font-weight: 700;
+      margin-top: 4px;
+      letter-spacing: -0.02em;
+    }
+
+    .call-timer {
+      font-size: 48px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      font-variant-numeric: tabular-nums;
+      color: var(--text);
+    }
+
+    .call-pills {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .call-pill {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 8px 12px;
+      background: var(--surface);
+      color: var(--text-secondary);
+      font-size: 13px;
+    }
+
+    .call-pill strong { color: var(--text); }
+
+    .call-body {
+      min-height: 0;
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 16px;
+    }
+
+    .call-lead-panel {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      overflow-y: auto;
+    }
+
+    .call-lead-header {
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .call-lead-kicker {
+      font-size: 11px;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .call-lead-name {
+      font-size: 18px;
+      font-weight: 700;
+      margin-top: 4px;
+    }
+
+    .call-lead-type { font-size: 13px; color: var(--purple); font-weight: 500; margin-top: 2px; }
+
+    .call-lead-field {
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius);
+      background: var(--bg);
+      padding: 10px 12px;
+    }
+
+    .call-lead-field-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-secondary);
+    }
+
+    .call-lead-field-value {
+      margin-top: 4px;
+      font-size: 13px;
+      line-height: 1.5;
+      word-break: break-word;
+    }
+
+    .call-lead-field-value a { color: var(--accent); text-decoration: none; }
+
+    .call-notes-area {
+      width: 100%;
+      resize: none;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+      color: var(--text);
+      padding: 20px;
+      font-family: inherit;
+      font-size: 15px;
+      line-height: 1.7;
+      outline: none;
+    }
+
+    .call-notes-area:focus { border-color: var(--ring); }
+
+    .call-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .call-hint { color: var(--text-secondary); font-size: 13px; }
+
+    /* ── HISTORY PAGE ────────────────────────────────── */
+    .history-list { display: grid; gap: 12px; }
+
+    .call-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .call-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .call-card-name {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    .call-card-meta {
+      margin-top: 4px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      color: var(--text-secondary);
+      font-size: 13px;
+    }
+
+    .chip {
+      font-size: 12px;
+      font-weight: 500;
+      padding: 4px 10px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+    }
+
+    .chip.time { color: var(--accent); }
+    .chip.date { color: var(--text-secondary); }
+
+    .call-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .info-box {
+      background: var(--bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius);
+      padding: 12px;
+    }
+
+    .notes-box {
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 12px;
+    }
+
+    .notes-box h4 {
+      font-size: 11px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+
+    .notes-box p {
+      line-height: 1.7;
+      white-space: pre-wrap;
+      font-size: 14px;
+    }
+
+    /* ── RESPONSIVE ──────────────────────────────────── */
+    @media (max-width: 768px) {
+      .app { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+      .page-body, .page-header { padding-left: 16px; padding-right: 16px; }
+      .detail-grid { grid-template-columns: 1fr; }
+      .call-body { grid-template-columns: 1fr; }
+      .call-grid { grid-template-columns: 1fr; }
+      .page-prospection.active { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="app">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">GMap<span>Prospect</span></div>
+
+    <button class="nav-item active" data-route="dashboard" onclick="navigate('dashboard')">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+      Dashboard
+    </button>
+
+    <button class="nav-item" data-route="swipe" onclick="navigate('swipe')">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M12 8v8M8 12h8"/></svg>
+      Swipe
+    </button>
+
+    <button class="nav-item" data-route="prospection" onclick="navigate('prospection')">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+      Prospection
+    </button>
+
+    <button class="nav-item" data-route="history" onclick="navigate('history')">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      Historique
+    </button>
+
+    <div class="nav-separator"></div>
+
+    <button class="theme-toggle" onclick="toggleTheme()">
+      <svg class="toggle-icon" id="theme-icon-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+      <svg class="toggle-icon" id="theme-icon-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+      <span id="theme-label">Mode clair</span>
+    </button>
+
+    <div class="sidebar-footer">
+      <button onclick="exportCSV()">Exporter CSV</button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- ─── DASHBOARD ─────────────────────────────── -->
+    <div class="page active" id="page-dashboard">
+      <div class="page-header">
+        <h1 class="page-title">Dashboard</h1>
+        <p class="page-desc">Vue d'ensemble de tes prospects</p>
+      </div>
+      <div class="page-body">
+        <div class="scrape-section">
+          <input type="text" class="input" id="scrape-query" placeholder="Ex: restaurants in Paris, plombiers Lyon..." />
+          <input type="number" id="scrape-total" value="10" min="1" max="200" />
+          <button class="btn btn-primary" id="scrape-btn" onclick="launchScrape()">Lancer le scraping</button>
+        </div>
+        <div class="log-box" id="log-box"></div>
+
+        <div class="stats-row">
+          <div class="stat-card"><div class="stat-label">Total</div><div class="stat-value" id="s-total" style="color:var(--accent)">--</div></div>
+          <div class="stat-card"><div class="stat-label">A contacter</div><div class="stat-value" id="s-to_contact">--</div></div>
+          <div class="stat-card"><div class="stat-label">Contactes</div><div class="stat-value" id="s-contacted" style="color:var(--yellow)">--</div></div>
+          <div class="stat-card"><div class="stat-label">Interesses</div><div class="stat-value" id="s-interested" style="color:var(--green)">--</div></div>
+          <div class="stat-card"><div class="stat-label">Pas interesses</div><div class="stat-value" id="s-not_interested" style="color:var(--red)">--</div></div>
+        </div>
+
+        <div class="toolbar">
+          <input type="text" class="input" id="filter-search" placeholder="Rechercher..." oninput="onFilter()" />
+          <select class="select" id="filter-status" onchange="onFilter()">
+            <option value="">Tous les statuts</option>
+            <option value="to_contact">A contacter</option>
+            <option value="contacted">Contacte</option>
+            <option value="interested">Interesse</option>
+            <option value="not_interested">Pas interesse</option>
+          </select>
+          <select class="select" id="filter-query" onchange="onFilter()">
+            <option value="">Toutes les recherches</option>
+          </select>
+          <select class="select" id="filter-sort" onchange="onFilter()">
+            <option value="scraped_at">Plus recents</option>
+            <option value="name">Nom A-Z</option>
+            <option value="reviews_count">Meilleures notes</option>
+          </select>
+        </div>
+
+        <div id="dashboard-content">
+          <div class="empty-state">
+            <div>
+              <h3>Aucun prospect</h3>
+              <p>Lance un scraping pour commencer.<br/><code>restaurants in Paris</code></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="pagination" id="pagination" style="display:none">
+          <button class="btn btn-sm" id="btn-prev" onclick="changePage(-1)">Prec.</button>
+          <span id="page-info"></span>
+          <button class="btn btn-sm" id="btn-next" onclick="changePage(1)">Suiv.</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── SWIPE ─────────────────────────────────── -->
+    <div class="page page-swipe" id="page-swipe">
+      <div class="swipe-filter-bar">
+        <select class="select" id="swipe-filter-status" onchange="swipeLoadCards()">
+          <option value="to_contact">A contacter</option>
+          <option value="">Tous</option>
+          <option value="contacted">Contactes</option>
+          <option value="interested">Interesses</option>
+          <option value="not_interested">Pas interesses</option>
+        </select>
+        <select class="select" id="swipe-filter-query" onchange="swipeLoadCards()">
+          <option value="">Toutes les recherches</option>
+        </select>
+        <span id="swipe-progress" style="margin-left:auto;font-size:13px;color:var(--text-secondary)"></span>
+      </div>
+
+      <div class="deck-wrapper" id="deck-wrapper">
+        <div class="hint-left" id="hint-left">Pas interesse</div>
+        <div class="hint-right" id="hint-right">Interesse</div>
+        <div class="deck" id="deck"></div>
+        <div class="done-screen" id="done-screen">
+          <h3>Termine !</h3>
+          <p>Tu as passe toutes les fiches.</p>
+          <button class="btn btn-primary" onclick="navigate('dashboard')">Retour au dashboard</button>
+        </div>
+      </div>
+
+      <div class="swipe-actions" id="swipe-actions">
+        <button class="btn-round undo" onclick="swipeUndo()" title="Annuler">&#x21A9;</button>
+        <button class="btn-round nope" onclick="swipeCard('left')" title="Pas interesse">&#x2715;</button>
+        <button class="btn-round skip" onclick="swipeSkip()" title="Passer">&#x2192;</button>
+        <button class="btn-round yep" onclick="swipeCard('right')" title="Interesse">&#x2605;</button>
+      </div>
+
+      <div class="swipe-kbd-hint">
+        <kbd>&larr;</kbd> Pas interesse &middot; <kbd>&rarr;</kbd> Interesse &middot; <kbd>&darr;</kbd> Passer &middot; <kbd>Z</kbd> Annuler
+      </div>
+    </div>
+
+    <!-- ─── PROSPECTION ───────────────────────────── -->
+    <div class="page page-prospection" id="page-prospection">
+      <aside class="prosp-sidebar">
+        <div class="prosp-count-card">
+          <div class="prosp-count-label">Pipeline Appels</div>
+          <div class="prosp-count-value" id="prosp-count">0</div>
+          <div class="prosp-count-desc">Fiches interessees, pretes a appeler.</div>
+        </div>
+
+        <div class="prosp-filters">
+          <input type="text" class="input" id="prosp-search" placeholder="Rechercher une fiche..." />
+          <select class="select" id="prosp-query-filter">
+            <option value="">Toutes les recherches</option>
+          </select>
+        </div>
+
+        <div class="lead-list" id="prosp-lead-list"></div>
+      </aside>
+
+      <div class="prosp-main">
+        <div class="prosp-topbar">
+          <div>
+            <h2>Prospection</h2>
+            <p>Prepare la fiche, puis lance l'appel avec <kbd>Espace</kbd></p>
+          </div>
+        </div>
+        <div class="detail-card" id="prosp-detail-card"></div>
+      </div>
+    </div>
+
+    <!-- ─── HISTORY ───────────────────────────────── -->
+    <div class="page" id="page-history">
+      <div class="page-header">
+        <h1 class="page-title">Historique des appels</h1>
+        <p class="page-desc">Chaque appel termine est enregistre ici.</p>
+      </div>
+      <div class="page-body">
+        <div class="stats-row" id="history-stats">
+          <div class="stat-card"><div class="stat-label">Appels passes</div><div class="stat-value" id="hs-total">--</div></div>
+          <div class="stat-card"><div class="stat-label">Duree moyenne</div><div class="stat-value" id="hs-avg">--</div></div>
+          <div class="stat-card"><div class="stat-label">Temps cumule</div><div class="stat-value" id="hs-cumul">--</div></div>
+          <div class="stat-card"><div class="stat-label">Top recherche</div><div class="stat-value" id="hs-top" style="font-size:16px">--</div></div>
+        </div>
+
+        <div class="toolbar">
+          <input type="text" class="input" id="history-search" placeholder="Rechercher un nom, telephone ou note..." />
+          <select class="select" id="history-query-filter">
+            <option value="">Toutes les recherches</option>
+          </select>
+        </div>
+
+        <div class="history-list" id="history-list"></div>
+
+        <div class="pagination" id="history-pagination" style="display:none">
+          <button class="btn btn-sm" id="history-btn-prev">Prec.</button>
+          <span id="history-page-info"></span>
+          <button class="btn btn-sm" id="history-btn-next">Suiv.</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- CALL OVERLAY -->
+<div class="call-overlay" id="call-overlay">
+  <div class="call-shell">
+    <div class="call-top">
+      <div>
+        <div class="call-title">Appel en cours</div>
+        <div class="call-name-display" id="call-name">--</div>
+      </div>
+      <div class="call-timer" id="call-timer">00:00</div>
+    </div>
+    <div class="call-pills" id="call-info"></div>
+    <div class="call-body">
+      <aside class="call-lead-panel" id="call-lead-card"></aside>
+      <textarea class="call-notes-area" id="call-notes" placeholder="Prise de note pendant l'appel..."></textarea>
+    </div>
+    <div class="call-footer">
+      <div class="call-hint">Mode focus : seules les notes et le bouton fin restent accessibles.</div>
+      <button class="btn btn-danger" id="hangup-btn">Couper l'appel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════════════════
+//  THEME
+// ════════════════════════════════════════════════════════════════════
+function getTheme() {
+  return localStorage.getItem("gmp-theme") || "dark";
+}
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute("data-theme", theme);
+  document.getElementById("theme-icon-dark").style.display = theme === "dark" ? "" : "none";
+  document.getElementById("theme-icon-light").style.display = theme === "light" ? "" : "none";
+  document.getElementById("theme-label").textContent = theme === "dark" ? "Mode clair" : "Mode sombre";
+}
+
+function toggleTheme() {
+  const next = getTheme() === "dark" ? "light" : "dark";
+  localStorage.setItem("gmp-theme", next);
+  applyTheme(next);
+}
+
+applyTheme(getTheme());
+
+// ════════════════════════════════════════════════════════════════════
+//  ROUTER
+// ════════════════════════════════════════════════════════════════════
+const API = "http://localhost:8000/api";
+const ROUTES = ["dashboard", "swipe", "prospection", "history"];
+
+function navigate(route) {
+  if (!ROUTES.includes(route)) route = "dashboard";
+  location.hash = "#/" + route;
+}
+
+function onRouteChange() {
+  const hash = location.hash.replace("#/", "") || "dashboard";
+  const route = ROUTES.includes(hash) ? hash : "dashboard";
+
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  document.getElementById("page-" + route).classList.add("active");
+
+  document.querySelectorAll(".nav-item[data-route]").forEach(n => {
+    n.classList.toggle("active", n.dataset.route === route);
+  });
+
+  if (route === "dashboard") { loadStats(); loadProspects(); }
+  if (route === "swipe") { swipeInit(); }
+  if (route === "prospection") { prospInit(); }
+  if (route === "history") { historyInit(); }
+}
+
+window.addEventListener("hashchange", onRouteChange);
+window.addEventListener("load", () => {
+  if (!location.hash) location.hash = "#/dashboard";
+  onRouteChange();
+});
+
+// ════════════════════════════════════════════════════════════════════
+//  SHARED
+// ════════════════════════════════════════════════════════════════════
+const STATUSES = {
+  to_contact:     { label: "A contacter",    cls: "badge-to_contact" },
+  contacted:      { label: "Contacte",       cls: "badge-contacted" },
+  interested:     { label: "Interesse",      cls: "badge-interested" },
+  not_interested: { label: "Pas interesse",  cls: "badge-not_interested" },
+};
+
+function escapeHtml(v) {
+  return String(v).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+}
+
+function formatDuration(s) {
+  s = Math.max(0, Number(s) || 0);
+  const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
+  if (h > 0) return `${h}h ${String(m).padStart(2,"0")}m`;
+  return `${String(m).padStart(2,"0")}:${String(sec).padStart(2,"0")}`;
+}
+
+function formatDate(v) {
+  return new Date(v).toLocaleString("fr-FR", { dateStyle: "medium", timeStyle: "short" });
+}
+
+function exportCSV() { window.location = `${API}/prospects/export`; }
+
+// ════════════════════════════════════════════════════════════════════
+//  DASHBOARD
+// ════════════════════════════════════════════════════════════════════
+let currentPage = 1, totalCount = 0;
+const PER_PAGE = 24;
+let filterTimeout = null, scrapePoller = null;
+
+async function loadStats() {
+  const r = await fetch(`${API}/prospects/stats`).catch(() => null);
+  if (!r) return;
+  const d = await r.json();
+  document.getElementById("s-total").textContent = d.total;
+  document.getElementById("s-to_contact").textContent = d.to_contact;
+  document.getElementById("s-contacted").textContent = d.contacted;
+  document.getElementById("s-interested").textContent = d.interested;
+  document.getElementById("s-not_interested").textContent = d.not_interested;
+
+  const sel = document.getElementById("filter-query");
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">Toutes les recherches</option>';
+  (d.queries || []).forEach(q => {
+    const o = document.createElement("option");
+    o.value = o.textContent = q;
+    if (q === cur) o.selected = true;
+    sel.appendChild(o);
+  });
+}
+
+async function loadProspects() {
+  const params = new URLSearchParams({ page: currentPage, per_page: PER_PAGE, sort: document.getElementById("filter-sort").value });
+  const s = document.getElementById("filter-search").value.trim();
+  const st = document.getElementById("filter-status").value;
+  const q = document.getElementById("filter-query").value;
+  if (s) params.set("search", s);
+  if (st) params.set("status", st);
+  if (q) params.set("query", q);
+
+  const r = await fetch(`${API}/prospects?${params}`).catch(() => null);
+  if (!r) {
+    document.getElementById("dashboard-content").innerHTML = '<div class="empty-state"><div><h3>Serveur inaccessible</h3><p>Lance : <code>python3 server.py</code></p></div></div>';
+    return;
+  }
+  const d = await r.json();
+  totalCount = d.total;
+  renderProspects(d.data);
+}
+
+function renderProspects(data) {
+  const el = document.getElementById("dashboard-content");
+  if (!data.length) {
+    el.innerHTML = `<div class="empty-state"><div><h3>${totalCount === 0 ? "Aucun prospect" : "Aucun resultat"}</h3><p>${totalCount === 0 ? "Lance un scraping pour commencer." : "Modifie les filtres."}</p></div></div>`;
+    document.getElementById("pagination").style.display = "none";
+    return;
+  }
+  const grid = document.createElement("div");
+  grid.className = "data-grid";
+  data.forEach(r => grid.appendChild(buildCard(r)));
+  el.innerHTML = "";
+  el.appendChild(grid);
+
+  const tp = Math.ceil(totalCount / PER_PAGE);
+  document.getElementById("pagination").style.display = tp > 1 ? "flex" : "none";
+  document.getElementById("page-info").textContent = `Page ${currentPage} / ${tp} — ${totalCount} prospects`;
+  document.getElementById("btn-prev").disabled = currentPage === 1;
+  document.getElementById("btn-next").disabled = currentPage === tp;
+}
+
+function buildCard(r) {
+  const card = document.createElement("div");
+  card.className = "card";
+  card.dataset.id = r.id;
+  const s = STATUSES[r.status] || STATUSES.to_contact;
+
+  const socials = [["website","Web"],["facebook","FB"],["instagram","IG"],["twitter","TW"],["tiktok","TK"],["linkedin","LI"]].filter(([k]) => r[k] && r[k] !== "Not Given");
+  const socialHtml = socials.length ? `<div class="social-links">${socials.map(([k,l]) => `<a class="social-link" href="${r[k]}" target="_blank">${l}</a>`).join("")}</div>` : "";
+  const reviewsHtml = r.reviews_average ? `<div class="card-reviews"><b>${r.reviews_average}</b>${r.reviews_count ? ` · ${Number(r.reviews_count).toLocaleString("fr")} avis` : ""}</div>` : "";
+  const statusBtns = Object.entries(STATUSES).map(([key, val]) =>
+    `<button class="status-btn ${r.status === key ? 'active-'+key : ''}" onclick="setStatus('${r.id}','${key}',this)">${val.label}</button>`
+  ).join("");
+
+  card.innerHTML = `
+    <div class="card-header">
+      <div class="card-name">${r.name || "—"}</div>
+      <span class="badge ${s.cls}">${s.label}</span>
+    </div>
+    ${r.place_type ? `<div class="card-type">${r.place_type}</div>` : ""}
+    <div class="card-meta">
+      ${r.address && r.address !== "Not Given" ? `<span>${r.address}</span>` : ""}
+      ${r.phone && r.phone !== "Not Given" ? `<span><a href="tel:${r.phone}">${r.phone}</a></span>` : ""}
+      ${r.opens_at && r.opens_at !== "Not Given" ? `<span>${r.opens_at}</span>` : ""}
+    </div>
+    ${reviewsHtml}
+    ${socialHtml}
+    <div class="card-actions">${statusBtns}</div>
+    <textarea class="notes-area" placeholder="Notes..." onchange="saveNote('${r.id}',this.value)">${(r.notes||"").replace(/</g,"&lt;")}</textarea>
+    <div class="card-query">${r.search_query || ""}</div>
+  `;
+  return card;
+}
+
+async function setStatus(id, status, btn) {
+  const body = { status };
+  if (status === "contacted") body.contacted_at = new Date().toISOString();
+  await fetch(`${API}/prospects/${id}`, { method: "PUT", headers: {"Content-Type":"application/json"}, body: JSON.stringify(body) });
+  const card = btn.closest(".card");
+  const s = STATUSES[status];
+  card.querySelector(".badge").className = `badge ${s.cls}`;
+  card.querySelector(".badge").textContent = s.label;
+  card.querySelectorAll(".status-btn").forEach(b => {
+    b.className = "status-btn";
+    if (b.textContent === s.label) b.classList.add("active-" + status);
+  });
+  loadStats();
+}
+
+async function saveNote(id, value) {
+  await fetch(`${API}/prospects/${id}`, { method: "PUT", headers: {"Content-Type":"application/json"}, body: JSON.stringify({ notes: value }) });
+}
+
+async function launchScrape() {
+  const search = document.getElementById("scrape-query").value.trim();
+  const total = parseInt(document.getElementById("scrape-total").value) || 10;
+  if (!search) { alert("Saisis une recherche."); return; }
+  const btn = document.getElementById("scrape-btn");
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Scraping...';
+  const r = await fetch(`${API}/scrape`, { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({ search, total }) });
+  const d = await r.json();
+  if (!r.ok) { alert(d.error); btn.disabled = false; btn.textContent = "Lancer le scraping"; return; }
+
+  const logBox = document.getElementById("log-box");
+  logBox.innerHTML = "";
+  logBox.classList.add("visible");
+  scrapePoller = setInterval(async () => {
+    const s = await fetch(`${API}/scrape/status`).then(r => r.json());
+    logBox.innerHTML = s.log.map(l => `<div class="log-line">${l}</div>`).join("");
+    logBox.scrollTop = logBox.scrollHeight;
+    if (!s.running) {
+      clearInterval(scrapePoller);
+      btn.disabled = false;
+      btn.textContent = "Lancer le scraping";
+      currentPage = 1;
+      loadStats();
+      loadProspects();
+    }
+  }, 800);
+}
+
+function onFilter() {
+  clearTimeout(filterTimeout);
+  filterTimeout = setTimeout(() => { currentPage = 1; loadProspects(); }, 300);
+}
+
+function changePage(dir) {
+  const tp = Math.ceil(totalCount / PER_PAGE);
+  currentPage = Math.max(1, Math.min(tp, currentPage + dir));
+  loadProspects();
+  document.querySelector(".main").scrollTo({ top: 0, behavior: "smooth" });
+}
+
+// ════════════════════════════════════════════════════════════════════
+//  SWIPE
+// ════════════════════════════════════════════════════════════════════
+let swipeCards = [], swipeHistory = [], swipeIdx = 0;
+
+async function swipeInit() {
+  const r = await fetch(`${API}/prospects/stats`).catch(() => null);
+  if (r) {
+    const d = await r.json();
+    const sel = document.getElementById("swipe-filter-query");
+    if (sel.options.length <= 1) {
+      (d.queries || []).forEach(q => {
+        const o = document.createElement("option");
+        o.value = o.textContent = q;
+        sel.appendChild(o);
+      });
+    }
+  }
+  swipeLoadCards();
+}
+
+async function swipeLoadCards() {
+  const status = document.getElementById("swipe-filter-status").value;
+  const query = document.getElementById("swipe-filter-query").value;
+  const params = new URLSearchParams({ per_page: 200 });
+  if (status) params.set("status", status);
+  if (query) params.set("query", query);
+  const r = await fetch(`${API}/prospects?${params}`).catch(() => null);
+  if (!r) return;
+  const d = await r.json();
+  swipeCards = d.data;
+  swipeHistory = [];
+  swipeIdx = 0;
+  swipeRender();
+}
+
+function swipeRender() {
+  const deck = document.getElementById("deck");
+  const done = document.getElementById("done-screen");
+  const actions = document.getElementById("swipe-actions");
+  const progress = document.getElementById("swipe-progress");
+  const remaining = swipeCards.slice(swipeIdx);
+
+  progress.textContent = remaining.length ? `${swipeIdx} / ${swipeCards.length}` : `${swipeCards.length} / ${swipeCards.length}`;
+
+  if (!remaining.length) {
+    deck.innerHTML = "";
+    done.classList.add("visible");
+    actions.style.display = "none";
+    return;
+  }
+
+  done.classList.remove("visible");
+  actions.style.display = "flex";
+  deck.innerHTML = "";
+
+  remaining.slice(0, 3).forEach((r, i) => {
+    const card = buildSwipeCard(r, i === 0);
+    deck.appendChild(card);
+  });
+
+  if (remaining.length > 0) initSwipeDrag(deck.querySelector(".swipe-card.top"));
+}
+
+function buildSwipeCard(r, isTop) {
+  const card = document.createElement("div");
+  card.className = `swipe-card${isTop ? " top" : ""}`;
+  card.dataset.id = r.id;
+
+  const socials = [["website","Site"],["facebook","FB"],["instagram","IG"],["twitter","TW"],["tiktok","TK"],["linkedin","LI"]].filter(([k]) => r[k] && r[k] !== "Not Given");
+  const avg = parseFloat((r.reviews_average||"0").replace(",",".")) || 0;
+  const starsCount = Math.round(avg);
+
+  card.innerHTML = `
+    <div class="swipe-overlay left"></div>
+    <div class="swipe-overlay right"></div>
+    <span class="stamp nope">NOPE</span>
+    <span class="stamp yep">HOT</span>
+    <div class="swipe-card-name">${r.name || "—"}</div>
+    ${r.place_type ? `<div class="swipe-card-type">${r.place_type}</div>` : ""}
+    ${r.reviews_average ? `<div class="swipe-rating"><span class="stars">${"★".repeat(starsCount)}${"☆".repeat(5-starsCount)}</span> <span>${r.reviews_average}</span> ${r.reviews_count ? `<span class="count">(${Number(r.reviews_count).toLocaleString("fr")} avis)</span>` : ""}</div>` : ""}
+    <div class="swipe-info">
+      ${r.address && r.address !== "Not Given" ? `<span>${r.address}</span>` : ""}
+      ${r.phone && r.phone !== "Not Given" ? `<span><a href="tel:${r.phone}">${r.phone}</a></span>` : ""}
+      ${r.opens_at && r.opens_at !== "Not Given" ? `<span>${r.opens_at}</span>` : ""}
+    </div>
+    ${socials.length ? `<div class="swipe-socials">${socials.map(([k,l]) => `<a class="swipe-pill" href="${r[k]}" target="_blank">${l}</a>`).join("")}</div>` : ""}
+    ${r.about && r.about !== "Not Given" ? `<div class="swipe-about">${r.about}</div>` : ""}
+    <div class="swipe-query">${r.search_query || ""}</div>
+  `;
+  return card;
+}
+
+function initSwipeDrag(card) {
+  if (!card) return;
+  let startX, dx = 0, dragging = false;
+
+  const onStart = e => {
+    dragging = true;
+    startX = (e.touches ? e.touches[0] : e).clientX;
+    card.style.transition = "none";
+  };
+
+  const onMove = e => {
+    if (!dragging) return;
+    dx = (e.touches ? e.touches[0] : e).clientX - startX;
+    card.style.transform = `translate(${dx}px, 0) rotate(${dx * 0.06}deg)`;
+    const ratio = Math.min(Math.abs(dx) / 120, 1);
+    card.querySelector(".swipe-overlay.left").style.opacity = dx < 0 ? ratio : 0;
+    card.querySelector(".swipe-overlay.right").style.opacity = dx > 0 ? ratio : 0;
+    card.querySelector(".stamp.nope").style.opacity = dx < 0 ? ratio : 0;
+    card.querySelector(".stamp.yep").style.opacity = dx > 0 ? ratio : 0;
+    document.getElementById("hint-left").style.opacity = dx < 0 ? ratio : 0;
+    document.getElementById("hint-right").style.opacity = dx > 0 ? ratio : 0;
+    e.preventDefault();
+  };
+
+  const onEnd = () => {
+    if (!dragging) return;
+    dragging = false;
+    document.getElementById("hint-left").style.opacity = 0;
+    document.getElementById("hint-right").style.opacity = 0;
+    if (dx > 100) swipeCard("right");
+    else if (dx < -100) swipeCard("left");
+    else { card.style.transition = "transform 0.3s ease"; card.style.transform = ""; }
+  };
+
+  card.addEventListener("mousedown", onStart);
+  card.addEventListener("touchstart", onStart, { passive: false });
+  window.addEventListener("mousemove", onMove);
+  window.addEventListener("touchmove", onMove, { passive: false });
+  window.addEventListener("mouseup", onEnd);
+  window.addEventListener("touchend", onEnd);
+}
+
+async function swipeCard(direction) {
+  const deck = document.getElementById("deck");
+  const topCard = deck.querySelector(".swipe-card.top");
+  if (!topCard) return;
+  const id = topCard.dataset.id;
+  const status = direction === "right" ? "interested" : "not_interested";
+
+  topCard.style.transition = "transform 0.35s ease, opacity 0.35s ease";
+  topCard.style.transform = `translate(${direction === "right" ? 600 : -600}px, -40px) rotate(${direction === "right" ? 25 : -25}deg)`;
+  topCard.style.opacity = "0";
+
+  swipeHistory.push({ id, prevStatus: swipeCards[swipeIdx].status });
+  swipeIdx++;
+  fetch(`${API}/prospects/${id}`, { method: "PUT", headers: {"Content-Type":"application/json"}, body: JSON.stringify({ status }) });
+  setTimeout(() => swipeRender(), 320);
+}
+
+function swipeSkip() {
+  if (swipeIdx >= swipeCards.length) return;
+  swipeCards.push(swipeCards.splice(swipeIdx, 1)[0]);
+  swipeRender();
+}
+
+function swipeUndo() {
+  if (!swipeHistory.length) return;
+  const last = swipeHistory.pop();
+  swipeIdx--;
+  fetch(`${API}/prospects/${last.id}`, { method: "PUT", headers: {"Content-Type":"application/json"}, body: JSON.stringify({ status: last.prevStatus }) });
+  swipeRender();
+}
+
+document.addEventListener("keydown", e => {
+  const hash = location.hash.replace("#/", "");
+  if (hash !== "swipe") return;
+  if (e.key === "ArrowLeft") swipeCard("left");
+  if (e.key === "ArrowRight") swipeCard("right");
+  if (e.key === "ArrowDown") swipeSkip();
+  if (e.key === "z" || e.key === "Z") swipeUndo();
+});
+
+// ════════════════════════════════════════════════════════════════════
+//  PROSPECTION
+// ════════════════════════════════════════════════════════════════════
+let prospLeads = [], prospSelectedId = null, prospCallId = null, prospCallStart = null, prospCallTimer = null, prospNoteSaveTimer = null;
+
+async function prospInit() {
+  const r = await fetch(`${API}/prospects/stats`).catch(() => null);
+  if (r) {
+    const d = await r.json();
+    const sel = document.getElementById("prosp-query-filter");
+    if (sel.options.length <= 1) {
+      (d.queries || []).forEach(q => {
+        const o = document.createElement("option");
+        o.value = o.textContent = q;
+        sel.appendChild(o);
+      });
+    }
+  }
+  prospLoadLeads();
+
+  document.getElementById("prosp-search").oninput = prospRenderList;
+  document.getElementById("prosp-query-filter").onchange = prospLoadLeads;
+  document.getElementById("hangup-btn").onclick = prospFinishCall;
+  document.getElementById("call-notes").oninput = () => {
+    clearTimeout(prospNoteSaveTimer);
+    prospNoteSaveTimer = setTimeout(() => prospSaveNote(prospCallId, document.getElementById("call-notes").value), 300);
+  };
+}
+
+async function prospLoadLeads() {
+  const params = new URLSearchParams({ status: "interested", per_page: 200, sort: "scraped_at" });
+  const qf = document.getElementById("prosp-query-filter").value;
+  if (qf) params.set("query", qf);
+
+  const r = await fetch(`${API}/prospects?${params}`).catch(() => null);
+  if (!r) return;
+  const d = await r.json();
+  prospLeads = d.data || [];
+  document.getElementById("prosp-count").textContent = prospLeads.length;
+  if (!prospLeads.some(l => l.id === prospSelectedId)) prospSelectedId = prospLeads[0]?.id || null;
+  prospRenderList();
+  prospRenderDetail();
+}
+
+function prospGetFiltered() {
+  const s = document.getElementById("prosp-search").value.trim().toLowerCase();
+  if (!s) return prospLeads;
+  return prospLeads.filter(l => [l.name, l.phone, l.address, l.search_query, l.place_type].join(" ").toLowerCase().includes(s));
+}
+
+function prospRenderList() {
+  const leads = prospGetFiltered();
+  document.getElementById("prosp-count").textContent = leads.length;
+  if (!leads.some(l => l.id === prospSelectedId)) prospSelectedId = leads[0]?.id || null;
+
+  const el = document.getElementById("prosp-lead-list");
+  if (!leads.length) {
+    el.innerHTML = '<div style="padding:16px;text-align:center;color:var(--text-secondary);font-size:13px">Aucune fiche interessee.</div>';
+    prospRenderDetail();
+    return;
+  }
+
+  el.innerHTML = "";
+  leads.forEach(l => {
+    const item = document.createElement("button");
+    item.type = "button";
+    item.className = `lead-item${l.id === prospSelectedId ? " active" : ""}`;
+    item.innerHTML = `
+      <div class="lead-name">${escapeHtml(l.name || "—")}</div>
+      <div class="lead-meta">
+        ${l.phone && l.phone !== "Not Given" ? `<span>${escapeHtml(l.phone)}</span>` : ""}
+        ${l.address && l.address !== "Not Given" ? `<span>${escapeHtml(l.address)}</span>` : ""}
+      </div>
+      <div class="lead-query">${escapeHtml(l.search_query || "")}</div>
+    `;
+    item.onclick = () => {
+      if (document.body.classList.contains("call-active")) return;
+      prospSelectedId = l.id;
+      prospRenderList();
+      prospRenderDetail();
+    };
+    el.appendChild(item);
+  });
+  prospRenderDetail();
+}
+
+function prospRenderDetail() {
+  const lead = prospLeads.find(l => l.id === prospSelectedId);
+  const el = document.getElementById("prosp-detail-card");
+  if (!lead) { el.innerHTML = '<div class="prosp-empty">Aucune fiche interessee a appeler.</div>'; return; }
+
+  const webHtml = lead.website && lead.website !== "Not Given" ? `<a href="${lead.website}" target="_blank">${escapeHtml(lead.website)}</a>` : "Non renseigne";
+
+  el.innerHTML = `
+    <div class="detail-head">
+      <div>
+        <span class="badge badge-interested">Interesse</span>
+        <div class="detail-name">${escapeHtml(lead.name || "—")}</div>
+        ${lead.place_type ? `<div class="detail-type">${escapeHtml(lead.place_type)}</div>` : ""}
+        <div class="detail-rating">${lead.reviews_average ? `${escapeHtml(lead.reviews_average)}` : "Pas de note"} ${lead.reviews_count ? `· ${Number(lead.reviews_count).toLocaleString("fr")} avis` : ""}</div>
+      </div>
+      <div class="detail-actions">
+        <button class="btn btn-primary" id="start-call-btn" type="button">Lancer l'appel</button>
+        <button class="btn" id="refresh-list-btn" type="button">Rafraichir</button>
+      </div>
+    </div>
+    <div class="detail-grid">
+      <div class="info-tile"><div class="info-label">Telephone</div><div class="info-value">${lead.phone && lead.phone !== "Not Given" ? escapeHtml(lead.phone) : "Non renseigne"}</div></div>
+      <div class="info-tile"><div class="info-label">Site web</div><div class="info-value">${webHtml}</div></div>
+      <div class="info-tile"><div class="info-label">Adresse</div><div class="info-value">${lead.address && lead.address !== "Not Given" ? escapeHtml(lead.address) : "Non renseignee"}</div></div>
+      <div class="info-tile"><div class="info-label">Recherche source</div><div class="info-value">${escapeHtml(lead.search_query || "—")}</div></div>
+    </div>
+    <div class="notes-section">
+      <h4>Notes existantes</h4>
+      <p>${lead.notes ? escapeHtml(lead.notes) : "Aucune note."}</p>
+    </div>
+  `;
+
+  document.getElementById("start-call-btn").onclick = prospStartCall;
+  document.getElementById("refresh-list-btn").onclick = prospLoadLeads;
+}
+
+function prospStartCall() {
+  if (document.body.classList.contains("call-active")) return;
+  const lead = prospLeads.find(l => l.id === prospSelectedId);
+  if (!lead) return;
+
+  prospCallId = lead.id;
+  prospCallStart = Date.now();
+  document.getElementById("call-name").textContent = lead.name || "—";
+  document.getElementById("call-notes").value = lead.notes || "";
+  document.getElementById("call-info").innerHTML = `
+    ${lead.phone && lead.phone !== "Not Given" ? `<div class="call-pill"><strong>Tel</strong> ${escapeHtml(lead.phone)}</div>` : ""}
+    ${lead.address && lead.address !== "Not Given" ? `<div class="call-pill"><strong>Adr</strong> ${escapeHtml(lead.address)}</div>` : ""}
+    <div class="call-pill"><strong>Rech.</strong> ${escapeHtml(lead.search_query || "—")}</div>
+  `;
+  document.getElementById("call-lead-card").innerHTML = `
+    <div class="call-lead-header">
+      <div class="call-lead-kicker">Fiche en cours</div>
+      <div class="call-lead-name">${escapeHtml(lead.name || "—")}</div>
+      ${lead.place_type ? `<div class="call-lead-type">${escapeHtml(lead.place_type)}</div>` : ""}
+    </div>
+    <div class="call-lead-field"><div class="call-lead-field-label">Telephone</div><div class="call-lead-field-value">${lead.phone && lead.phone !== "Not Given" ? escapeHtml(lead.phone) : "N/A"}</div></div>
+    <div class="call-lead-field"><div class="call-lead-field-label">Adresse</div><div class="call-lead-field-value">${lead.address && lead.address !== "Not Given" ? escapeHtml(lead.address) : "N/A"}</div></div>
+    <div class="call-lead-field"><div class="call-lead-field-label">Site web</div><div class="call-lead-field-value">${lead.website && lead.website !== "Not Given" ? `<a href="${lead.website}" target="_blank">${escapeHtml(lead.website)}</a>` : "N/A"}</div></div>
+    <div class="call-lead-field"><div class="call-lead-field-label">Note Google</div><div class="call-lead-field-value">${lead.reviews_average ? `${escapeHtml(lead.reviews_average)}` : "Pas de note"} ${lead.reviews_count ? `· ${Number(lead.reviews_count).toLocaleString("fr")} avis` : ""}</div></div>
+  `;
+
+  document.body.classList.add("call-active");
+  document.getElementById("call-overlay").classList.add("visible");
+  prospCallTimer = setInterval(prospUpdateTimer, 1000);
+  prospUpdateTimer();
+  setTimeout(() => document.getElementById("call-notes").focus(), 60);
+}
+
+async function prospFinishCall() {
+  if (!prospCallId) return;
+  const endedAt = new Date().toISOString();
+  const dur = Math.max(0, Math.floor((Date.now() - prospCallStart) / 1000));
+  clearInterval(prospCallTimer);
+  clearTimeout(prospNoteSaveTimer);
+
+  await fetch(`${API}/calls`, {
+    method: "POST", headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({ prospect_id: prospCallId, started_at: new Date(prospCallStart).toISOString(), ended_at: endedAt, duration_seconds: dur, notes: document.getElementById("call-notes").value })
+  });
+
+  const lead = prospLeads.find(l => l.id === prospCallId);
+  if (lead) { lead.status = "contacted"; lead.notes = document.getElementById("call-notes").value; }
+
+  const finId = prospCallId;
+  prospCallId = null;
+  prospCallStart = null;
+  document.getElementById("call-timer").textContent = "00:00";
+  document.getElementById("call-overlay").classList.remove("visible");
+  document.body.classList.remove("call-active");
+
+  prospLeads = prospLeads.filter(l => l.id !== finId);
+  if (prospSelectedId === finId) prospSelectedId = prospLeads[0]?.id || null;
+  prospRenderList();
+  prospRenderDetail();
+}
+
+function prospUpdateTimer() {
+  if (!prospCallStart) return;
+  const s = Math.max(0, Math.floor((Date.now() - prospCallStart) / 1000));
+  document.getElementById("call-timer").textContent = `${String(Math.floor(s/60)).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`;
+}
+
+async function prospSaveNote(id, notes) {
+  if (!id) return;
+  await fetch(`${API}/prospects/${id}`, { method: "PUT", headers: {"Content-Type":"application/json"}, body: JSON.stringify({ notes }) });
+  const lead = prospLeads.find(l => l.id === id);
+  if (lead) lead.notes = notes;
+}
+
+document.addEventListener("keydown", e => {
+  if (e.code !== "Space") return;
+  const hash = location.hash.replace("#/", "");
+  if (hash !== "prospection") return;
+  if (document.body.classList.contains("call-active")) {
+    if (e.target === document.getElementById("call-notes")) return;
+    e.preventDefault(); return;
+  }
+  if (["INPUT","TEXTAREA","SELECT","BUTTON"].includes(e.target.tagName)) return;
+  e.preventDefault();
+  prospStartCall();
+});
+
+// ════════════════════════════════════════════════════════════════════
+//  HISTORY
+// ════════════════════════════════════════════════════════════════════
+let historyPage = 1, historyTotal = 0;
+const HISTORY_PP = 20;
+let historyFilterTimer = null;
+
+async function historyInit() {
+  await historyLoadStats();
+  historyLoadList();
+
+  document.getElementById("history-search").oninput = () => {
+    clearTimeout(historyFilterTimer);
+    historyFilterTimer = setTimeout(() => { historyPage = 1; historyLoadList(); }, 250);
+  };
+  document.getElementById("history-query-filter").onchange = () => { historyPage = 1; historyLoadList(); };
+  document.getElementById("history-btn-prev").onclick = () => historyChangePage(-1);
+  document.getElementById("history-btn-next").onclick = () => historyChangePage(1);
+}
+
+async function historyLoadStats() {
+  const r = await fetch(`${API}/calls/stats`).catch(() => null);
+  if (!r) return;
+  const d = await r.json();
+  document.getElementById("hs-total").textContent = d.total_calls ?? 0;
+  document.getElementById("hs-avg").textContent = formatDuration(Math.round(d.average_duration_seconds || 0));
+  document.getElementById("hs-cumul").textContent = formatDuration(d.total_duration_seconds || 0);
+
+  const top = (d.by_query || [])[0];
+  document.getElementById("hs-top").textContent = top ? top.search_query : "—";
+
+  const sel = document.getElementById("history-query-filter");
+  if (sel.options.length <= 1) {
+    (d.queries || []).forEach(q => {
+      const o = document.createElement("option");
+      o.value = o.textContent = q;
+      sel.appendChild(o);
+    });
+  }
+}
+
+async function historyLoadList() {
+  const params = new URLSearchParams({ page: historyPage, per_page: HISTORY_PP });
+  const qf = document.getElementById("history-query-filter").value;
+  const sf = document.getElementById("history-search").value.trim();
+  if (qf) params.set("query", qf);
+  if (sf) params.set("search", sf);
+
+  const r = await fetch(`${API}/calls?${params}`).catch(() => null);
+  if (!r) { document.getElementById("history-list").innerHTML = '<div class="empty-state"><div><h3>Serveur inaccessible</h3></div></div>'; return; }
+  const d = await r.json();
+  historyTotal = d.total || 0;
+  historyRender(d.data || []);
+  historyRenderPagination();
+}
+
+function historyRender(items) {
+  const el = document.getElementById("history-list");
+  if (!items.length) { el.innerHTML = '<div class="empty-state"><div><h3>Aucun appel</h3><p>Les appels termines apparaitront ici.</p></div></div>'; return; }
+
+  el.innerHTML = items.map(i => `
+    <article class="call-card">
+      <div class="call-head">
+        <div>
+          <div class="call-card-name">${escapeHtml(i.prospect_name || "—")}</div>
+          <div class="call-card-meta">
+            ${i.phone ? `<span>${escapeHtml(i.phone)}</span>` : ""}
+            ${i.search_query ? `<span>${escapeHtml(i.search_query)}</span>` : ""}
+          </div>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <span class="chip time">${formatDuration(i.duration_seconds || 0)}</span>
+          <span class="chip date">${i.ended_at ? formatDate(i.ended_at) : "—"}</span>
+        </div>
+      </div>
+      <div class="call-grid">
+        <div class="info-box"><div class="info-label">Debut</div><div class="info-value">${i.started_at ? formatDate(i.started_at) : "—"}</div></div>
+        <div class="info-box"><div class="info-label">Fin</div><div class="info-value">${i.ended_at ? formatDate(i.ended_at) : "—"}</div></div>
+        <div class="info-box"><div class="info-label">Duree</div><div class="info-value">${formatDuration(i.duration_seconds || 0)}</div></div>
+      </div>
+      <div class="notes-box">
+        <h4>Notes</h4>
+        <p>${i.notes ? escapeHtml(i.notes) : "Aucune note."}</p>
+      </div>
+    </article>
+  `).join("");
+}
+
+function historyRenderPagination() {
+  const tp = Math.max(1, Math.ceil(historyTotal / HISTORY_PP));
+  const el = document.getElementById("history-pagination");
+  el.style.display = historyTotal > HISTORY_PP ? "flex" : "none";
+  document.getElementById("history-page-info").textContent = `Page ${historyPage} / ${tp} — ${historyTotal} appel(s)`;
+  document.getElementById("history-btn-prev").disabled = historyPage <= 1;
+  document.getElementById("history-btn-next").disabled = historyPage >= tp;
+}
+
+function historyChangePage(dir) {
+  const tp = Math.max(1, Math.ceil(historyTotal / HISTORY_PP));
+  historyPage = Math.max(1, Math.min(tp, historyPage + dir));
+  historyLoadList();
+  document.querySelector(".main").scrollTo({ top: 0, behavior: "smooth" });
+}
+</script>
+</body>
+</html>
