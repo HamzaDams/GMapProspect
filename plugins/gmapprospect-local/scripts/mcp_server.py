@@ -5,6 +5,7 @@ import sys
 import time
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlparse
 
 import httpx
 from fastmcp import FastMCP
@@ -33,12 +34,32 @@ def _healthcheck() -> bool:
         return False
 
 
+def _server_bind_args() -> tuple[str, int]:
+    parsed = urlparse(BASE_URL)
+    host = parsed.hostname or "127.0.0.1"
+    if parsed.port is not None:
+        port = parsed.port
+    elif parsed.scheme == "https":
+        port = 443
+    else:
+        port = 80
+    return host, port
+
+
 def _start_backend() -> None:
     log_path = REPO_ROOT / ".claude" / "gmapprospect-server.log"
     log_path.parent.mkdir(parents=True, exist_ok=True)
+    host, port = _server_bind_args()
     with log_path.open("ab") as log_file:
         subprocess.Popen(
-            [sys.executable, str(REPO_ROOT / "server.py")],
+            [
+                sys.executable,
+                str(REPO_ROOT / "server.py"),
+                "--host",
+                host,
+                "--port",
+                str(port),
+            ],
             cwd=REPO_ROOT,
             stdout=log_file,
             stderr=subprocess.STDOUT,
