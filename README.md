@@ -9,6 +9,22 @@ The project runs **on the user's machine**.
 - work leads from a dashboard, swipe flow, or call flow
 - track call history, notes, and durations
 
+## Table of contents
+
+- [What the project does](#what-the-project-does)
+- [Stack](#stack)
+- [Installation](#installation)
+- [Quick start](#quick-start)
+- [Data flow](#data-flow)
+- [LLM integration](#llm-integration)
+- [Generated data](#generated-data)
+- [Recommended workflow](#recommended-workflow)
+- [Call history](#call-history)
+- [Important](#important)
+- [Useful commands](#useful-commands)
+- [Current limitations](#current-limitations)
+- [License](#license)
+
 ## What the project does
 
 - scrapes Google Maps leads from a search query

@@ -135,6 +135,38 @@ def parse_bool(value):
     return str(value).strip().lower() in {"1", "true", "yes", "on"}
 
 
+def delete_prospects_by_ids(conn, ids):
+    ids = [str(pid).strip() for pid in ids if str(pid).strip()]
+    if not ids:
+        return {"deleted_prospects": 0, "deleted_calls": 0}
+    placeholders = ",".join("?" for _ in ids)
+    deleted_calls = conn.execute(
+        f"DELETE FROM call_history WHERE prospect_id IN ({placeholders})",
+        ids,
+    ).rowcount
+    deleted_prospects = conn.execute(
+        f"DELETE FROM prospects WHERE id IN ({placeholders})",
+        ids,
+    ).rowcount
+    return {"deleted_prospects": deleted_prospects, "deleted_calls": deleted_calls}
+
+
+def delete_prospects_by_query(conn, query):
+    query = str(query or "").strip()
+    if not query:
+        return {"deleted_prospects": 0, "deleted_calls": 0}
+    ids = [row["id"] for row in conn.execute("SELECT id FROM prospects WHERE search_query=?", (query,)).fetchall()]
+    deleted_calls = conn.execute("DELETE FROM call_history WHERE search_query=?", (query,)).rowcount
+    if ids:
+        placeholders = ",".join("?" for _ in ids)
+        deleted_calls += conn.execute(
+            f"DELETE FROM call_history WHERE prospect_id IN ({placeholders})",
+            ids,
+        ).rowcount
+    deleted_prospects = conn.execute("DELETE FROM prospects WHERE search_query=?", (query,)).rowcount
+    return {"deleted_prospects": deleted_prospects, "deleted_calls": deleted_calls}
+
+
 def run_scrape(search, total):
     scrape_status["running"] = True
     scrape_status["log"] = []
@@ -214,7 +246,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
 
     def do_OPTIONS(self):
         self.send_response(204)
-        self.send_header("Allow", "GET, POST, PUT, OPTIONS")
+        self.send_header("Allow", "GET, POST, PUT, DELETE, OPTIONS")
         self.end_headers()
 
     def do_GET(self):
@@ -444,6 +476,47 @@ class Handler(http.server.BaseHTTPRequestHandler):
         else:
             self.send_response(404)
             self.end_headers()
+
+    def do_DELETE(self):
+        parsed = urlparse(self.path)
+        path = parsed.path
+        parts = path.strip("/").split("/")
+        length = int(self.headers.get("Content-Length", 0))
+        body = json.loads(self.rfile.read(length)) if length else {}
+
+        if len(parts) == 3 and parts[0] == "api" and parts[1] == "prospects":
+            pid = parts[2].strip()
+            if not pid:
+                self.send_json({"error": "prospect id is required"}, 400)
+                return
+            conn = get_db()
+            outcome = delete_prospects_by_ids(conn, [pid])
+            conn.commit()
+            conn.close()
+            self.send_json({"ok": True, "scope": "single", **outcome})
+            return
+
+        if path == "/api/prospects":
+            ids = body.get("ids") or []
+            query = body.get("query", "")
+            conn = get_db()
+            if ids:
+                outcome = delete_prospects_by_ids(conn, ids)
+                scope = "selection"
+            elif str(query).strip():
+                outcome = delete_prospects_by_query(conn, query)
+                scope = "query"
+            else:
+                conn.close()
+                self.send_json({"error": "ids or query is required"}, 400)
+                return
+            conn.commit()
+            conn.close()
+            self.send_json({"ok": True, "scope": scope, **outcome})
+            return
+
+        self.send_response(404)
+        self.end_headers()
 
 
 if __name__ == "__main__":
