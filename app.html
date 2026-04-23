@@ -1275,6 +1275,352 @@
       background: var(--surface);
     }
 
+    .opportunity-hero {
+      position: relative;
+      overflow: hidden;
+      display: grid;
+      gap: 18px;
+      padding: 22px;
+      margin-bottom: 18px;
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      background:
+        radial-gradient(circle at 8% 0%, var(--accent-muted), transparent 34%),
+        radial-gradient(circle at 92% 18%, var(--green-muted), transparent 30%),
+        linear-gradient(135deg, var(--surface), var(--bg));
+      box-shadow: 0 22px 55px hsl(0 0% 0% / 0.1);
+    }
+
+    .opportunity-hero::after {
+      content: "";
+      position: absolute;
+      right: -120px;
+      top: -120px;
+      width: 260px;
+      height: 260px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      opacity: 0.55;
+      pointer-events: none;
+    }
+
+    .opportunity-hero-head {
+      position: relative;
+      z-index: 1;
+      max-width: 720px;
+    }
+
+    .opportunity-kicker {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+
+    .opportunity-hero-title {
+      margin-top: 8px;
+      font-size: clamp(28px, 4vw, 44px);
+      font-weight: 850;
+      letter-spacing: -0.055em;
+      line-height: 0.95;
+    }
+
+    .opportunity-hero-copy {
+      margin-top: 10px;
+      color: var(--text-secondary);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    .opportunity-control-grid {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: minmax(220px, 1.25fr) minmax(220px, 1fr) 120px 140px;
+      gap: 10px;
+      align-items: end;
+    }
+
+    .opportunity-control {
+      display: grid;
+      gap: 7px;
+    }
+
+    .opportunity-control span {
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+    }
+
+    .opportunity-control .select {
+      width: 100%;
+      min-height: 48px;
+      border-radius: 15px;
+      background: color-mix(in srgb, var(--surface) 64%, var(--bg));
+      font-weight: 650;
+    }
+
+    .opportunity-scan-btn {
+      min-height: 48px;
+      justify-content: center;
+      border-radius: 15px;
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+      font-weight: 800;
+      box-shadow: 0 16px 34px var(--accent-muted);
+    }
+
+    .opportunity-stats {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(120px, 1fr));
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .opportunity-stat {
+      min-height: 96px;
+      padding: 14px;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: var(--surface);
+      display: grid;
+      align-content: space-between;
+      box-shadow: 0 12px 28px hsl(0 0% 0% / 0.05);
+    }
+
+    .opportunity-stat-label {
+      font-size: 11px;
+      font-weight: 750;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+    }
+
+    .opportunity-stat-value {
+      font-size: 30px;
+      font-weight: 850;
+      letter-spacing: -0.04em;
+      color: var(--text);
+    }
+
+    .opportunity-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .opportunity-card {
+      position: relative;
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: 148px minmax(0, 1fr);
+      gap: 16px;
+      padding: 16px;
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      background: var(--surface);
+      box-shadow: 0 14px 34px hsl(0 0% 0% / 0.06);
+      transition: transform 0.16s, border-color 0.16s, box-shadow 0.16s;
+    }
+
+    .opportunity-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--accent);
+      box-shadow: 0 24px 56px hsl(0 0% 0% / 0.1);
+    }
+
+    .opportunity-score-panel {
+      position: relative;
+      overflow: hidden;
+      display: grid;
+      align-content: space-between;
+      min-height: 190px;
+      padding: 16px;
+      border-radius: 20px;
+      border: 1px solid var(--border-subtle);
+      background:
+        linear-gradient(155deg, var(--text), color-mix(in srgb, var(--text) 84%, var(--accent))),
+        var(--text);
+      color: var(--bg);
+    }
+
+    .opportunity-score-panel::after {
+      content: "";
+      position: absolute;
+      width: 92px;
+      height: 92px;
+      right: -28px;
+      bottom: -28px;
+      border-radius: 999px;
+      background: hsl(0 0% 100% / 0.18);
+    }
+
+    .opportunity-score-label {
+      position: relative;
+      z-index: 1;
+      font-size: 10px;
+      font-weight: 850;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      opacity: 0.68;
+    }
+
+    .opportunity-score {
+      position: relative;
+      z-index: 1;
+      font-size: 56px;
+      font-weight: 900;
+      letter-spacing: -0.08em;
+      line-height: 0.9;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .opportunity-score span {
+      font-size: 17px;
+      letter-spacing: -0.03em;
+      opacity: 0.65;
+    }
+
+    .opportunity-grade {
+      position: relative;
+      z-index: 1;
+      width: max-content;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: hsl(0 0% 100% / 0.18);
+      font-size: 12px;
+      font-weight: 850;
+    }
+
+    .opportunity-main {
+      min-width: 0;
+      display: grid;
+      gap: 14px;
+    }
+
+    .opportunity-card-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-start;
+    }
+
+    .opportunity-name {
+      font-size: 20px;
+      font-weight: 850;
+      letter-spacing: -0.035em;
+      line-height: 1.15;
+    }
+
+    .opportunity-meta {
+      margin-top: 6px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      color: var(--text-secondary);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .opportunity-signals {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 6px;
+    }
+
+    .opportunity-signal {
+      padding: 5px 9px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text-secondary);
+      font-size: 11px;
+      font-weight: 750;
+    }
+
+    .opportunity-signal.hot {
+      background: var(--green-muted);
+      border-color: hsl(142 71% 45% / 0.25);
+      color: var(--green);
+    }
+
+    .opportunity-signal.warn {
+      background: var(--yellow-muted);
+      border-color: hsl(48 96% 53% / 0.25);
+      color: var(--yellow);
+    }
+
+    .opportunity-body-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 0.95fr) minmax(260px, 1.05fr);
+      gap: 12px;
+    }
+
+    .opportunity-reasons,
+    .opportunity-angle {
+      border: 1px solid var(--border-subtle);
+      border-radius: 18px;
+      background: var(--bg);
+      padding: 14px;
+    }
+
+    .opportunity-block-label {
+      font-size: 10px;
+      font-weight: 850;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      margin-bottom: 9px;
+    }
+
+    .opportunity-reasons ul {
+      display: grid;
+      gap: 8px;
+      list-style: none;
+    }
+
+    .opportunity-reasons li {
+      position: relative;
+      padding-left: 16px;
+      color: var(--text);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .opportunity-reasons li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0.62em;
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: var(--accent);
+    }
+
+    .opportunity-angle p {
+      color: var(--text);
+      font-size: 14px;
+      line-height: 1.65;
+    }
+
+    .opportunity-actions {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+      gap: 8px;
+    }
+
+    .opportunity-actions .btn {
+      justify-content: center;
+      min-height: 42px;
+      border-radius: 14px;
+      font-weight: 750;
+    }
+
     .lead-list {
       display: flex;
       flex-direction: column;
@@ -1850,6 +2196,14 @@
       .call-end-actions { grid-template-columns: 1fr; }
       .bulk-actions-meta { margin-left: 0; width: 100%; }
       .page-prospection.active, .services-layout { grid-template-columns: 1fr; }
+      .opportunity-control-grid,
+      .opportunity-stats,
+      .opportunity-card,
+      .opportunity-body-grid,
+      .opportunity-actions { grid-template-columns: 1fr; }
+      .opportunity-score-panel { min-height: 132px; }
+      .opportunity-card-head { flex-direction: column; }
+      .opportunity-signals { justify-content: flex-start; }
     }
   </style>
 </head>
@@ -1878,6 +2232,11 @@
     <button class="nav-item" data-route="services" onclick="navigate('services')">
       <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7h-9"/><path d="M14 17H5"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/></svg>
       Services
+    </button>
+
+    <button class="nav-item" data-route="opportunities" onclick="navigate('opportunities')">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><path d="M3 12h18"/><path d="M7 7l10 10"/><path d="M17 7L7 17"/></svg>
+      Opportunities
     </button>
 
     <button class="nav-item" data-route="history" onclick="navigate('history')">
@@ -2085,6 +2444,54 @@
       </div>
     </div>
 
+    <!-- ─── OPPORTUNITIES ───────────────────────────── -->
+    <div class="page" id="page-opportunities">
+      <div class="page-header">
+        <h1 class="page-title">Opportunities</h1>
+        <p class="page-desc">Rank the best leads for each service before calling.</p>
+      </div>
+      <div class="page-body">
+        <section class="opportunity-hero">
+          <div class="opportunity-hero-head">
+            <div class="opportunity-kicker">Opportunity Scanner</div>
+            <div class="opportunity-hero-title">Find the leads worth calling first.</div>
+            <p class="opportunity-hero-copy">Pick a service and the scanner scores your local leads with simple explainable signals: missing website, ad intent, reviews, phone availability, and category fit.</p>
+          </div>
+          <div class="opportunity-control-grid">
+            <label class="opportunity-control">
+              <span>Service</span>
+              <select class="select" id="opportunity-service-filter"></select>
+            </label>
+            <label class="opportunity-control">
+              <span>Source query</span>
+              <select class="select" id="opportunity-query-filter">
+                <option value="">All queries</option>
+              </select>
+            </label>
+            <label class="opportunity-control">
+              <span>Limit</span>
+              <select class="select" id="opportunity-limit">
+                <option value="25">Top 25</option>
+                <option value="50">Top 50</option>
+                <option value="100">Top 100</option>
+              </select>
+            </label>
+            <button class="btn btn-primary opportunity-scan-btn" id="opportunity-refresh-btn" type="button">Scan</button>
+          </div>
+        </section>
+
+        <div class="opportunity-stats">
+          <div class="opportunity-stat"><div class="opportunity-stat-label">Ranked leads</div><div class="opportunity-stat-value" id="opp-total">--</div></div>
+          <div class="opportunity-stat"><div class="opportunity-stat-label">Hot leads</div><div class="opportunity-stat-value" id="opp-hot">--</div></div>
+          <div class="opportunity-stat"><div class="opportunity-stat-label">Avg score</div><div class="opportunity-stat-value" id="opp-avg">--</div></div>
+          <div class="opportunity-stat"><div class="opportunity-stat-label">No website</div><div class="opportunity-stat-value" id="opp-no-website">--</div></div>
+          <div class="opportunity-stat"><div class="opportunity-stat-label">Ad signals</div><div class="opportunity-stat-value" id="opp-ads">--</div></div>
+        </div>
+
+        <div class="opportunity-list" id="opportunity-list"></div>
+      </div>
+    </div>
+
     <!-- ─── HISTORY ───────────────────────────────── -->
     <div class="page" id="page-history">
       <div class="page-header">
@@ -2197,7 +2604,7 @@ applyTheme(getTheme());
 //  ROUTER
 // ════════════════════════════════════════════════════════════════════
 const API = `${window.location.origin}/api`;
-const ROUTES = ["dashboard", "swipe", "prospection", "services", "history"];
+const ROUTES = ["dashboard", "swipe", "prospection", "services", "opportunities", "history"];
 
 function navigate(route) {
   if (!ROUTES.includes(route)) route = "dashboard";
@@ -2219,6 +2626,7 @@ function onRouteChange() {
   if (route === "swipe") { swipeInit(); }
   if (route === "prospection") { prospInit(); }
   if (route === "services") { servicesInit(); }
+  if (route === "opportunities") { opportunitiesInit(); }
   if (route === "history") { historyInit(); }
 }
 
@@ -2953,6 +3361,230 @@ async function deleteService(id) {
       if (getCurrentRoute() === "prospection") await prospLoadLeads();
     }
   });
+}
+
+// ════════════════════════════════════════════════════════════════════
+//  OPPORTUNITIES
+// ════════════════════════════════════════════════════════════════════
+let opportunityItems = [];
+
+async function opportunitiesInit() {
+  await loadServices();
+  opportunityRenderServiceOptions();
+  await opportunityLoadQueryOptions();
+
+  document.getElementById("opportunity-refresh-btn").onclick = loadOpportunities;
+  document.getElementById("opportunity-service-filter").onchange = loadOpportunities;
+  document.getElementById("opportunity-query-filter").onchange = loadOpportunities;
+  document.getElementById("opportunity-limit").onchange = loadOpportunities;
+
+  loadOpportunities();
+}
+
+function opportunityRenderServiceOptions() {
+  const sel = document.getElementById("opportunity-service-filter");
+  if (!sel) return;
+  const current = sel.value;
+  if (!services.length) {
+    sel.innerHTML = '<option value="">Create a service first</option>';
+    return;
+  }
+  sel.innerHTML = services.map(service => (
+    `<option value="${escapeHtml(service.id)}">${escapeHtml(service.name || "Untitled service")}</option>`
+  )).join("");
+  sel.value = services.some(service => service.id === current) ? current : services[0].id;
+}
+
+async function opportunityLoadQueryOptions() {
+  const sel = document.getElementById("opportunity-query-filter");
+  if (!sel) return;
+  const current = sel.value;
+  const r = await fetch(`${API}/prospects/stats`).catch(() => null);
+  if (!r) return;
+  const d = await r.json();
+  sel.innerHTML = '<option value="">All queries</option>';
+  (d.queries || []).forEach(q => {
+    const option = document.createElement("option");
+    option.value = option.textContent = q;
+    if (q === current) option.selected = true;
+    sel.appendChild(option);
+  });
+}
+
+function opportunityRenderSummary(summary = {}) {
+  document.getElementById("opp-total").textContent = summary.total ?? 0;
+  document.getElementById("opp-hot").textContent = summary.hot ?? 0;
+  document.getElementById("opp-avg").textContent = summary.average_score ?? 0;
+  document.getElementById("opp-no-website").textContent = summary.no_website ?? 0;
+  document.getElementById("opp-ads").textContent = summary.ad_signals ?? 0;
+}
+
+function opportunityEmptyState(title, copy, action = "") {
+  return `<div class="empty-state"><div><h3>${escapeHtml(title)}</h3><p>${copy}</p>${action}</div></div>`;
+}
+
+async function loadOpportunities() {
+  const list = document.getElementById("opportunity-list");
+  const btn = document.getElementById("opportunity-refresh-btn");
+  if (!list || !btn) return;
+
+  if (!services.length) {
+    opportunityItems = [];
+    opportunityRenderSummary({ total: 0, hot: 0, average_score: 0, no_website: 0, ad_signals: 0 });
+    list.innerHTML = opportunityEmptyState(
+      "No services yet",
+      "Create at least one service, then come back to rank the best prospects for that offer.",
+      '<p style="margin-top:14px"><button class="btn btn-primary" type="button" onclick="navigate(\'services\')">Create service</button></p>'
+    );
+    return;
+  }
+
+  const serviceId = document.getElementById("opportunity-service-filter").value;
+  const query = document.getElementById("opportunity-query-filter").value;
+  const limit = document.getElementById("opportunity-limit").value;
+  if (!serviceId) return;
+
+  const params = new URLSearchParams({ service_id: serviceId, limit, closed: "open" });
+  if (query) params.set("query", query);
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Scanning';
+  list.innerHTML = opportunityEmptyState("Scanning leads", "Calculating opportunity scores from your local prospect database...");
+
+  try {
+    const r = await fetch(`${API}/opportunities?${params}`);
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(d.error || "Opportunity scan failed");
+    opportunityItems = d.data || [];
+    opportunityRenderSummary(d.summary || {});
+    opportunityRenderList(opportunityItems);
+  } catch (err) {
+    opportunityItems = [];
+    opportunityRenderSummary({ total: 0, hot: 0, average_score: 0, no_website: 0, ad_signals: 0 });
+    list.innerHTML = opportunityEmptyState("Scanner unavailable", escapeHtml(err.message || "Unable to load opportunities."));
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Scan";
+  }
+}
+
+function opportunityRenderList(items) {
+  const list = document.getElementById("opportunity-list");
+  if (!items.length) {
+    list.innerHTML = opportunityEmptyState("No matching opportunities", "Try another service, source query, or scrape a fresh list.");
+    return;
+  }
+  list.innerHTML = items.map(opportunityCardHtml).join("");
+}
+
+function opportunityCurrentServiceId() {
+  return document.getElementById("opportunity-service-filter")?.value || "";
+}
+
+function opportunityCardHtml(item) {
+  const status = STATUSES[item.status] || STATUSES.to_contact;
+  const isAd = Number(item.is_ad) === 1 || item.is_ad === true;
+  const assignedIds = getAssignedServiceIds(item);
+  const currentServiceId = opportunityCurrentServiceId();
+  const alreadyAssigned = currentServiceId && assignedIds.includes(currentServiceId);
+  const idArg = escapeHtml(JSON.stringify(String(item.id || "")));
+  const safeWebsiteUrl = sanitizeHttpUrl(item.website);
+  const websiteHtml = safeWebsiteUrl ? externalLinkHtml(safeWebsiteUrl, formatWebsiteLabel(item.website)) : "No website";
+  const phoneHtml = item.phone && item.phone !== "Not Given"
+    ? (sanitizeTelHref(item.phone) ? `<a href="${escapeHtml(sanitizeTelHref(item.phone))}">${escapeHtml(item.phone)}</a>` : escapeHtml(item.phone))
+    : "No phone";
+  const reviews = item.reviews_count_num
+    ? `${Number(item.reviews_count_num).toLocaleString("en-US")} reviews`
+    : "No reviews";
+  const signals = [
+    !item.has_website ? '<span class="opportunity-signal warn">No website</span>' : '<span class="opportunity-signal">Website</span>',
+    isAd ? '<span class="opportunity-signal hot">Ad signal</span>' : "",
+    item.has_phone ? '<span class="opportunity-signal hot">Phone</span>' : '<span class="opportunity-signal warn">No phone</span>',
+    item.reviews_average_num ? `<span class="opportunity-signal">${escapeHtml(item.reviews_average_num)}★ · ${escapeHtml(reviews)}</span>` : `<span class="opportunity-signal">${escapeHtml(reviews)}</span>`,
+    alreadyAssigned ? '<span class="opportunity-signal hot">Service assigned</span>' : "",
+  ].filter(Boolean).join("");
+
+  return `
+    <article class="opportunity-card">
+      <aside class="opportunity-score-panel">
+        <div class="opportunity-score-label">Fit score</div>
+        <div class="opportunity-score">${escapeHtml(item.score ?? 0)}<span>/100</span></div>
+        <div class="opportunity-grade">${escapeHtml(item.grade || "Watch")}</div>
+      </aside>
+      <div class="opportunity-main">
+        <div class="opportunity-card-head">
+          <div>
+            <div class="opportunity-name">${escapeHtml(item.name || "Untitled prospect")}</div>
+            <div class="opportunity-meta">
+              ${item.place_type ? `<span>${escapeHtml(item.place_type)}</span>` : ""}
+              ${item.address && item.address !== "Not Given" ? `<span>${escapeHtml(item.address)}</span>` : ""}
+              ${item.search_query ? `<span>${escapeHtml(item.search_query)}</span>` : ""}
+              <span class="badge ${status.cls}">${status.label}</span>
+            </div>
+          </div>
+          <div class="opportunity-signals">${signals}</div>
+        </div>
+        <div class="opportunity-body-grid">
+          <div class="opportunity-reasons">
+            <div class="opportunity-block-label">Why this lead</div>
+            <ul>${(item.reasons || []).map(reason => `<li>${escapeHtml(reason)}</li>`).join("")}</ul>
+          </div>
+          <div class="opportunity-angle">
+            <div class="opportunity-block-label">Pitch angle</div>
+            <p>${escapeHtml(item.pitch_angle || "")}</p>
+          </div>
+        </div>
+        <div class="detail-grid">
+          <div class="info-tile"><div class="info-label">Phone</div><div class="info-value">${phoneHtml}</div></div>
+          <div class="info-tile"><div class="info-label">Website</div><div class="info-value">${websiteHtml}</div></div>
+        </div>
+        <div class="opportunity-actions">
+          <button class="btn" type="button" onclick="opportunityAssignService(${idArg})">${alreadyAssigned ? "Refresh assignment" : "Assign service"}</button>
+          <button class="btn btn-primary" type="button" onclick="opportunitySendToOutreach(${idArg})">Queue for outreach</button>
+        </div>
+      </div>
+    </article>
+  `;
+}
+
+function opportunityFindItem(id) {
+  return opportunityItems.find(item => item.id === id);
+}
+
+function opportunityNextServiceIds(item) {
+  const ids = new Set(getAssignedServiceIds(item));
+  const serviceId = opportunityCurrentServiceId();
+  if (serviceId) ids.add(serviceId);
+  return [...ids];
+}
+
+async function opportunityUpdateProspect(id, extra = {}) {
+  const item = opportunityFindItem(id);
+  if (!item) return null;
+  const payload = {
+    service_ids: opportunityNextServiceIds(item),
+    ...extra,
+  };
+  const r = await fetch(`${API}/prospects/${id}`, {
+    method: "PUT",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify(payload)
+  });
+  if (!r.ok) throw new Error("Prospect update failed");
+  const updated = await r.json();
+  Object.assign(item, updated);
+  return updated;
+}
+
+async function opportunityAssignService(id) {
+  await opportunityUpdateProspect(id);
+  opportunityRenderList(opportunityItems);
+}
+
+async function opportunitySendToOutreach(id) {
+  await opportunityUpdateProspect(id, { status: "interested" });
+  prospSelectedId = id;
+  navigate("prospection");
 }
 
 async function prospLoadLeads() {

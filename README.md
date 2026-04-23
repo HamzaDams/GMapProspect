@@ -7,6 +7,7 @@ The project runs **on the user's machine**.
 - scrape Google Maps leads with Playwright
 - store and qualify prospects locally
 - work leads from a dashboard, swipe flow, or call flow
+- rank leads by service with the Opportunity Scanner
 - track call history, notes, and durations
 
 ## Table of contents
@@ -35,6 +36,8 @@ The project runs **on the user's machine**.
   - `/`: main dashboard
   - `/swipe`: quick lead triage
   - `/prospection`: focused call mode
+  - `/services`: services/offers you can pitch
+  - `/opportunities`: local opportunity scanner by service
   - `/history`: call history
 
 ## Stack
@@ -93,6 +96,8 @@ From this interface, you can:
 - start a scrape
 - browse prospects
 - change their status
+- create services you want to pitch
+- rank prospects in the opportunity scanner
 - take notes
 - use swipe mode
 - use call mode
@@ -144,10 +149,45 @@ The MCP bridge exposes these business tools:
 - `get_scrape_status`
 - `search_prospects`
 - `get_prospect_stats`
+- `list_services`
+- `create_service`
+- `delete_service`
+- `get_opportunities`
 - `update_prospect`
 - `list_calls`
 - `get_call_stats`
 - `create_call`
+
+### Opportunity Scanner through MCP
+
+The Opportunity Scanner is designed to be used by the LLM through MCP when you want coherent prospecting recommendations.
+
+The split is intentional:
+
+- `server.py` calculates a local deterministic score from existing data
+- the MCP tool exposes that score and the reasons as JSON
+- the LLM uses the result to prioritize leads, explain fit, and draft outreach
+
+Use `get_opportunities` when the user asks things like:
+
+- "Which leads should I call first for my website service?"
+- "Find the best prospects for this offer and explain why."
+- "Prepare a call list for my Odoo service."
+- "Give me a coherent prospecting plan from my scraped leads."
+
+Recommended agent flow:
+
+1. call `list_services`
+2. pick or ask for the relevant `service_id`
+3. call `get_opportunities` with `service_id`, optional `query`, and `limit`
+4. use the returned `score`, `reasons`, and `pitch_angle`
+5. optionally call `update_prospect` to assign the service or mark selected leads as `interested`
+
+Example prompt for Claude Code or Codex:
+
+```text
+Use the GMapProspect MCP tools. Pick my "Site" service, get the top 10 opportunities, explain why each lead is relevant, and prepare a short call angle for each one.
+```
 
 ### How it works
 
@@ -180,6 +220,8 @@ If the config is loaded correctly, Claude can use the local MCP server to:
 
 - launch a scrape
 - inspect prospects
+- manage services
+- rank the best prospects for a service with `get_opportunities`
 - update lead status and notes
 - read call history and call stats
 
@@ -196,6 +238,8 @@ It includes:
 - plugin metadata in `.codex-plugin/plugin.json`
 - local MCP wiring in `plugins/gmapprospect-local/.mcp.json`
 - a local marketplace entry in `.agents/plugins/marketplace.json`
+
+The MCP config does not list individual tools manually. It starts `plugins/gmapprospect-local/scripts/mcp_server.py`, and FastMCP exposes the current tool list from that file. After this change, `get_opportunities` is available automatically when the MCP server is loaded.
 
 ### Logs
 
@@ -223,11 +267,12 @@ Data is stored locally inside the project directory:
 1. Run `python3 server.py`
 2. Open `http://localhost:8000`
 3. Start a scrape
-4. Review imported leads in the dashboard or via `/swipe`
-5. Move promising leads to the `Interested` status
-6. Use `/prospection` to handle calls
-7. Review completed calls in `/history`
-8. Use `Export CSV` from the app when you need a cleaned export from the database
+4. Create services in `/services`
+5. Use `/opportunities` or the MCP `get_opportunities` tool to rank leads for a service
+6. Move promising leads to the `Interested` status
+7. Use `/prospection` to handle calls
+8. Review completed calls in `/history`
+9. Use `Export CSV` from the app when you need a cleaned export from the database
 
 ## Call history
 

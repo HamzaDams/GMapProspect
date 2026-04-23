@@ -10,7 +10,7 @@
         "GMAPPROSPECT_BASE_URL": "http://127.0.0.1:8000",
         "GMAPPROSPECT_AUTOSTART": "1"
       },
-      "note": "Local MCP bridge for the GMapProspect API. Starts server.py on demand if the backend is not already running."
+      "note": "Local MCP bridge for the GMapProspect API. Starts server.py on demand if the backend is not already running. Exposes service-based opportunity scoring through get_opportunities."
     }
   }
 }

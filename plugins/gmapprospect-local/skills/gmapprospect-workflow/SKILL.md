@@ -14,6 +14,10 @@ Use this skill when the user wants to operate the local GMapProspect project thr
 - `get_scrape_status`: inspect running scrape progress and logs
 - `search_prospects`: filter leads by text, status, query, and pagination
 - `get_prospect_stats`: summarize prospect pipeline counts
+- `list_services`: list services/offers that can be pitched to prospects
+- `create_service`: create a service/offer for outreach
+- `delete_service`: remove a service/offer
+- `get_opportunities`: rank open prospects for a service with scores, reasons, and pitch angles
 - `update_prospect`: update lead status, notes, or contacted timestamp
 - `list_calls`: inspect call history
 - `get_call_stats`: summarize call activity
@@ -23,8 +27,11 @@ Use this skill when the user wants to operate the local GMapProspect project thr
 
 - Start with `ping_backend` if backend availability is uncertain.
 - Use `start_scrape` only when the user clearly asked for a new scrape.
+- When the user asks which leads to prioritize, use `list_services` then `get_opportunities` instead of manually ranking raw prospects.
+- Treat `get_opportunities` as the source of truth for fit score, reasons, and first pitch angle.
 - Prefer `search_prospects` before updating a lead so you confirm the right `prospect_id`.
 - Use `update_prospect` for CRM state changes and `create_call` when a real call record should exist.
+- To queue a ranked lead for calls, use `update_prospect` with `status="interested"` and the relevant `service_ids`.
 - When summarizing results, highlight top leads, missing websites, strong review counts, and outreach status.
 
 ## Notes

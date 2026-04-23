@@ -8,6 +8,7 @@ import sys
 import os
 import csv
 import io
+import re
 import uuid
 from urllib.parse import urlparse, parse_qs
 
@@ -228,6 +229,188 @@ def resolve_services(conn, service_ids):
     return resolved_ids, resolved_names
 
 
+def parse_review_count(value):
+    text = str(value or "").strip().lower().replace("\xa0", " ")
+    if not text or text in {"not given", "none", "n/a", "no reviews"}:
+        return 0
+    multiplier = 1
+    if "k" in text:
+        multiplier = 1000
+    elif "m" in text:
+        multiplier = 1000000
+    if multiplier > 1:
+        match = re.search(r"\d+(?:[\.,]\d+)?", text)
+        return int(float(match.group(0).replace(",", ".")) * multiplier) if match else 0
+    digits = re.sub(r"\D", "", text)
+    return int(digits) if digits else 0
+
+
+def parse_review_average(value):
+    match = re.search(r"\d+(?:[\.,]\d+)?", str(value or ""))
+    if not match:
+        return 0.0
+    return max(0.0, min(5.0, float(match.group(0).replace(",", "."))))
+
+
+def has_usable_value(value):
+    text = str(value or "").strip()
+    return bool(text and text.lower() not in {"not given", "none", "n/a", "null", "-"})
+
+
+def keyword_tokens(*values):
+    stopwords = {
+        "and", "with", "for", "the", "you", "your", "from", "that", "this",
+        "service", "services", "offer", "offers", "local", "business", "lead",
+        "leads", "sales", "prospect", "prospects",
+    }
+    text = " ".join(str(value or "").lower() for value in values)
+    return {
+        token
+        for token in re.findall(r"[a-z0-9]{3,}", text)
+        if token not in stopwords
+    }
+
+
+def opportunity_grade(score):
+    if score >= 80:
+        return "Hot"
+    if score >= 65:
+        return "Ready"
+    if score >= 50:
+        return "Warm"
+    return "Watch"
+
+
+def score_opportunity(prospect, service):
+    service_name = service["name"] if service else "your offer"
+    service_description = service["description"] if service else ""
+    reviews_count = parse_review_count(prospect["reviews_count"])
+    reviews_average = parse_review_average(prospect["reviews_average"])
+    has_website = has_usable_value(prospect["website"])
+    has_phone = has_usable_value(prospect["phone"])
+    is_ad = parse_bool(prospect["is_ad"])
+    status = prospect["status"] or "to_contact"
+    service_text = f"{service_name} {service_description}".lower()
+    web_service = any(word in service_text for word in ("website", "web", "site", "landing", "seo"))
+
+    score = 18
+    reasons = []
+
+    if not has_website:
+        score += 24
+        reasons.append("No website is listed on Google Maps.")
+        if web_service:
+            score += 10
+            reasons.append("Your service directly fits the missing website signal.")
+    else:
+        score += 3
+
+    if is_ad:
+        score += 14
+        reasons.append("Ad signal detected, so the business may already spend on acquisition.")
+
+    if has_phone:
+        score += 10
+        reasons.append("Phone number is available for direct outreach.")
+    else:
+        score -= 8
+
+    if reviews_count >= 100:
+        score += 16
+        reasons.append("Strong local demand: 100+ public reviews.")
+    elif reviews_count >= 50:
+        score += 13
+        reasons.append("Solid proof of demand: 50+ public reviews.")
+    elif reviews_count >= 10:
+        score += 9
+        reasons.append("Enough reviews to validate local traction.")
+    elif reviews_count > 0:
+        score += 5
+        reasons.append("Some public reviews are already present.")
+
+    if reviews_average >= 4.7:
+        score += 10
+        reasons.append("Excellent average rating.")
+    elif reviews_average >= 4.3:
+        score += 8
+    elif reviews_average >= 4.0:
+        score += 6
+
+    if status == "interested":
+        score += 12
+        reasons.append("Already marked as interested.")
+    elif status == "to_contact":
+        score += 7
+    elif status == "contacted":
+        score -= 6
+    elif status == "not_interested":
+        score -= 35
+
+    service_tokens = keyword_tokens(service_name, service_description)
+    prospect_tokens = keyword_tokens(
+        prospect["name"],
+        prospect["place_type"],
+        prospect["about"],
+        prospect["search_query"],
+        prospect["address"],
+    )
+    matched_tokens = sorted(service_tokens & prospect_tokens)
+    if matched_tokens:
+        score += min(18, len(matched_tokens) * 5)
+        reasons.append(f"Service keywords match this lead: {', '.join(matched_tokens[:4])}.")
+
+    if any(has_usable_value(prospect[key]) for key in ("facebook", "instagram", "linkedin", "tiktok")):
+        score += 4
+
+    if parse_bool(prospect["is_closed"]):
+        score -= 35
+
+    score = max(0, min(100, round(score)))
+    if not reasons:
+        reasons.append("Basic local prospect data is available.")
+
+    if not has_website and web_service:
+        pitch_angle = (
+            f"Lead with {service_name}: they already show up on Maps, but no website is listed. "
+            "Position the offer as a way to convert search visibility into owned traffic and calls."
+        )
+    elif is_ad:
+        pitch_angle = (
+            f"Lead with {service_name}: they appear to invest in acquisition. "
+            "Frame the offer around improving conversion after the click or phone call."
+        )
+    elif reviews_count >= 50:
+        pitch_angle = (
+            f"Lead with {service_name}: they already have social proof. "
+            "Frame it as a way to turn that trust into more qualified enquiries."
+        )
+    elif status == "interested":
+        pitch_angle = (
+            f"Lead with {service_name}: they are already marked interested. "
+            "Keep the message short and move quickly to a concrete next step."
+        )
+    else:
+        pitch_angle = (
+            f"Lead with {service_name}: connect the offer to their category, local search demand, "
+            "and the easiest next step for the owner."
+        )
+
+    item = dict(prospect)
+    item.update({
+        "score": score,
+        "grade": opportunity_grade(score),
+        "reasons": reasons[:5],
+        "pitch_angle": pitch_angle,
+        "reviews_count_num": reviews_count,
+        "reviews_average_num": reviews_average,
+        "has_website": has_website,
+        "has_phone": has_phone,
+        "opportunity_service_id": service["id"] if service else "",
+        "opportunity_service_name": service_name,
+    })
+    return item
+
+
 def run_scrape(search, total):
     scrape_status["running"] = True
     scrape_status["log"] = []
@@ -318,7 +501,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
         path = parsed.path
         qs = parse_qs(parsed.query)
 
-        if path == "/" or path in ("/index.html", "/app.html", "/swipe", "/swipe.html", "/prospection", "/prospection.html", "/services", "/services.html", "/history", "/history.html"):
+        if path == "/" or path in ("/index.html", "/app.html", "/swipe", "/swipe.html", "/prospection", "/prospection.html", "/services", "/services.html", "/opportunities", "/opportunities.html", "/history", "/history.html"):
             self.send_static_page("app.html")
 
         elif path == "/api/prospects":
@@ -425,6 +608,52 @@ class Handler(http.server.BaseHTTPRequestHandler):
             rows = conn.execute("SELECT * FROM services ORDER BY created_at DESC, name ASC").fetchall()
             conn.close()
             self.send_json({"data": [dict(r) for r in rows]})
+
+        elif path == "/api/opportunities":
+            service_id = qs.get("service_id", [""])[0].strip()
+            if not service_id:
+                self.send_json({"error": "service_id is required"}, 400)
+                return
+            query_filter = qs.get("query", [""])[0].strip()
+            closed_filter = qs.get("closed", ["open"])[0].strip() or "open"
+            limit = parse_int(qs.get("limit", [50])[0], 50, minimum=1, maximum=MAX_PAGE_SIZE)
+
+            conn = get_db()
+            service = fetch_service(conn, service_id)
+            if not service:
+                conn.close()
+                self.send_json({"error": "Service not found"}, 404)
+                return
+
+            sql = "SELECT * FROM prospects WHERE COALESCE(status, 'to_contact') != 'not_interested'"
+            params = []
+            if closed_filter == "open":
+                sql += " AND COALESCE(is_closed, 0)=0"
+            elif closed_filter == "closed":
+                sql += " AND COALESCE(is_closed, 0)=1"
+            if query_filter:
+                sql += " AND search_query=?"
+                params.append(query_filter)
+            rows = conn.execute(sql, params).fetchall()
+            conn.close()
+
+            scored = [score_opportunity(row, service) for row in rows]
+            scored.sort(key=lambda item: (item["score"], item.get("reviews_count_num", 0)), reverse=True)
+            summary_source = scored
+            top_items = scored[:limit]
+            avg_score = round(sum(item["score"] for item in summary_source) / len(summary_source)) if summary_source else 0
+            summary = {
+                "total": len(summary_source),
+                "hot": sum(1 for item in summary_source if item["score"] >= 80),
+                "average_score": avg_score,
+                "no_website": sum(1 for item in summary_source if not item["has_website"]),
+                "ad_signals": sum(1 for item in summary_source if parse_bool(item.get("is_ad"))),
+            }
+            self.send_json({
+                "service": dict(service),
+                "summary": summary,
+                "data": top_items,
+            })
 
         elif path == "/api/scrape/status":
             self.send_json(scrape_status)

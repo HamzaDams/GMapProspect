@@ -1,7 +1,7 @@
 {
   "name": "gmapprospect-local",
   "version": "0.1.0",
-  "description": "Local Codex plugin for GMapProspect backed by the repo API.",
+  "description": "Local Codex plugin for GMapProspect backed by the repo API, including service-based opportunity scoring.",
   "author": {
     "name": "HamzaDams",
     "url": "https://github.com/HamzaDams"
@@ -19,8 +19,8 @@
   "mcpServers": "./.mcp.json",
   "interface": {
     "displayName": "GMapProspect Local",
-    "shortDescription": "Run scrapes and manage leads from the local repo backend",
-    "longDescription": "Expose GMapProspect lead, call, and scrape workflows to Codex through a local MCP server that talks to the existing server.py API and can auto-start it when needed.",
+    "shortDescription": "Run scrapes, manage leads, and rank opportunities from the local backend",
+    "longDescription": "Expose GMapProspect lead, call, scrape, service, and opportunity-scoring workflows to Codex through a local MCP server that talks to the existing server.py API and can auto-start it when needed.",
     "developerName": "HamzaDams",
     "category": "Productivity",
     "capabilities": [
@@ -32,6 +32,7 @@
     "termsOfServiceURL": "https://github.com/HamzaDams/GMapProspect",
     "defaultPrompt": [
       "Launch a local scrape for plumbers in Paris and summarize the best leads",
+      "Use my Site service to find the top opportunities and draft a call angle for each lead",
       "Show me contacted leads from the latest query and their notes",
       "Give me call stats and the next leads to prioritize"
     ],

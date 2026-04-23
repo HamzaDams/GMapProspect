@@ -4,11 +4,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**GMapProspect** is a Python CLI tool that scrapes business data from Google Maps via Google Search. It uses Playwright to automate a Chromium browser, navigates search results, clicks each listing, and extracts 25+ fields (name, address, phone, website, social links, reviews, hours, service options) into a `results.csv`.
+**GMapProspect** is a local Google Maps lead generation and prospecting tool. It uses Playwright to scrape business data, imports leads into a local SQLite-backed web app, and exposes CRM workflows for services, opportunity ranking, outreach, calls, and exports.
 
 ## MCP Usage
 
-When the task is about running scrapes, listing prospects, updating lead status, or reading call history, prefer the project MCP server `gmapprospect-local` over ad hoc shell commands. It exposes the existing `server.py` backend and can auto-start it if needed.
+When the task is about running scrapes, listing prospects, managing services, ranking opportunities, updating lead status, or reading call history, prefer the project MCP server `gmapprospect-local` over ad hoc shell commands. It exposes the existing `server.py` backend and can auto-start it if needed.
+
+For prospect prioritization, use the MCP flow:
+
+1. `list_services`
+2. `get_opportunities` with the chosen `service_id`
+3. use the returned `score`, `reasons`, and `pitch_angle` to explain lead fit
+4. optionally call `update_prospect` to assign the service or mark selected leads as `interested`
+
+Do not manually re-rank raw prospects when `get_opportunities` can answer the task. The deterministic score lives in `server.py`; the LLM should add strategy, wording, and call preparation on top.
 
 ## Setup & Usage
 

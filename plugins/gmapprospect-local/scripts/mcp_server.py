@@ -179,6 +179,25 @@ def delete_service(service_id: str) -> dict[str, Any]:
     return request_json("DELETE", f"/api/services/{service_id.strip()}")
 
 
+@mcp.tool(description="Rank open prospects for a selected service with local opportunity scores, reasons, and pitch angles.")
+def get_opportunities(
+    service_id: str,
+    query: str = "",
+    closed: str = "open",
+    limit: int = 25,
+) -> dict[str, Any]:
+    if not service_id.strip():
+        raise ValueError("service_id is required")
+    params: dict[str, Any] = {
+        "service_id": service_id.strip(),
+        "closed": closed,
+        "limit": limit,
+    }
+    if query:
+        params["query"] = query
+    return request_json("GET", "/api/opportunities", params=params)
+
+
 @mcp.tool(description="Update a prospect status, notes, contacted timestamp, or closed state.")
 def update_prospect(
     prospect_id: str,
