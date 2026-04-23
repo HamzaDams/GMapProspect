@@ -42,6 +42,11 @@ def init_db():
             contacted_at TEXT DEFAULT '',
             is_closed INTEGER DEFAULT 0,
             closed_at TEXT DEFAULT '',
+            is_ad INTEGER DEFAULT 0,
+            service_id TEXT DEFAULT '',
+            service_name TEXT DEFAULT '',
+            service_ids TEXT DEFAULT '[]',
+            service_names TEXT DEFAULT '',
             name TEXT,
             address TEXT,
             address_line TEXT,
@@ -75,13 +80,34 @@ def init_db():
             ended_at TEXT,
             duration_seconds INTEGER DEFAULT 0,
             closed INTEGER DEFAULT 0,
+            service_id TEXT DEFAULT '',
+            service_name TEXT DEFAULT '',
+            service_ids TEXT DEFAULT '[]',
+            service_names TEXT DEFAULT '',
             created_at TEXT,
             FOREIGN KEY(prospect_id) REFERENCES prospects(id)
         )
     """)
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS services (
+            id TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            description TEXT DEFAULT '',
+            created_at TEXT DEFAULT ''
+        )
+    """)
     ensure_column(conn, "prospects", "is_closed", "INTEGER DEFAULT 0")
     ensure_column(conn, "prospects", "closed_at", "TEXT DEFAULT ''")
+    ensure_column(conn, "prospects", "is_ad", "INTEGER DEFAULT 0")
+    ensure_column(conn, "prospects", "service_id", "TEXT DEFAULT ''")
+    ensure_column(conn, "prospects", "service_name", "TEXT DEFAULT ''")
+    ensure_column(conn, "prospects", "service_ids", "TEXT DEFAULT '[]'")
+    ensure_column(conn, "prospects", "service_names", "TEXT DEFAULT ''")
     ensure_column(conn, "call_history", "closed", "INTEGER DEFAULT 0")
+    ensure_column(conn, "call_history", "service_id", "TEXT DEFAULT ''")
+    ensure_column(conn, "call_history", "service_name", "TEXT DEFAULT ''")
+    ensure_column(conn, "call_history", "service_ids", "TEXT DEFAULT '[]'")
+    ensure_column(conn, "call_history", "service_names", "TEXT DEFAULT ''")
     conn.execute("""
         INSERT INTO call_history
         (id, prospect_id, prospect_name, phone, search_query, notes, started_at, ended_at, duration_seconds, closed, created_at)
@@ -167,6 +193,41 @@ def delete_prospects_by_query(conn, query):
     return {"deleted_prospects": deleted_prospects, "deleted_calls": deleted_calls}
 
 
+def fetch_service(conn, service_id):
+    service_id = str(service_id or "").strip()
+    if not service_id:
+        return None
+    return conn.execute("SELECT * FROM services WHERE id=?", (service_id,)).fetchone()
+
+
+def normalize_service_ids(value):
+    if isinstance(value, list):
+        return [str(item).strip() for item in value if str(item).strip()]
+    if isinstance(value, str):
+        stripped = value.strip()
+        if not stripped:
+            return []
+        try:
+            decoded = json.loads(stripped)
+            if isinstance(decoded, list):
+                return [str(item).strip() for item in decoded if str(item).strip()]
+        except json.JSONDecodeError:
+            return [item.strip() for item in stripped.split(",") if item.strip()]
+    return []
+
+
+def resolve_services(conn, service_ids):
+    ids = normalize_service_ids(service_ids)
+    if not ids:
+        return [], []
+    placeholders = ",".join("?" for _ in ids)
+    rows = conn.execute(f"SELECT id, name FROM services WHERE id IN ({placeholders})", ids).fetchall()
+    by_id = {row["id"]: row["name"] for row in rows}
+    resolved_ids = [sid for sid in ids if sid in by_id]
+    resolved_names = [by_id[sid] for sid in resolved_ids]
+    return resolved_ids, resolved_names
+
+
 def run_scrape(search, total):
     scrape_status["running"] = True
     scrape_status["log"] = []
@@ -199,12 +260,15 @@ def run_scrape(search, total):
                 if not existing:
                     conn.execute("""
                         INSERT OR IGNORE INTO prospects
-                        (id,search_query,scraped_at,status,notes,contacted_at,is_closed,closed_at,name,address,address_line,area,zip_code,country,located_in,website,phone,reviews_count,reviews_average,place_type,opens_at,about,facebook,instagram,twitter,tiktok,linkedin)
-                        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                        (id,search_query,scraped_at,status,notes,contacted_at,is_closed,closed_at,is_ad,service_id,service_name,service_ids,service_names,name,address,address_line,area,zip_code,country,located_in,website,phone,reviews_count,reviews_average,place_type,opens_at,about,facebook,instagram,twitter,tiktok,linkedin)
+                        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
                     """, (
                         r.get("id"), r.get("search_query"), r.get("scraped_at"),
                         r.get("status","to_contact"), r.get("notes",""), r.get("contacted_at",""),
                         1 if parse_bool(r.get("is_closed", 0)) else 0, r.get("closed_at",""),
+                        1 if parse_bool(r.get("is_ad", 0)) else 0,
+                        r.get("service_id", ""), r.get("service_name", ""),
+                        json.dumps(normalize_service_ids(r.get("service_ids", []))), r.get("service_names", ""),
                         r.get("name"), r.get("address"), r.get("address_line"), r.get("area"),
                         r.get("zip_code"), r.get("country"), r.get("located_in"), r.get("website"),
                         r.get("phone"), str(r.get("reviews_count","")), str(r.get("reviews_average","")),
@@ -254,7 +318,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
         path = parsed.path
         qs = parse_qs(parsed.query)
 
-        if path == "/" or path in ("/index.html", "/app.html", "/swipe", "/swipe.html", "/prospection", "/prospection.html", "/history", "/history.html"):
+        if path == "/" or path in ("/index.html", "/app.html", "/swipe", "/swipe.html", "/prospection", "/prospection.html", "/services", "/services.html", "/history", "/history.html"):
             self.send_static_page("app.html")
 
         elif path == "/api/prospects":
@@ -356,6 +420,12 @@ class Handler(http.server.BaseHTTPRequestHandler):
             payload["by_query"] = [dict(r) for r in query_rows]
             self.send_json(payload)
 
+        elif path == "/api/services":
+            conn = get_db()
+            rows = conn.execute("SELECT * FROM services ORDER BY created_at DESC, name ASC").fetchall()
+            conn.close()
+            self.send_json({"data": [dict(r) for r in rows]})
+
         elif path == "/api/scrape/status":
             self.send_json(scrape_status)
 
@@ -363,7 +433,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
             conn = get_db()
             rows = conn.execute("SELECT * FROM prospects ORDER BY scraped_at DESC").fetchall()
             conn.close()
-            fields = ["name","status","is_closed","closed_at","phone","website","address","place_type","reviews_average","reviews_count","notes","contacted_at","search_query","scraped_at"]
+            fields = ["name","status","is_closed","closed_at","service_names","phone","website","address","place_type","reviews_average","reviews_count","notes","contacted_at","search_query","scraped_at"]
             out = io.StringIO()
             writer = csv.DictWriter(out, fieldnames=fields, extrasaction='ignore')
             writer.writeheader()
@@ -407,6 +477,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
             duration_seconds = int(body.get("duration_seconds", 0) or 0)
             notes = body.get("notes", "")
             closed = 1 if parse_bool(body.get("closed")) else 0
+            service_ids_input = body.get("service_ids", body.get("service_id", ""))
 
             if not prospect_id:
                 self.send_json({"error": "prospect_id is required"}, 400)
@@ -419,11 +490,23 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 self.send_json({"error": "Prospect not found"}, 404)
                 return
 
+            resolved_ids, resolved_names = resolve_services(conn, service_ids_input)
+            if not resolved_ids:
+                resolved_ids = normalize_service_ids(prospect["service_ids"])
+                resolved_names = [name.strip() for name in str(prospect["service_names"] or "").split(",") if name.strip()]
+            if not resolved_ids and prospect["service_id"]:
+                resolved_ids = [prospect["service_id"]]
+                resolved_names = [prospect["service_name"]] if prospect["service_name"] else []
+            next_service_id = resolved_ids[0] if resolved_ids else ""
+            next_service_name = resolved_names[0] if resolved_names else ""
+            next_service_ids = json.dumps(resolved_ids)
+            next_service_names = ", ".join(resolved_names)
+
             call_id = str(uuid.uuid4())
             conn.execute("""
                 INSERT INTO call_history
-                (id, prospect_id, prospect_name, phone, search_query, notes, started_at, ended_at, duration_seconds, closed, created_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                (id, prospect_id, prospect_name, phone, search_query, notes, started_at, ended_at, duration_seconds, closed, service_id, service_name, service_ids, service_names, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 call_id,
                 prospect_id,
@@ -435,17 +518,38 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 ended_at,
                 duration_seconds,
                 closed,
+                next_service_id,
+                next_service_name,
+                next_service_ids,
+                next_service_names,
                 ended_at or started_at
             ))
             next_closed = closed or int(prospect["is_closed"] or 0)
             next_closed_at = (ended_at or started_at) if closed else (prospect["closed_at"] or "")
             conn.execute("""
                 UPDATE prospects
-                SET status=?, notes=?, contacted_at=?, is_closed=?, closed_at=?
+                SET status=?, notes=?, contacted_at=?, is_closed=?, closed_at=?, service_id=?, service_name=?, service_ids=?, service_names=?
                 WHERE id=?
-            """, ("contacted", notes, ended_at, next_closed, next_closed_at, prospect_id))
+            """, ("contacted", notes, ended_at, next_closed, next_closed_at, next_service_id, next_service_name, next_service_ids, next_service_names, prospect_id))
             conn.commit()
             row = conn.execute("SELECT * FROM call_history WHERE id=?", (call_id,)).fetchone()
+            conn.close()
+            self.send_json(dict(row), 201)
+
+        elif path == "/api/services":
+            name = body.get("name", "").strip()
+            description = body.get("description", "").strip()
+            if not name:
+                self.send_json({"error": "name is required"}, 400)
+                return
+            conn = get_db()
+            service_id = str(uuid.uuid4())
+            conn.execute("""
+                INSERT INTO services (id, name, description, created_at)
+                VALUES (?, ?, ?, datetime('now'))
+            """, (service_id, name, description))
+            conn.commit()
+            row = conn.execute("SELECT * FROM services WHERE id=?", (service_id,)).fetchone()
             conn.close()
             self.send_json(dict(row), 201)
 
@@ -462,10 +566,17 @@ class Handler(http.server.BaseHTTPRequestHandler):
             length = int(self.headers.get("Content-Length", 0))
             body = json.loads(self.rfile.read(length)) if length else {}
             conn = get_db()
-            allowed = ["status", "notes", "contacted_at", "is_closed", "closed_at"]
+            allowed = ["status", "notes", "contacted_at", "is_closed", "closed_at", "service_id", "service_name", "service_ids", "service_names"]
             updates = {k: v for k, v in body.items() if k in allowed}
             if "is_closed" in updates:
                 updates["is_closed"] = 1 if parse_bool(updates["is_closed"]) else 0
+            if "service_ids" in updates or "service_id" in updates:
+                ids_source = updates.get("service_ids", updates.get("service_id", ""))
+                resolved_ids, resolved_names = resolve_services(conn, ids_source)
+                updates["service_ids"] = json.dumps(resolved_ids)
+                updates["service_names"] = ", ".join(resolved_names)
+                updates["service_id"] = resolved_ids[0] if resolved_ids else ""
+                updates["service_name"] = resolved_names[0] if resolved_names else ""
             if updates:
                 set_clause = ", ".join(f"{k}=?" for k in updates)
                 conn.execute(f"UPDATE prospects SET {set_clause} WHERE id=?", list(updates.values()) + [pid])
@@ -513,6 +624,33 @@ class Handler(http.server.BaseHTTPRequestHandler):
             conn.commit()
             conn.close()
             self.send_json({"ok": True, "scope": scope, **outcome})
+            return
+
+        if len(parts) == 3 and parts[0] == "api" and parts[1] == "services":
+            service_id = parts[2].strip()
+            if not service_id:
+                self.send_json({"error": "service id is required"}, 400)
+                return
+            conn = get_db()
+            rows = conn.execute("SELECT id, service_ids FROM prospects").fetchall()
+            for row in rows:
+                next_ids = [sid for sid in normalize_service_ids(row["service_ids"]) if sid != service_id]
+                resolved_ids, resolved_names = resolve_services(conn, next_ids)
+                conn.execute("""
+                    UPDATE prospects
+                    SET service_id=?, service_name=?, service_ids=?, service_names=?
+                    WHERE id=?
+                """, (
+                    resolved_ids[0] if resolved_ids else "",
+                    resolved_names[0] if resolved_names else "",
+                    json.dumps(resolved_ids),
+                    ", ".join(resolved_names),
+                    row["id"],
+                ))
+            deleted = conn.execute("DELETE FROM services WHERE id=?", (service_id,)).rowcount
+            conn.commit()
+            conn.close()
+            self.send_json({"ok": True, "deleted_services": deleted})
             return
 
         self.send_response(404)

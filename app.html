@@ -302,6 +302,7 @@
     .badge-interested { background: var(--green-muted); color: var(--green); }
     .badge-not_interested { background: var(--red-muted); color: var(--red); }
     .badge-closed { background: var(--surface-2); color: var(--text); border: 1px solid var(--border); }
+    .badge-ad { background: hsl(32 100% 95% / 1); color: hsl(27 88% 40% / 1); border: 1px solid hsl(32 88% 75% / 0.65); }
 
     /* stats row */
     .stats-row {
@@ -1137,6 +1138,143 @@
     .prosp-filters { display: flex; flex-direction: column; gap: 8px; }
     .prosp-filters .input, .prosp-filters .select { width: 100%; }
 
+    .service-panel {
+      display: grid;
+      gap: 10px;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      background: var(--bg);
+    }
+
+    .service-panel-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .service-panel-title {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-secondary);
+    }
+
+    .service-form {
+      display: grid;
+      gap: 8px;
+    }
+
+    .service-form textarea {
+      min-height: 58px;
+      resize: vertical;
+    }
+
+    .service-list {
+      display: grid;
+      gap: 6px;
+      max-height: 190px;
+      overflow-y: auto;
+    }
+
+    .service-item {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      align-items: start;
+      padding: 9px 10px;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius);
+      background: var(--surface);
+    }
+
+    .service-name {
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .service-desc {
+      margin-top: 3px;
+      font-size: 12px;
+      line-height: 1.4;
+      color: var(--text-secondary);
+    }
+
+    .service-delete {
+      border: none;
+      background: transparent;
+      color: var(--red);
+      cursor: pointer;
+      font: inherit;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 2px 0;
+    }
+
+    .service-select-row {
+      display: grid;
+      gap: 8px;
+      padding: 14px;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius);
+      background: var(--bg);
+    }
+
+    .service-choice-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 8px;
+    }
+
+    .service-choice {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .service-choice input {
+      width: 15px;
+      height: 15px;
+      accent-color: var(--accent);
+    }
+
+    .services-layout {
+      display: grid;
+      grid-template-columns: minmax(260px, 360px) 1fr;
+      gap: 16px;
+    }
+
+    .services-create,
+    .services-list-panel {
+      display: grid;
+      gap: 12px;
+      align-content: start;
+    }
+
+    .services-list-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 12px;
+    }
+
+    .service-card {
+      display: grid;
+      gap: 8px;
+      padding: 16px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+    }
+
     .lead-list {
       display: flex;
       flex-direction: column;
@@ -1711,7 +1849,7 @@
       .call-grid { grid-template-columns: 1fr; }
       .call-end-actions { grid-template-columns: 1fr; }
       .bulk-actions-meta { margin-left: 0; width: 100%; }
-      .page-prospection.active { grid-template-columns: 1fr; }
+      .page-prospection.active, .services-layout { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -1735,6 +1873,11 @@
     <button class="nav-item" data-route="prospection" onclick="navigate('prospection')">
       <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
       Outreach
+    </button>
+
+    <button class="nav-item" data-route="services" onclick="navigate('services')">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7h-9"/><path d="M14 17H5"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/></svg>
+      Services
     </button>
 
     <button class="nav-item" data-route="history" onclick="navigate('history')">
@@ -1917,6 +2060,31 @@
       </div>
     </div>
 
+    <!-- ─── SERVICES ───────────────────────────────── -->
+    <div class="page" id="page-services">
+      <div class="page-header">
+        <h1 class="page-title">Services</h1>
+        <p class="page-desc">Offers you can pitch during outreach.</p>
+      </div>
+      <div class="page-body">
+        <div class="services-layout">
+          <div class="services-create">
+            <div class="service-panel">
+              <div class="service-panel-title">Create service</div>
+              <div class="service-form">
+                <input class="input" id="service-name-input" type="text" placeholder="Service name..." />
+                <textarea class="input" id="service-description-input" placeholder="Short pitch / notes..."></textarea>
+                <button class="btn btn-primary" id="create-service-btn" type="button">Add service</button>
+              </div>
+            </div>
+          </div>
+          <div class="services-list-panel">
+            <div class="services-list-grid" id="service-list"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- ─── HISTORY ───────────────────────────────── -->
     <div class="page" id="page-history">
       <div class="page-header">
@@ -2029,7 +2197,7 @@ applyTheme(getTheme());
 //  ROUTER
 // ════════════════════════════════════════════════════════════════════
 const API = `${window.location.origin}/api`;
-const ROUTES = ["dashboard", "swipe", "prospection", "history"];
+const ROUTES = ["dashboard", "swipe", "prospection", "services", "history"];
 
 function navigate(route) {
   if (!ROUTES.includes(route)) route = "dashboard";
@@ -2050,6 +2218,7 @@ function onRouteChange() {
   if (route === "dashboard") { loadStats(); loadProspects(); }
   if (route === "swipe") { swipeInit(); }
   if (route === "prospection") { prospInit(); }
+  if (route === "services") { servicesInit(); }
   if (route === "history") { historyInit(); }
 }
 
@@ -2232,6 +2401,7 @@ function buildCard(r) {
   card.className = "card";
   card.dataset.id = r.id;
   const closed = isLeadClosed(r.is_closed);
+  const isAd = Number(r.is_ad) === 1 || r.is_ad === true;
   if (closed) card.classList.add("closed");
   const s = STATUSES[r.status] || STATUSES.to_contact;
 
@@ -2266,6 +2436,7 @@ function buildCard(r) {
         </div>
       </div>
       <div class="card-header-badges">
+        ${isAd ? '<span class="badge badge-ad">Ad</span>' : ""}
         ${closed ? '<span class="badge badge-closed">Closed-won</span>' : ""}
         <span class="badge status-badge ${s.cls}">${s.label}</span>
       </div>
@@ -2661,6 +2832,7 @@ document.addEventListener("keydown", e => {
 //  PROSPECTION
 // ════════════════════════════════════════════════════════════════════
 let prospLeads = [], prospSelectedId = null, prospCallId = null, prospCallStart = null, prospCallTimer = null, prospNoteSaveTimer = null;
+let services = [];
 
 async function prospInit() {
   const r = await fetch(`${API}/prospects/stats`).catch(() => null);
@@ -2675,6 +2847,7 @@ async function prospInit() {
       });
     }
   }
+  await loadServices();
   prospLoadLeads();
 
   document.getElementById("prosp-search").oninput = prospRenderList;
@@ -2687,6 +2860,99 @@ async function prospInit() {
     clearTimeout(prospNoteSaveTimer);
     prospNoteSaveTimer = setTimeout(() => prospSaveNote(prospCallId, document.getElementById("call-notes").value), 300);
   };
+}
+
+async function servicesInit() {
+  await loadServices();
+  document.getElementById("create-service-btn").onclick = createService;
+}
+
+async function loadServices() {
+  const r = await fetch(`${API}/services`).catch(() => null);
+  if (!r) return;
+  const d = await r.json();
+  services = d.data || [];
+  renderServices();
+}
+
+function renderServices() {
+  const el = document.getElementById("service-list");
+  if (!el) return;
+  if (!services.length) {
+    el.innerHTML = '<div class="empty-state"><div><h3>No services yet</h3><p>Create your first offer before outreach.</p></div></div>';
+    return;
+  }
+  el.innerHTML = services.map(s => `
+    <div class="service-card">
+      <div>
+        <div class="service-name">${escapeHtml(s.name || "Untitled service")}</div>
+        ${s.description ? `<div class="service-desc">${escapeHtml(s.description)}</div>` : ""}
+      </div>
+      <button class="service-delete" type="button" onclick="deleteService('${s.id}')">Delete</button>
+    </div>
+  `).join("");
+}
+
+function getAssignedServiceIds(lead) {
+  if (Array.isArray(lead.service_ids)) return lead.service_ids;
+  try {
+    const parsed = JSON.parse(lead.service_ids || "[]");
+    if (Array.isArray(parsed) && parsed.length) return parsed;
+  } catch {}
+  return lead.service_id ? [lead.service_id] : [];
+}
+
+function getLeadServiceNames(lead) {
+  return lead.service_names || lead.service_name || "";
+}
+
+function serviceChoicesHtml(selectedIds = []) {
+  if (!services.length) {
+    return '<div class="info-value">Create services from the Services page first.</div>';
+  }
+  const selected = new Set(selectedIds);
+  return `
+    <div class="service-choice-list">
+      ${services.map(s => `
+        <label class="service-choice">
+          <input type="checkbox" value="${escapeHtml(s.id)}" ${selected.has(s.id) ? "checked" : ""} onchange="onLeadServiceChoiceChange()" />
+          <span>${escapeHtml(s.name)}</span>
+        </label>
+      `).join("")}
+    </div>
+  `;
+}
+
+async function createService() {
+  const nameInput = document.getElementById("service-name-input");
+  const descInput = document.getElementById("service-description-input");
+  const name = nameInput.value.trim();
+  const description = descInput.value.trim();
+  if (!name) return;
+  const r = await fetch(`${API}/services`, {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({ name, description })
+  });
+  if (!r.ok) return;
+  nameInput.value = "";
+  descInput.value = "";
+  await loadServices();
+  if (getCurrentRoute() === "services") servicesInit();
+}
+
+async function deleteService(id) {
+  showConfirmModal({
+    title: "Delete this service?",
+    copy: "This removes the service from future prospects. Existing call history keeps the service name already saved.",
+    confirmLabel: "Delete service",
+    onConfirm: async () => {
+      const r = await fetch(`${API}/services/${id}`, { method: "DELETE" });
+      if (!r.ok) throw new Error("Service deletion failed");
+      await loadServices();
+      if (getCurrentRoute() === "prospection") await prospLoadLeads();
+    }
+  });
 }
 
 async function prospLoadLeads() {
@@ -2732,6 +2998,7 @@ function prospRenderList() {
       <div class="lead-meta">
         ${l.phone && l.phone !== "Not Given" ? `<span>${escapeHtml(l.phone)}</span>` : ""}
         ${l.address && l.address !== "Not Given" ? `<span>${escapeHtml(l.address)}</span>` : ""}
+        ${getLeadServiceNames(l) ? `<span>Services: ${escapeHtml(getLeadServiceNames(l))}</span>` : ""}
       </div>
       <div class="lead-query">${escapeHtml(l.search_query || "")}</div>
     `;
@@ -2775,6 +3042,11 @@ function prospRenderDetail() {
       <div class="info-tile"><div class="info-label">Address</div><div class="info-value">${lead.address && lead.address !== "Not Given" ? escapeHtml(lead.address) : "Not provided"}</div></div>
       <div class="info-tile"><div class="info-label">Source query</div><div class="info-value">${escapeHtml(lead.search_query || "—")}</div></div>
     </div>
+    <div class="service-select-row">
+      <div class="info-label">Services to pitch</div>
+      ${serviceChoicesHtml(getAssignedServiceIds(lead))}
+      <div class="info-value">${getLeadServiceNames(lead) ? escapeHtml(getLeadServiceNames(lead)) : "Select one or more offers that fit this prospect."}</div>
+    </div>
     <div class="notes-section">
       <h4>Existing notes</h4>
       <p>${lead.notes ? escapeHtml(lead.notes) : "No notes."}</p>
@@ -2784,6 +3056,33 @@ function prospRenderDetail() {
   document.getElementById("start-call-btn").onclick = prospStartCall;
   document.getElementById("toggle-close-btn").onclick = () => toggleClosed(lead.id, closed ? 0 : 1);
   document.getElementById("refresh-list-btn").onclick = prospLoadLeads;
+  document.querySelectorAll("#prosp-detail-card .service-choice input").forEach(input => {
+    input.onchange = () => onLeadServiceChoiceChange();
+  });
+}
+
+function onLeadServiceChoiceChange() {
+  const ids = [...document.querySelectorAll("#prosp-detail-card .service-choice input:checked")].map(input => input.value);
+  if (prospSelectedId) prospAssignServices(prospSelectedId, ids);
+}
+
+async function prospAssignServices(id, serviceIds) {
+  const r = await fetch(`${API}/prospects/${id}`, {
+    method: "PUT",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({ service_ids: serviceIds })
+  });
+  if (!r.ok) return;
+  const updated = await r.json();
+  const lead = prospLeads.find(l => l.id === id);
+  if (lead) {
+    lead.service_ids = updated.service_ids || "[]";
+    lead.service_names = updated.service_names || "";
+    lead.service_id = updated.service_id || "";
+    lead.service_name = updated.service_name || "";
+  }
+  prospRenderList();
+  prospRenderDetail();
 }
 
 function prospStartCall() {
@@ -2798,6 +3097,7 @@ function prospStartCall() {
   prospHideEndCallDialog();
   document.getElementById("call-info").innerHTML = `
     ${lead.phone && lead.phone !== "Not Given" ? `<div class="call-pill"><strong>Phone</strong> ${escapeHtml(lead.phone)}</div>` : ""}
+    ${getLeadServiceNames(lead) ? `<div class="call-pill"><strong>Services</strong> ${escapeHtml(getLeadServiceNames(lead))}</div>` : ""}
     ${lead.address && lead.address !== "Not Given" ? `<div class="call-pill"><strong>Addr.</strong> ${escapeHtml(lead.address)}</div>` : ""}
     <div class="call-pill"><strong>Query</strong> ${escapeHtml(lead.search_query || "—")}</div>
   `;
@@ -2808,6 +3108,7 @@ function prospStartCall() {
       ${lead.place_type ? `<div class="call-lead-type">${escapeHtml(lead.place_type)}</div>` : ""}
     </div>
     <div class="call-lead-field"><div class="call-lead-field-label">Phone</div><div class="call-lead-field-value">${lead.phone && lead.phone !== "Not Given" ? escapeHtml(lead.phone) : "N/A"}</div></div>
+    <div class="call-lead-field"><div class="call-lead-field-label">Services to pitch</div><div class="call-lead-field-value">${getLeadServiceNames(lead) ? escapeHtml(getLeadServiceNames(lead)) : "N/A"}</div></div>
     <div class="call-lead-field"><div class="call-lead-field-label">Address</div><div class="call-lead-field-value">${lead.address && lead.address !== "Not Given" ? escapeHtml(lead.address) : "N/A"}</div></div>
     <div class="call-lead-field"><div class="call-lead-field-label">Website</div><div class="call-lead-field-value">${lead.website && lead.website !== "Not Given" ? externalLinkHtml(lead.website, lead.website) : "N/A"}</div></div>
     <div class="call-lead-field"><div class="call-lead-field-label">Google rating</div><div class="call-lead-field-value">${lead.reviews_average ? `${escapeHtml(lead.reviews_average)}` : "No rating"} ${lead.reviews_count ? `· ${Number(lead.reviews_count).toLocaleString("en-US")} reviews` : ""}</div></div>
@@ -2831,6 +3132,7 @@ function prospHideEndCallDialog() {
 
 async function prospFinishCall(closed) {
   if (!prospCallId) return;
+  const lead = prospLeads.find(l => l.id === prospCallId);
   const endedAt = new Date().toISOString();
   const dur = Math.max(0, Math.floor((Date.now() - prospCallStart) / 1000));
   prospHideEndCallDialog();
@@ -2839,10 +3141,9 @@ async function prospFinishCall(closed) {
 
   await fetch(`${API}/calls`, {
     method: "POST", headers: {"Content-Type":"application/json"},
-    body: JSON.stringify({ prospect_id: prospCallId, started_at: new Date(prospCallStart).toISOString(), ended_at: endedAt, duration_seconds: dur, notes: document.getElementById("call-notes").value, closed })
+    body: JSON.stringify({ prospect_id: prospCallId, started_at: new Date(prospCallStart).toISOString(), ended_at: endedAt, duration_seconds: dur, notes: document.getElementById("call-notes").value, closed, service_ids: getAssignedServiceIds(lead || {}) })
   });
 
-  const lead = prospLeads.find(l => l.id === prospCallId);
   if (lead) {
     lead.status = "contacted";
     lead.notes = document.getElementById("call-notes").value;
@@ -2965,6 +3266,7 @@ function historyRender(items) {
           <div class="call-card-meta">
             ${i.phone ? `<span>${escapeHtml(i.phone)}</span>` : ""}
             ${i.search_query ? `<span>${escapeHtml(i.search_query)}</span>` : ""}
+            ${i.service_names || i.service_name ? `<span>Services: ${escapeHtml(i.service_names || i.service_name)}</span>` : ""}
           </div>
         </div>
         <div style="display:flex;gap:6px;flex-wrap:wrap">

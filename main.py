@@ -39,6 +39,7 @@ twitter_link_list = []
 instagram_link_list = []
 tiktok_link_list = []
 linkedin_link_list = []
+is_ad_list = []
 
 
 
@@ -139,6 +140,21 @@ def main():
             Name = get_text('h1.DUwDvf')
             name_list.append(Name)
 
+            listing_text = ""
+            listing_aria = ""
+            try:
+                listing_text = listing.inner_text(timeout=1000) or ""
+            except:
+                listing_text = ""
+            try:
+                listing_aria = listing.get_attribute("aria-label") or ""
+            except:
+                listing_aria = ""
+            listing_blob = f"{listing_text}\n{listing_aria}".lower()
+            is_ad_list.append(
+                any(token in listing_blob for token in ("sponsored", "sponsorisé", "ad", "annonce", "promoted"))
+            )
+
             # Place type
             Place_Type = get_text('button.DkEaL')
             place_type_list.append(Place_Type)
@@ -228,8 +244,8 @@ def main():
 
        
         browser.close()
-        df = pd.DataFrame(list(zip(name_list, address_list, address_line_list, area_list, zip_code_list, country_list, located_in_list, website_list,phone_number_list,reviews_count_list, reviews_average_list,in_store_shopping_list,in_store_pickup_list,store_delivery_list,place_type_list, opens_at_list,about_list,orders_links1_list,orders_links2_list,orders_links3_list, facebook_link_list, twitter_link_list, instagram_link_list, tiktok_link_list,linkedin_link_list)),
-                           columns =["Name","Address","Address Line","Area","Zip Code", "Country", "Located in", "Website", "Phone Number", "Reviews Count", "Reviews Average","In Store Shopping", "In Store Pickup","Store Delivery","Place Type","Opens at","About","Orders Links1", "Orders Links2", "Orders Links3", "Facebook Link", "Twitter Link", "Instagram Link", "TikTok Link", "Linkedin Link"])
+        df = pd.DataFrame(list(zip(name_list, address_list, address_line_list, area_list, zip_code_list, country_list, located_in_list, website_list,phone_number_list,reviews_count_list, reviews_average_list,in_store_shopping_list,in_store_pickup_list,store_delivery_list,place_type_list, opens_at_list,about_list,orders_links1_list,orders_links2_list,orders_links3_list, facebook_link_list, twitter_link_list, instagram_link_list, tiktok_link_list,linkedin_link_list,is_ad_list)),
+                           columns =["Name","Address","Address Line","Area","Zip Code", "Country", "Located in", "Website", "Phone Number", "Reviews Count", "Reviews Average","In Store Shopping", "In Store Pickup","Store Delivery","Place Type","Opens at","About","Orders Links1", "Orders Links2", "Orders Links3", "Facebook Link", "Twitter Link", "Instagram Link", "TikTok Link", "Linkedin Link","Is Ad"])
         columns_to_delete = []
         for col in df.columns:
             if df[col].nunique() == 1:
@@ -248,6 +264,7 @@ def main():
                 "status": "to_contact",  # to_contact | contacted | interested | not_interested
                 "notes": "",
                 "contacted_at": "",
+                "is_ad": bool(row.get("Is Ad", False)),
                 "name": row.get("Name", ""),
                 "address": row.get("Address", ""),
                 "address_line": row.get("Address Line", ""),

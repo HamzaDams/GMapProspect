@@ -156,6 +156,29 @@ def get_scrape_status() -> dict[str, Any]:
     return request_json("GET", "/api/scrape/status")
 
 
+@mcp.tool(description="List services that can be pitched to prospects.")
+def list_services() -> dict[str, Any]:
+    return request_json("GET", "/api/services")
+
+
+@mcp.tool(description="Create a service that can be assigned to prospects before calls.")
+def create_service(name: str, description: str = "") -> dict[str, Any]:
+    if not name.strip():
+        raise ValueError("name is required")
+    return request_json(
+        "POST",
+        "/api/services",
+        json_body={"name": name.strip(), "description": description.strip()},
+    )
+
+
+@mcp.tool(description="Delete a service and remove it from prospects that reference it.")
+def delete_service(service_id: str) -> dict[str, Any]:
+    if not service_id.strip():
+        raise ValueError("service_id is required")
+    return request_json("DELETE", f"/api/services/{service_id.strip()}")
+
+
 @mcp.tool(description="Update a prospect status, notes, contacted timestamp, or closed state.")
 def update_prospect(
     prospect_id: str,
@@ -164,6 +187,7 @@ def update_prospect(
     contacted_at: str = "",
     is_closed: bool | None = None,
     closed_at: str = "",
+    service_ids: list[str] | None = None,
 ) -> dict[str, Any]:
     if not prospect_id.strip():
         raise ValueError("prospect_id is required")
@@ -180,6 +204,8 @@ def update_prospect(
         payload["closed_at"] = closed_at if is_closed else ""
     elif closed_at:
         payload["closed_at"] = closed_at
+    if service_ids is not None:
+        payload["service_ids"] = service_ids
 
     if not payload:
         raise ValueError("At least one field must be provided to update a prospect")
@@ -218,6 +244,7 @@ def create_call(
     duration_seconds: int = 0,
     notes: str = "",
     closed: bool = False,
+    service_ids: list[str] | None = None,
 ) -> dict[str, Any]:
     if not prospect_id.strip():
         raise ValueError("prospect_id is required")
@@ -232,6 +259,7 @@ def create_call(
             "duration_seconds": duration_seconds,
             "notes": notes,
             "closed": closed,
+            "service_ids": service_ids or [],
         },
     )
 
